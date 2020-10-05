@@ -1,14 +1,16 @@
 # using Distributions
 # using PDMats # test dependencies
-using Test
 # using Distributed
-using Random
 # using StatsBase
 # using LinearAlgebra
 # using HypothesisTests
 
 # import JSON
 # import ForwardDiff
+
+using JLRMoE
+using Random
+using Test
 
 const tests = [
     "dummytest",
