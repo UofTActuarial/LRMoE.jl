@@ -1,4 +1,4 @@
-module JuliaLRMoE
+module JLRMoE
 
 greet() = print("Hello World!")
 

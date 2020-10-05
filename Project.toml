@@ -1,4 +1,4 @@
-name = "JuliaLRMoE"
+name = "JLRMoE"
 uuid = "b6847444-3cfa-4637-857f-9c8c615f8351"
 authors = ["Spark Tseung <hi@sparktseung.com>"]
 version = "0.1.0"
