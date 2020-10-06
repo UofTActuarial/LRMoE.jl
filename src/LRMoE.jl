@@ -13,6 +13,23 @@ import Distributions: UnivariateDistribution, DiscreteUnivariateDistribution, Co
 import Distributions: LogNormal
 
 
+export
+    # generic types
+    ZeroInflation
+    ExpertSupport
+    AnyExpert
+    DiscreteExpert
+    ContinuousExpert
+    RealDiscreteExpert
+    RealContinuousExpert
+    NonNegDiscreteExpert
+    NonNegContinuousExpert
+    ZIDiscreteExpert
+    ZIContinuousExpert
+    NonZIDiscreteExpert
+    NonZIContinuousExpert
+
+
 """
 A Julia package for the Logit-Reduced Mixture-of-Experts (LRMoE) model.
 """
