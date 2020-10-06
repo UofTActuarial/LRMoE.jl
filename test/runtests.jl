@@ -8,7 +8,7 @@
 # import JSON
 # import ForwardDiff
 
-using JLRMoE
+using LRMoE
 using Random
 using Test
 
@@ -32,5 +32,5 @@ end
 
 # print method ambiguities
 println("Potentially stale exports: ")
-display(Test.detect_ambiguities(JLRMoE))
+display(Test.detect_ambiguities(LRMoE))
 println()
