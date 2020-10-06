@@ -15,18 +15,18 @@ import Distributions: LogNormal
 
 export
     # generic types
-    ZeroInflation
-    ExpertSupport
-    AnyExpert
-    DiscreteExpert
-    ContinuousExpert
-    RealDiscreteExpert
-    RealContinuousExpert
-    NonNegDiscreteExpert
-    NonNegContinuousExpert
-    ZIDiscreteExpert
-    ZIContinuousExpert
-    NonZIDiscreteExpert
+    ZeroInflation,
+    ExpertSupport,
+    AnyExpert,
+    DiscreteExpert,
+    ContinuousExpert,
+    RealDiscreteExpert,
+    RealContinuousExpert,
+    NonNegDiscreteExpert,
+    NonNegContinuousExpert,
+    ZIDiscreteExpert,
+    ZIContinuousExpert,
+    NonZIDiscreteExpert,
     NonZIContinuousExpert
 
 
