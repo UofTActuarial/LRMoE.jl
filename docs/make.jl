@@ -1,9 +1,9 @@
-using Documenter, JLRMoE
+using Documenter, LRMoE
 
 makedocs(
 	doctest = false,
-    modules = [JLRMoE],
-	sitename = "JLRMoE.jl",
+    modules = [LRMoE],
+	sitename = "LRMoE.jl",
 	pages = [
 		"Home" => "index.md",
 		# "Tutorials" => Any[
@@ -41,7 +41,7 @@ makedocs(
 )
 
 deploydocs(
-	repo = "github.com/sparktseung/JLRMoE.jl.git",
+	repo = "github.com/sparktseung/LRMoE.jl.git",
 	branch = "gh-pages",
 	devbranch = "main",
 )

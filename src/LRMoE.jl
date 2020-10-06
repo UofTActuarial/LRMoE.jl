@@ -1,4 +1,4 @@
-module JLRMoE
+module LRMoE
 
 greet() = print("Hello World!")
 
