@@ -43,4 +43,5 @@ makedocs(
 deploydocs(
 	repo = "github.com/sparktseung/JLRMoE.jl.git",
 	branch = "gh-pages",
+	devbranch = "main",
 )
