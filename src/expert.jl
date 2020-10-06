@@ -48,10 +48,10 @@ const continuous_experts = [
     "zilognormal"
 ]
 
-for dname in continuous_experts
+for dname in discrete_experts
     include(joinpath("experts", "discrete", "$(dname).jl"))
 end
 
-for dname in continuous_distributions
+for dname in continuous_experts
     include(joinpath("experts", "continuous", "$(dname).jl"))
 end
