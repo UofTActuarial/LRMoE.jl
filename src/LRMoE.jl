@@ -27,8 +27,17 @@ export
     ZIDiscreteExpert,
     ZIContinuousExpert,
     NonZIDiscreteExpert,
-    NonZIContinuousExpert
+    NonZIContinuousExpert,
 
+
+    # experts
+    LogNormalExpert, ZILogNormalExpert
+
+
+
+### source files
+
+include("expert.jl")
 
 """
 A Julia package for the Logit-Reduced Mixture-of-Experts (LRMoE) model.

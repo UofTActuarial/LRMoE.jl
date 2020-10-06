@@ -34,3 +34,24 @@ function expert_ll(d::DiscreteExpert, yl::Real, yu::Real)
 
     return result
 end
+
+##### specific distributions #####
+
+const discrete_experts = [
+    
+]
+
+const continuous_experts = [
+    # NonZI
+    "lognormal",
+    # ZI
+    "zilognormal"
+]
+
+for dname in continuous_experts
+    include(joinpath("experts", "discrete", "$(dname).jl"))
+end
+
+for dname in continuous_distributions
+    include(joinpath("experts", "continuous", "$(dname).jl"))
+end
