@@ -37,8 +37,10 @@ export
 
 ### source files
 
-include("expert.jl")
 include("utils.jl")
+
+include("expert.jl")
+
 
 """
 A Julia package for the Logit-Reduced Mixture-of-Experts (LRMoE) model.
