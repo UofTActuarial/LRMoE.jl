@@ -7,6 +7,7 @@ Expert function: `LogNormal(μ, σ)` and `ZILogNormalExpert(p, μ, σ)`.
 struct LogNormalExpert{T<:Real} <: NonZIContinuousExpert
     μ::T
     σ::T
+    LogNormalExpert{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
 end
 
 function LogNormalExpert(μ::T, σ::T; check_args=true) where {T <: Real}

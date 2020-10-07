@@ -8,6 +8,7 @@ struct ZILogNormalExpert{T<:Real} <: ZIContinuousExpert
     p::T
     μ::T
     σ::T
+    ZILogNormalExpert{T}(p::T, µ::T, σ::T) where {T<:Real} = new{T}(p, µ, σ)
 end
 
 
