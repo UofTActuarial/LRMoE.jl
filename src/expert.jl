@@ -25,6 +25,14 @@ const ZIContinuousExpert = NonNegContinuousExpert{ZI}
 const NonZIDiscreteExpert = NonNegDiscreteExpert{NonZI}
 const NonZIContinuousExpert = NonNegContinuousExpert{NonZI}
 
+## Broadcast issues
+Broadcast.broadcastable(d::RealDiscreteExpert) = Ref(d) 
+Broadcast.broadcastable(d::RealContinuousExpert) = Ref(d) 
+Broadcast.broadcastable(d::ZIDiscreteExpert) = Ref(d) 
+Broadcast.broadcastable(d::ZIContinuousExpert) = Ref(d) 
+Broadcast.broadcastable(d::NonZIDiscreteExpert) = Ref(d) 
+Broadcast.broadcastable(d::NonZIContinuousExpert) = Ref(d) 
+
 
 ##### specific distributions #####
 
@@ -39,10 +47,18 @@ const continuous_experts = [
     "zilognormal"
 ]
 
+const calcs = [
+    "expert_ll_pos"
+]
+
 for dname in discrete_experts
     include(joinpath("experts", "discrete", "$(dname).jl"))
 end
 
 for dname in continuous_experts
     include(joinpath("experts", "continuous", "$(dname).jl"))
+end
+
+for dname in calcs
+    include(joinpath("ll", "$(dname).jl"))
 end

@@ -33,6 +33,9 @@ export
     pdf, logpdf,
     cdf, logcdf,
 
+    expert_ll_pos,
+
+
     # experts
     LogNormalExpert, ZILogNormalExpert
 
@@ -44,6 +47,7 @@ include("utils.jl")
 
 include("expert.jl")
 
+# include("experts/ll/expert_ll_pos.jl")
 
 """
 A Julia package for the Logit-Reduced Mixture-of-Experts (LRMoE) model.

@@ -1,7 +1,11 @@
 using Test
 using Distributions
 
-@testset "override pdf, cdf, etc." begin
+μ = 1
+σ = 2
+
+
+@testset "loglik functions of expert" begin
 
     d = Distributions.Gamma(1.0, 2.0)
 
@@ -11,7 +15,7 @@ using Distributions
     for (μ, σ) in zip(μμ, σσ)
         l = Distributions.LogNormal(μ, σ)
         r = LRMoE.LogNormalExpert(μ, σ)
-        x = rand(l, 100) 
+        x = rand(l, 500000) 
         @test LRMoE.logpdf(r, x) ≈ Distributions.logpdf.(l, x)
         @test LRMoE.logcdf(r, x) ≈ Distributions.logcdf.(l, x)
         @test LRMoE.pdf(r, x) ≈ Distributions.pdf.(l, x)
