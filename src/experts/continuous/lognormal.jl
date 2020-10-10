@@ -1,7 +1,7 @@
 """
     LogNormalExpert(μ, σ)
 
-Expert function: `LogNormal(μ, σ)` and `ZILogNormalExpert(p, μ, σ)`.
+Expert function: `LogNormal(μ, σ)`.
 
 """
 struct LogNormalExpert{T<:Real} <: NonZIContinuousExpert
@@ -15,6 +15,12 @@ function LogNormalExpert(μ::T, σ::T; check_args=true) where {T <: Real}
     return LogNormalExpert{T}(μ, σ)
 end
 
-#### Outer constructors
+## Outer constructors
 LogNormalExpert(μ::Real, σ::Real) = LogNormalExpert(promote(μ, σ)...)
 LogNormalExpert(μ::Integer, σ::Integer) = LogNormalExpert(float(μ), float(σ))
+
+## Loglikelihood of Expoert
+logpdf(d::LogNormalExpert, x...) = Distributions.logpdf.(LogNormal(d.μ, d.σ), x...)
+pdf(d::LogNormalExpert, x...) = Distributions.pdf.(LogNormal(d.μ, d.σ), x...)
+logcdf(d::LogNormalExpert, x...) = Distributions.logcdf.(LogNormal(d.μ, d.σ), x...)
+cdf(d::LogNormalExpert, x...) = Distributions.cdf.(LogNormal(d.μ, d.σ), x...)

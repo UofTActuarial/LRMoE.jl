@@ -29,6 +29,9 @@ export
     NonZIDiscreteExpert,
     NonZIContinuousExpert,
 
+    # loglikelihood functions
+    pdf, logpdf,
+    cdf, logcdf,
 
     # experts
     LogNormalExpert, ZILogNormalExpert

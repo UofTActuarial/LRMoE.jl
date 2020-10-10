@@ -9,11 +9,13 @@
 # import ForwardDiff
 
 using LRMoE
+using Distributions
 using Random
 using Test
 
 const tests = [
     "dummytest",
+    "pdfcdf",
 ]
 
 printstyled("Running tests:\n", color=:blue)

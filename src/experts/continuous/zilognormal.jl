@@ -21,3 +21,9 @@ end
 #### Outer constructors
 ZILogNormalExpert(p::Real, μ::Real, σ::Real) = ZILogNormalExpert(promote(p, μ, σ)...)
 ZILogNormalExpert(p::Integer, μ::Integer, σ::Integer) = ZILogNormalExpert(float(p), float(μ), float(σ))
+
+## Loglikelihood of Expoert
+logpdf(d::ZILogNormalExpert, x...) = Distributions.logpdf.(LogNormal(d.μ, d.σ), x...)
+pdf(d::ZILogNormalExpert, x...) = Distributions.pdf.(LogNormal(d.μ, d.σ), x...)
+logcdf(d::ZILogNormalExpert, x...) = Distributions.logcdf.(LogNormal(d.μ, d.σ), x...)
+cdf(d::ZILogNormalExpert, x...) = Distributions.cdf.(LogNormal(d.μ, d.σ), x...)
