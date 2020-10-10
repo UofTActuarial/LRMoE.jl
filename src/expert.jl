@@ -60,5 +60,5 @@ for dname in continuous_experts
 end
 
 for dname in calcs
-    include(joinpath("ll", "$(dname).jl"))
+    include(joinpath("experts", "ll", "$(dname).jl"))
 end
