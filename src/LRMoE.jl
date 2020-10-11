@@ -34,6 +34,8 @@ export
     cdf, logcdf,
 
     expert_ll_pos,
+    expert_tn_pos,
+    expert_tn_bar_pos,
 
 
     # experts

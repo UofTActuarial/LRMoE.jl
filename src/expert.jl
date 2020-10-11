@@ -48,7 +48,9 @@ const continuous_experts = [
 ]
 
 const calcs = [
-    "expert_ll_pos"
+    "expert_ll_pos",
+    "expert_tn_pos",
+    "expert_tn_bar_pos"
 ]
 
 for dname in discrete_experts

@@ -16,6 +16,7 @@ using Test
 const tests = [
     "dummytest",
     "pdfcdf",
+    "expert_loglik"
 ]
 
 printstyled("Running tests:\n", color=:blue)
