@@ -36,6 +36,9 @@ export
     expert_ll_pos,
     expert_tn_pos,
     expert_tn_bar_pos,
+    expert_ll,
+    expert_tn,
+    expert_tn_bar,
 
 
     # experts

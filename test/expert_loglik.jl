@@ -148,3 +148,149 @@ end
 
 end
 
+@testset "expert_(ll/tn/tn_bar): LogNormal, ZILogNormal" begin
+
+    d = Distributions.Gamma(1.0, 2.0)
+
+    μμ = rand(d, 10)
+    σσ = rand(d, 10)
+
+    for (μ, σ) in zip(μμ, σσ)
+        l = Distributions.LogNormal(μ, σ)
+        x = rand(l, 20)
+
+        # LogNormal
+        r = LRMoE.LogNormalExpert(μ, σ)
+
+        @test isapprox(LRMoE.expert_ll.(r, x, x, x, x), Distributions.logpdf.(l, x), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, x, x, Inf), Distributions.logpdf.(l, x), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, x, Inf, Inf), logcdf.(r, Inf) .+ log1mexp.(logcdf.(r, x) .- logcdf.(r, Inf)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, 0.75.*x, 1.25.*x, Inf), logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, 0.75.*x) .- logcdf.(r, 1.25.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, 0.75.*x) .- logcdf.(r, 1.25.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, 0.75.*x) .- logcdf.(r, 1.25.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, 0.0, Inf, Inf), logcdf.(r, Inf) .+ log1mexp.(logcdf.(r, 0.0) .- logcdf.(r, Inf)), atol = 1e-6)
+
+        @test isapprox(LRMoE.expert_tn.(r, x, x, x, x), Distributions.logpdf.(l, x), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, x, x, Inf), fill(log.(Distributions.cdf.(l, Inf) .- Distributions.cdf.(l, 0.0)), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, x, Inf, Inf), fill(log.(Distributions.cdf.(l, Inf) .- Distributions.cdf.(l, 0.0)), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.75.*x, 1.25.*x, Inf), fill(log.(Distributions.cdf.(l, Inf) .- Distributions.cdf.(l, 0.0)), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.(Distributions.cdf.(l, 1.25.*x) .- Distributions.cdf.(l, 0.75.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.(Distributions.cdf.(l, 2.00.*x) .- Distributions.cdf.(l, 0.50.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.0, Inf, Inf), log.(Distributions.cdf.(l, Inf) .- Distributions.cdf.(l, 0.0)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.0, 0.0, 0.0), -Inf, atol = 1e-6)
+
+        @test isapprox(LRMoE.expert_tn_bar.(r, x, x, x, x), fill(0.0, length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, x, x, Inf), log1mexp.(LRMoE.expert_tn_pos.(r, 0.0, x, x, Inf)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, x, Inf, Inf), log1mexp.(LRMoE.expert_tn_pos.(r, 0.0, x, Inf, Inf)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.75.*x, 1.25.*x, Inf), log1mexp.(LRMoE.expert_tn_pos.(r, 0.0, 0.75.*x, 1.25.*x, Inf)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log1mexp.(LRMoE.expert_tn_pos.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log1mexp.(LRMoE.expert_tn_pos.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.0, Inf, Inf), log1mexp.(LRMoE.expert_tn_pos.(r, 0.0, 0.0, Inf, Inf)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.0, 0.0, 0.0), 0.0, atol = 1e-6)
+
+        # ZILogNormal
+        p = rand(Distributions.Uniform(0, 1), 1)[1]
+        r = LRMoE.ZILogNormalExpert(p, μ, σ)
+
+        x = rand(l, 20) .+ 0.02
+        @test isapprox(LRMoE.expert_ll.(r, x, x, x, x), log.((1-p) .* Distributions.pdf.(l, x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, x, x, Inf), log.((1-p) .* Distributions.pdf.(l, x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, x, Inf, Inf), log.((1-p) .*  exp.(logcdf.(r, Inf) .+ log1mexp.(logcdf.(r, x) .- logcdf.(r, Inf)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, 0.75.*x, 1.25.*x, Inf), log.((1-p) .*  exp.(logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, 0.75.*x) .- logcdf.(r, 1.25.*x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.((1-p) .*  exp.(logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, 0.75.*x) .- logcdf.(r, 1.25.*x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.((1-p) .*  exp.(logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, 0.75.*x) .- logcdf.(r, 1.25.*x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, 0.0, Inf, Inf), log.(p .+ (1-p) .*  exp.(logcdf.(r, Inf) .+ log1mexp.(logcdf.(r, 0.0) .- logcdf.(r, Inf)))), atol = 1e-6)
+
+        @test isapprox(LRMoE.expert_tn.(r, x, x, x, x), log.((1-p) .* Distributions.pdf.(l, x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, x, x, Inf), fill(log(1.0), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, x, Inf, Inf), fill(log(1.0), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.75.*x, 1.25.*x, Inf), fill(log(1.0), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.((1-p) .*  exp.(log.(Distributions.cdf.(l, 1.25.*x) .- Distributions.cdf.(l, 0.75.*x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.((1-p) .*  exp.(log.(Distributions.cdf.(l, 2.00.*x) .- Distributions.cdf.(l, 0.50.*x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.0, Inf, Inf), log(1.0), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.0, 0.0, 0.0), log(p), atol = 1e-6)
+
+        @test isapprox(LRMoE.expert_tn_bar.(r, x, x, x, x), fill(log(1.0), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, x, x, Inf), fill(log(0.0), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, x, Inf, Inf), fill(log(0.0), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.75.*x, 1.25.*x, Inf), fill(log(0.0), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.(p .+ (1-p) .* exp.(LRMoE.expert_tn_bar_pos.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.(p .+ (1-p) .* exp.(LRMoE.expert_tn_bar_pos.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.0, Inf, Inf), -Inf, atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.0, 0.0, 0.0), log(1-p), atol = 1e-6)
+    end
+
+end
+
+@testset "expert_(ll/tn/tn_bar): Poisson, ZIPoisson" begin
+
+    d = Distributions.Gamma(10.0, 2.0)
+
+    λλ = rand(d, 10)
+
+    for λ in λλ
+        l = Distributions.Poisson(λ)
+        x = rand(l, 20)
+
+        # Poisson
+        r = LRMoE.PoissonExpert(λ)
+        
+        @test isapprox(LRMoE.expert_ll.(r, x, x, x, x), Distributions.logpdf.(l, x), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, x, x, Inf), Distributions.logpdf.(l, x), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, x, Inf, Inf), logcdf.(r, Inf) .+ log1mexp.(logcdf.(r, ceil.(x) .- 1) .- logcdf.(r, Inf)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, 0.75.*x, 1.25.*x, Inf), logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, ceil.(0.75.*x) .- 1) .- logcdf.(r, 1.25.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, ceil.(0.75.*x) .- 1) .- logcdf.(r, 1.25.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, ceil.(0.75.*x) .- 1) .- logcdf.(r, 1.25.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, 0.0, Inf, Inf), logcdf.(r, Inf) .+ log1mexp.(logcdf.(r, ceil.(0.0) .- 1) .- logcdf.(r, Inf)), atol = 1e-6)
+
+        @test isapprox(LRMoE.expert_tn.(r, x, x, x, x), Distributions.logpdf.(l, x), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, x, x, Inf), fill(0.0 .- Distributions.cdf.(l, ceil(0.0) .- 1), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, x, Inf, Inf), fill(0.0 .- Distributions.cdf.(l, ceil(0.0) .- 1), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.75.*x, 1.25.*x, Inf), fill(0.0 .- Distributions.cdf.(l, ceil(0.0) .- 1), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.(Distributions.cdf.(l, 1.25.*x) .- Distributions.cdf.(l, ceil.(0.75.*x) .- 1)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.(Distributions.cdf.(l, 2.00.*x) .- Distributions.cdf.(l, ceil.(0.50.*x) .- 1)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.0, Inf, Inf), log.(1.0 .- Distributions.cdf.(l, ceil.(0.0) .- 1)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.0, 0.0, 0.0), Distributions.logpdf.(l, 0.0), atol = 1e-6)
+
+        @test isapprox(LRMoE.expert_tn_bar.(r, x, x, x, x), log1mexp.(Distributions.logpdf.(l, x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, x, x, Inf), log1mexp.(LRMoE.expert_tn_pos.(r, 0.0, x, x, Inf)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, x, Inf, Inf), log1mexp.(LRMoE.expert_tn_pos.(r, 0.0, x, Inf, Inf)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.75.*x, 1.25.*x, Inf), log1mexp.(LRMoE.expert_tn_pos.(r, 0.0, 0.75.*x, 1.25.*x, Inf)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log1mexp.(LRMoE.expert_tn_pos.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log1mexp.(LRMoE.expert_tn_pos.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.0, Inf, Inf), log1mexp.(LRMoE.expert_tn_pos.(r, 0.0, 0.0, Inf, Inf)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.0, 0.0, 0.0), log1mexp.(Distributions.logpdf.(l, 0.0)), atol = 1e-6)
+
+        # ZIPoisson
+        p = rand(Distributions.Uniform(0, 1), 1)[1]
+        r = LRMoE.ZIPoissonExpert(p, λ)
+
+        x = rand(l, 20) .+ 1.0
+        @test isapprox(LRMoE.expert_ll.(r, x, x, x, x), log.((1-p) .* Distributions.pdf.(l, x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, x, x, Inf), log.((1-p) .* Distributions.pdf.(l, x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, x, Inf, Inf), log.((1-p) .*  exp.(logcdf.(r, Inf) .+ log1mexp.(logcdf.(r, ceil.(x) .- 1) .- logcdf.(r, Inf)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, 0.75.*x, 1.25.*x, Inf), log.((1-p) .*  exp.(logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, ceil.(0.75.*x) .- 1) .- logcdf.(r, 1.25.*x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.((1-p) .*  exp.(logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, ceil.(0.75.*x) .- 1) .- logcdf.(r, 1.25.*x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.((1-p) .*  exp.(logcdf.(r, 1.25.*x) .+ log1mexp.(logcdf.(r, ceil.(0.75.*x) .- 1) .- logcdf.(r, 1.25.*x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_ll.(r, 0.0, 0.0, Inf, Inf), log.(p .+ (1-p) .*  exp.(logcdf.(r, Inf) .+ log1mexp.(logcdf.(r, ceil.(0.0) .- 1) .- logcdf.(r, Inf)))), atol = 1e-6)
+
+        @test isapprox(LRMoE.expert_tn.(r, x, x, x, x), log.((1-p) .* Distributions.pdf.(l, x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, x, x, Inf), fill(log(p + 1-p), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, x, Inf, Inf), fill(log(p + 1-p), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.75.*x, 1.25.*x, Inf), fill(log(p + 1-p), length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.((1-p) .* exp.(log.(Distributions.cdf.(l, 1.25.*x) .- Distributions.cdf.(l, ceil.(0.75.*x) .- 1)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.((1-p) .* exp.(log.(Distributions.cdf.(l, 2.00.*x) .- Distributions.cdf.(l, ceil.(0.50.*x) .- 1)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.0, Inf, Inf), log(p + 1-p), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn.(r, 0.0, 0.0, 0.0, 0.0), log(p + (1-p) * Distributions.cdf.(l, 0.0)), atol = 1e-6)
+
+        @test isapprox(LRMoE.expert_tn_bar.(r, x, x, x, x), log.(p .+ (1-p) .* exp.(log1mexp.(Distributions.logpdf.(l, x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, x, x, Inf), fill(-Inf, length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, x, Inf, Inf), fill(-Inf, length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.75.*x, 1.25.*x, Inf), fill(-Inf, length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.(p .+ (1-p) .* exp.(log1mexp.(LRMoE.expert_tn_pos.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.(p .+ (1-p) .* exp.(log1mexp.(LRMoE.expert_tn_pos.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x)))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.0, Inf, Inf), -Inf, atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar.(r, 0.0, 0.0, 0.0, 0.0), log((1-p)*(1-Distributions.cdf.(l, 0.0))), atol = 1e-6)
+    end
+
+end
