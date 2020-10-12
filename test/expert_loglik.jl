@@ -36,14 +36,14 @@ using Distributions
         @test isapprox(LRMoE.expert_tn_pos.(r, 0.0, 0.0, Inf, Inf), log.(Distributions.cdf.(l, Inf) .- Distributions.cdf.(l, 0.0)), rtol = 1e-6)
         @test isapprox(LRMoE.expert_tn_pos.(r, 0.0, 0.0, 0.0, 0.0), -Inf, rtol = 1e-6)
 
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, x, x, x, x), fill(0.0, length(x)), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, x, x, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, x, x, Inf))), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, x, Inf, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, x, Inf, Inf))), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.75.*x, 1.25.*x, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, 0.75.*x, 1.25.*x, Inf))), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.(1.0 .- Distributions.cdf.(l, 1.25.*x) .+ Distributions.cdf.(l, 0.75.*x)), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.(1.0 .- Distributions.cdf.(l, 2.00.*x) .+ Distributions.cdf.(l, 0.50.*x)), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.0, Inf, Inf), log.(1.0 .- Distributions.cdf.(l, Inf) .+ Distributions.cdf.(l, 0.0)), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.0, 0.0, 0.0), 0.0, rtol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, x, x, x, x), fill(0.0, length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, x, x, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, x, x, Inf))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, x, Inf, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, x, Inf, Inf))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.75.*x, 1.25.*x, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, 0.75.*x, 1.25.*x, Inf))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.(1.0 .- Distributions.cdf.(l, 1.25.*x) .+ Distributions.cdf.(l, 0.75.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.(1.0 .- Distributions.cdf.(l, 2.00.*x) .+ Distributions.cdf.(l, 0.50.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.0, Inf, Inf), log.(1.0 .- Distributions.cdf.(l, Inf) .+ Distributions.cdf.(l, 0.0)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.0, 0.0, 0.0), 0.0, atol = 1e-6)
 
         # ZILogNormal
         r = LRMoE.ZILogNormalExpert(0.50, μ, σ)
@@ -65,14 +65,14 @@ using Distributions
         @test isapprox(LRMoE.expert_tn_pos.(r, 0.0, 0.0, Inf, Inf), log.(Distributions.cdf.(l, Inf) .- Distributions.cdf.(l, 0.0)), rtol = 1e-6)
         @test isapprox(LRMoE.expert_tn_pos.(r, 0.0, 0.0, 0.0, 0.0), -Inf, rtol = 1e-6)
 
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, x, x, x, x), fill(0.0, length(x)), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, x, x, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, x, x, Inf))), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, x, Inf, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, x, Inf, Inf))), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.75.*x, 1.25.*x, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, 0.75.*x, 1.25.*x, Inf))), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.(1.0 .- Distributions.cdf.(l, 1.25.*x) .+ Distributions.cdf.(l, 0.75.*x)), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.(1.0 .- Distributions.cdf.(l, 2.00.*x) .+ Distributions.cdf.(l, 0.50.*x)), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.0, Inf, Inf), log.(1.0 .- Distributions.cdf.(l, Inf) .+ Distributions.cdf.(l, 0.0)), rtol = 1e-6)
-        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.0, 0.0, 0.0), 0.0, rtol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, x, x, x, x), fill(0.0, length(x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, x, x, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, x, x, Inf))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, x, Inf, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, x, Inf, Inf))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.75.*x, 1.25.*x, Inf), log.(1.0 .- exp.(LRMoE.expert_tn_pos.(r, 0.0, 0.75.*x, 1.25.*x, Inf))), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.75.*x, 0.75.*x, 1.25.*x, 1.25.*x), log.(1.0 .- Distributions.cdf.(l, 1.25.*x) .+ Distributions.cdf.(l, 0.75.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.50.*x, 0.75.*x, 1.25.*x, 2.00.*x), log.(1.0 .- Distributions.cdf.(l, 2.00.*x) .+ Distributions.cdf.(l, 0.50.*x)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.0, Inf, Inf), log.(1.0 .- Distributions.cdf.(l, Inf) .+ Distributions.cdf.(l, 0.0)), atol = 1e-6)
+        @test isapprox(LRMoE.expert_tn_bar_pos.(r, 0.0, 0.0, 0.0, 0.0), 0.0, atol = 1e-6)
     end
 
 end
