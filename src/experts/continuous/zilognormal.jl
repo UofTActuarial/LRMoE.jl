@@ -23,7 +23,7 @@ ZILogNormalExpert(p::Real, μ::Real, σ::Real) = ZILogNormalExpert(promote(p, μ
 ZILogNormalExpert(p::Integer, μ::Integer, σ::Integer) = ZILogNormalExpert(float(p), float(μ), float(σ))
 
 ## Loglikelihood of Expoert
-logpdf(d::ZILogNormalExpert, x...) = Distributions.logpdf.(LogNormal(d.μ, d.σ), x...)
-pdf(d::ZILogNormalExpert, x...) = Distributions.pdf.(LogNormal(d.μ, d.σ), x...)
-logcdf(d::ZILogNormalExpert, x...) = Distributions.logcdf.(LogNormal(d.μ, d.σ), x...)
-cdf(d::ZILogNormalExpert, x...) = Distributions.cdf.(LogNormal(d.μ, d.σ), x...)
+logpdf(d::ZILogNormalExpert, x...) = Distributions.logpdf.(Distributions.LogNormal(d.μ, d.σ), x...)
+pdf(d::ZILogNormalExpert, x...) = Distributions.pdf.(Distributions.LogNormal(d.μ, d.σ), x...)
+logcdf(d::ZILogNormalExpert, x...) = Distributions.logcdf.(Distributions.LogNormal(d.μ, d.σ), x...)
+cdf(d::ZILogNormalExpert, x...) = Distributions.cdf.(Distributions.LogNormal(d.μ, d.σ), x...)

@@ -1,7 +1,7 @@
 module LRMoE
 
 import Base: size, length, convert, show, getindex, rand, vec, inv
-import Base: sum, maximum, minimum, extrema, +, -, *, ==
+import Base: sum, maximum, minimum, ceil, floor, extrema, +, -, *, ==
 import Base.Math: @horner
 
 using StatsFuns
@@ -39,7 +39,8 @@ export
 
 
     # experts
-    LogNormalExpert, ZILogNormalExpert
+    LogNormalExpert, ZILogNormalExpert,
+    PoissonExpert, ZIPoissonExpert
 
 
 
