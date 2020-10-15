@@ -5,7 +5,7 @@ import Base: sum, maximum, minimum, ceil, floor, extrema, +, -, *, ==
 import Base.Math: @horner
 
 using StatsFuns
-import StatsFuns: log1mexp, log1pexp
+import StatsFuns: log1mexp, log1pexp, logsumexp
 
 using Distributions
 import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf
@@ -40,6 +40,8 @@ export
     expert_tn,
     expert_tn_bar,
 
+    # gating
+    LogitGating,
 
     # experts
     LogNormalExpert, ZILogNormalExpert,
@@ -51,6 +53,7 @@ export
 
 include("utils.jl")
 
+include("gating.jl")
 include("expert.jl")
 
 # include("experts/ll/expert_ll_pos.jl")
