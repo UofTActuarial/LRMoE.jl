@@ -1,8 +1,8 @@
 language: julia
 os:
-  - linux
-  - osx:
+  - linux:
     - arch: arm64-graviton2
+  - osx
 julia:
   - 1.0
   - 1.4
