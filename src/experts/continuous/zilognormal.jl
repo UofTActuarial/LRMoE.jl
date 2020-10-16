@@ -27,7 +27,7 @@ function convert(::Type{ZILogNormalExpert{T}}, p::S, μ::S, σ::S) where {T <: R
     ZILogNormalExpert(T(p), T(μ), T(σ))
 end
 function convert(::Type{ZILogNormalExpert{T}}, d::ZILogNormalExpert{S}) where {T <: Real, S <: Real}
-    ZILogNormalExpert(T(d.p), T(d.μ), T(d.λ), check_args=false)
+    ZILogNormalExpert(T(d.p), T(d.μ), T(d.σ), check_args=false)
 end
 copy(d::ZILogNormalExpert) = ZILogNormalExpert(d.p, d.μ, d.σ, check_args=false)
 

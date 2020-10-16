@@ -24,7 +24,7 @@ function convert(::Type{LogNormalExpert{T}}, μ::S, σ::S) where {T <: Real, S <
     LogNormalExpert(T(μ), T(σ))
 end
 function convert(::Type{LogNormalExpert{T}}, d::LogNormalExpert{S}) where {T <: Real, S <: Real}
-    LogNormalExpert(T(d.μ), T(d.λ), check_args=false)
+    LogNormalExpert(T(d.μ), T(d.σ), check_args=false)
 end
 copy(d::LogNormalExpert) = LogNormalExpert(d.μ, d.σ, check_args=false)
 
