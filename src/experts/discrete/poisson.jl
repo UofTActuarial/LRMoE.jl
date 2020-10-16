@@ -18,6 +18,15 @@ end
 # PoissonExpert(λ::Real) = PoissonExpert(promote(λ)...)
 PoissonExpert(λ::Integer) = PoissonExpert(float(λ))
 
+## Conversion
+function convert(::Type{PoissonExpert{T}}, λ::S) where {T <: Real, S <: Real}
+    PoissonExpert(T(λ))
+end
+function convert(::Type{PoissonExpert{T}}, d::PoissonExpert{S}) where {T <: Real, S <: Real}
+    PoissonExpert(T(d.λ), check_args=false)
+end
+copy(d::PoissonExpert) = PoissonExpert(d.λ, check_args=false)
+
 ## Loglikelihood of Expoert
 logpdf(d::PoissonExpert, x...) = isinf(x...) ? 0.0 : Distributions.logpdf.(Distributions.Poisson(d.λ), x...)
 pdf(d::PoissonExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distributions.Poisson(d.λ), x...)

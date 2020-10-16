@@ -19,6 +19,15 @@ end
 ZIPoissonExpert(p::Real, λ::Real) = ZIPoissonExpert(promote(p, λ)...)
 ZIPoissonExpert(p::Integer, λ::Integer) = ZIPoissonExpert(float(p), float(λ))
 
+## Conversion
+function convert(::Type{ZIPoissonExpert{T}}, p::S, λ::S) where {T <: Real, S <: Real}
+    ZIPoissonExpert(T(p), T(λ))
+end
+function convert(::Type{ZIPoissonExpert{T}}, d::ZIPoissonExpert{S}) where {T <: Real, S <: Real}
+    ZIPoissonExpert(T(d.p), T(d.λ), check_args=false)
+end
+copy(d::ZIPoissonExpert) = ZIPoissonExpert(d.p, d.λ, check_args=false)
+
 ## Loglikelihood of Expoert
 logpdf(d::ZIPoissonExpert, x...) = isinf(x...) ? 0.0 : Distributions.logpdf.(Distributions.Poisson(d.λ), x...)
 pdf(d::ZIPoissonExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distributions.Poisson(d.λ), x...)

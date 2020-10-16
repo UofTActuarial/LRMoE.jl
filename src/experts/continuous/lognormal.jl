@@ -19,6 +19,15 @@ end
 LogNormalExpert(μ::Real, σ::Real) = LogNormalExpert(promote(μ, σ)...)
 LogNormalExpert(μ::Integer, σ::Integer) = LogNormalExpert(float(μ), float(σ))
 
+## Conversion
+function convert(::Type{LogNormalExpert{T}}, μ::S, σ::S) where {T <: Real, S <: Real}
+    LogNormalExpert(T(μ), T(σ))
+end
+function convert(::Type{LogNormalExpert{T}}, d::LogNormalExpert{S}) where {T <: Real, S <: Real}
+    LogNormalExpert(T(d.μ), T(d.λ), check_args=false)
+end
+copy(d::LogNormalExpert) = LogNormalExpert(d.μ, d.σ, check_args=false)
+
 ## Loglikelihood of Expoert
 logpdf(d::LogNormalExpert, x...) = Distributions.logpdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 pdf(d::LogNormalExpert, x...) = Distributions.pdf.(Distributions.LogNormal(d.μ, d.σ), x...)
