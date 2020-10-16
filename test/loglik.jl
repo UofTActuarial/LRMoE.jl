@@ -79,41 +79,55 @@ using StatsFuns
         @test expert_tn_list(Y, model)[1] ≈ [Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))]
         @test expert_tn_bar_list(Y, model)[1] ≈ log1mexp.([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))])
 
-        # 1*2 model
+        # 2*1 model
         p = rand(Distributions.Uniform(0.0, 1.0), 1)[1]
         y = rand(l, 2) .+ 0.5
         Y = [0.0 0.80*y[1] 1.25*y[1] Inf 0.0 0.80*y[2] 1.25*y[2] Inf]
-        model = [LRMoE.LogNormalExpert(μ, σ) LRMoE.ZILogNormalExpert(p, μ, σ)]
-        @test expert_ll_pos_list(Y, model)[1] ≈ reshape([Distributions.logcdf.(l, Y[3]) + log1mexp.(Distributions.logcdf.(l, Y[2]) - Distributions.logcdf.(l, Y[3]))
-                                                        Distributions.logcdf.(l, Y[7]) + log1mexp.(Distributions.logcdf.(l, Y[6]) - Distributions.logcdf.(l, Y[7]))], (1, 2))
-        @test expert_tn_pos_list(Y, model)[1] ≈ reshape([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))
-                                                        Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))], (1, 2))
-        @test expert_tn_bar_pos_list(Y, model)[1] ≈ log1mexp.(reshape([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))
-                                                        Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))], (1, 2)))
-        @test expert_ll_list(Y, model)[1] ≈ reshape([Distributions.logcdf.(l, Y[3]) + log1mexp.(Distributions.logcdf.(l, Y[2]) - Distributions.logcdf.(l, Y[3]))
-                                                log(1-p) .+ Distributions.logcdf.(l, Y[7]) + log1mexp.(Distributions.logcdf.(l, Y[6]) - Distributions.logcdf.(l, Y[7]))], (1, 2))
-        @test expert_tn_list(Y, model)[1] ≈ reshape([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))
-                                                    Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))], (1, 2))
-        @test expert_tn_bar_list(Y, model)[1] ≈ log1mexp.(reshape([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))
-                                                Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))], (1, 2)))
+        model = reshape([LRMoE.LogNormalExpert(μ, σ);
+                 LRMoE.ZILogNormalExpert(p, μ, σ)], (2, 1))
+        @test expert_ll_pos_list(Y, model)[1] ≈ [Distributions.logcdf.(l, Y[3]) + log1mexp.(Distributions.logcdf.(l, Y[2]) - Distributions.logcdf.(l, Y[3]))]
+        @test expert_ll_pos_list(Y, model)[2] ≈ [Distributions.logcdf.(l, Y[7]) + log1mexp.(Distributions.logcdf.(l, Y[6]) - Distributions.logcdf.(l, Y[7]))]
+
+        @test expert_tn_pos_list(Y, model)[1] ≈ [Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))]
+        @test expert_tn_pos_list(Y, model)[2] ≈ [Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))]
+
+        @test expert_tn_bar_pos_list(Y, model)[1] ≈ log1mexp.([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))])
+        @test expert_tn_bar_pos_list(Y, model)[2] ≈ log1mexp.([Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))])
+
+        @test expert_ll_list(Y, model)[1] ≈ [Distributions.logcdf.(l, Y[3]) + log1mexp.(Distributions.logcdf.(l, Y[2]) - Distributions.logcdf.(l, Y[3]))]
+        @test expert_ll_list(Y, model)[2] ≈ [log(1-p) .+ Distributions.logcdf.(l, Y[7]) + log1mexp.(Distributions.logcdf.(l, Y[6]) - Distributions.logcdf.(l, Y[7]))]
+
+        @test expert_tn_list(Y, model)[1] ≈ [Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))]
+        @test expert_tn_list(Y, model)[2] ≈ [Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))]
+
+        @test expert_tn_bar_list(Y, model)[1] ≈ log1mexp.([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))])
+        @test expert_tn_bar_list(Y, model)[2] ≈ log1mexp.([Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))])
+        
         
         p = rand(Distributions.Uniform(0.0, 1.0), 1)[1]
         y = rand(l, 2) .+ 0.5
         Y = [0.0 0.80*y[1] 1.25*y[1] Inf 0.50*y[2] 0.80*y[2] 1.25*y[2] 2.50*y[2]]
-        model = [LRMoE.LogNormalExpert(μ, σ) LRMoE.ZILogNormalExpert(p, μ, σ)]
-        @test expert_ll_pos_list(Y, model)[1] ≈ reshape([Distributions.logcdf.(l, Y[3]) + log1mexp.(Distributions.logcdf.(l, Y[2]) - Distributions.logcdf.(l, Y[3]))
-                                                        Distributions.logcdf.(l, Y[7]) + log1mexp.(Distributions.logcdf.(l, Y[6]) - Distributions.logcdf.(l, Y[7]))], (1, 2))
-        @test expert_tn_pos_list(Y, model)[1] ≈ reshape([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))
-                                                        Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))], (1, 2))
-        @test expert_tn_bar_pos_list(Y, model)[1] ≈ log1mexp.(reshape([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))
-                                                        Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))], (1, 2)))
-        @test expert_ll_list(Y, model)[1] ≈ reshape([Distributions.logcdf.(l, Y[3]) + log1mexp.(Distributions.logcdf.(l, Y[2]) - Distributions.logcdf.(l, Y[3]))
-                                                log(1-p) .+ Distributions.logcdf.(l, Y[7]) + log1mexp.(Distributions.logcdf.(l, Y[6]) - Distributions.logcdf.(l, Y[7]))], (1, 2))
-        @test expert_tn_list(Y, model)[1] ≈ reshape([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))
-                                                log(1-p) .+ Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))], (1, 2))
-        @test expert_tn_bar_list(Y, model)[1] ≈ log1mexp.(reshape([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))
-                                                log(1-p) .+ Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))], (1, 2)))
+        model = reshape([LRMoE.LogNormalExpert(μ, σ);
+                LRMoE.ZILogNormalExpert(p, μ, σ)], (2, 1))
+        @test expert_ll_pos_list(Y, model)[1] ≈ [Distributions.logcdf.(l, Y[3]) + log1mexp.(Distributions.logcdf.(l, Y[2]) - Distributions.logcdf.(l, Y[3]))]
+        @test expert_ll_pos_list(Y, model)[2] ≈ [Distributions.logcdf.(l, Y[7]) + log1mexp.(Distributions.logcdf.(l, Y[6]) - Distributions.logcdf.(l, Y[7]))]
 
+        @test expert_tn_pos_list(Y, model)[1] ≈ [Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))]
+        @test expert_tn_pos_list(Y, model)[2] ≈ [Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))]
+
+        @test expert_tn_bar_pos_list(Y, model)[1] ≈ log1mexp.([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))])
+        @test expert_tn_bar_pos_list(Y, model)[2] ≈ log1mexp.([Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))])
+
+        @test expert_ll_list(Y, model)[1] ≈ [Distributions.logcdf.(l, Y[3]) + log1mexp.(Distributions.logcdf.(l, Y[2]) - Distributions.logcdf.(l, Y[3]))]
+        @test expert_ll_list(Y, model)[2] ≈ [log(1-p) .+ Distributions.logcdf.(l, Y[7]) + log1mexp.(Distributions.logcdf.(l, Y[6]) - Distributions.logcdf.(l, Y[7]))]
+
+        @test expert_tn_list(Y, model)[1] ≈ [Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))]
+        @test expert_tn_list(Y, model)[2] ≈ [log(1-p) .+ Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8]))]
+
+        @test expert_tn_bar_list(Y, model)[1] ≈ log1mexp.([Distributions.logcdf.(l, Y[4]) + log1mexp.(Distributions.logcdf.(l, Y[1]) - Distributions.logcdf.(l, Y[4]))])
+        @test expert_tn_bar_list(Y, model)[2] ≈ [log.(p .+ (1-p) .* exp.(log1mexp.(Distributions.logcdf.(l, Y[8]) + log1mexp.(Distributions.logcdf.(l, Y[5]) - Distributions.logcdf.(l, Y[8])))))]
+
+        # 2*3 model
 
     end
 
