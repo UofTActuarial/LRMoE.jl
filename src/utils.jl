@@ -8,3 +8,6 @@ macro check_args(D, cond)
         end
     end
 end
+
+# rowlogsumexps
+rowlogsumexp(x) = logsumexp.(x[row,:] for row in 1:size(x)[1])

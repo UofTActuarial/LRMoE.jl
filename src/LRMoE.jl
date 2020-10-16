@@ -32,6 +32,7 @@ export
     # loglikelihood functions
     pdf, logpdf,
     cdf, logcdf,
+    rowlogsumexp,
 
     expert_ll_pos,
     expert_tn_pos,
@@ -39,6 +40,12 @@ export
     expert_ll,
     expert_tn,
     expert_tn_bar,
+    expert_ll_pos_list,
+    expert_tn_pos_list,
+    expert_tn_bar_pos_list,
+    expert_ll_list,
+    expert_tn_list,
+    expert_tn_bar_list,
 
     # gating
     LogitGating,
@@ -55,6 +62,7 @@ include("utils.jl")
 
 include("gating.jl")
 include("expert.jl")
+include("loglik.jl")
 
 # include("experts/ll/expert_ll_pos.jl")
 

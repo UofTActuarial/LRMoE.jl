@@ -19,6 +19,7 @@
 function LogitGating(α, x; check_args = true)
     check_args && @check_args(LogitGating, size(α)[2] == size(x)[2])
     ax = x * α'
-    rowsum = logsumexp.(ax[row,:] for row in 1:size(ax)[1])
+    rowsum = rowlogsumexp(ax) # logsumexp.(ax[row,:] for row in 1:size(ax)[1])
     return ax .- rowsum
+    # return (x * α') .- logsumexp.((x * α')[row,:] for row in 1:size((x * α'))[1])
 end
