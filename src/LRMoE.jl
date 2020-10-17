@@ -50,6 +50,11 @@ export
     expert_tn_list,
     expert_tn_bar_list,
 
+    loglik_aggre_dim,
+    loglik_aggre_gate_dim,
+    loglik_aggre_gate_dim_comp,
+    loglik_np,
+
     # gating
     LogitGating,
 

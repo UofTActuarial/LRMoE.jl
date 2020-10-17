@@ -2,7 +2,7 @@ using Test
 using Distributions
 using StatsFuns
 
-@testset "loglik list" begin
+@testset "loglik list (individual)" begin
 
     d = Distributions.Gamma(1.0, 2.0)
 
@@ -172,4 +172,38 @@ using StatsFuns
     end
 
 
+end
+
+@testset "loglik list (aggredated) " begin
+    d = Distributions.Gamma(1.0, 2.0)
+
+    μμ = rand(d, 5)
+    σσ = rand(d, 5)
+
+    for (μ, σ) in zip(μμ, σσ)
+        l = Distributions.LogNormal(μ, σ)
+        y = rand(l, 25)
+
+        # LogNormal
+        r = LRMoE.LogNormalExpert(μ, σ)
+        
+        X = rand(Uniform(-1, 1), 25, 10)
+        α = rand(Uniform(-1, 1), 3, 10)
+        α[3,:] .= 0.0
+
+        Y = hcat(fill(0, length(y)), y, y, fill(Inf, length(y)), fill(0, length(y)), 0.80.*y, 1.25.*y, fill(Inf, length(y)))
+        model = [LRMoE.LogNormalExpert(μ, σ) LRMoE.LogNormalExpert(0.5*μ, 0.6*σ) LRMoE.LogNormalExpert(1.5*μ, 2.0*σ);
+                LRMoE.ZILogNormalExpert(0.4, μ, σ) LRMoE.LogNormalExpert(0.5*μ, 0.6*σ) LRMoE.ZILogNormalExpert(0.80, 1.5*μ, 2.0*σ)]
+        
+        # Test size
+        @test size(LogitGating(α, X))[1] == 25
+        @test size(LogitGating(α, X))[2] == 3
+
+        gate = LogitGating(α, X)
+        ll_ls = loglik_np(Y, gate, model)
+        # Test number
+        @test isa(ll_ls.ll, Number)
+        @test exp.(ll_ls.gate_expert_tn) + exp.(ll_ls.gate_expert_tn_bar) ≈ fill(1.0, length(ll_ls.gate_expert_tn))
+        
+    end
 end
