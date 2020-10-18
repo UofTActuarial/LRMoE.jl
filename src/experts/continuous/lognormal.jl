@@ -28,8 +28,9 @@ function convert(::Type{LogNormalExpert{T}}, d::LogNormalExpert{S}) where {T <: 
 end
 copy(d::LogNormalExpert) = LogNormalExpert(d.μ, d.σ, check_args=false)
 
-## Loglikelihood of Expoert
+## Loglikelihood of Expert
 logpdf(d::LogNormalExpert, x...) = Distributions.logpdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 pdf(d::LogNormalExpert, x...) = Distributions.pdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 logcdf(d::LogNormalExpert, x...) = Distributions.logcdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 cdf(d::LogNormalExpert, x...) = Distributions.cdf.(Distributions.LogNormal(d.μ, d.σ), x...)
+penalize(d::LogNormalExpert, p) = (p[1]-1)*log(d.μ) - d.μ/p[2] + (p[3]-1)*log(d.σ) - d.σ/p[4]
