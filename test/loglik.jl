@@ -149,18 +149,20 @@ using StatsFuns
         @test expert_tn_pos_list(Y, model)[2] ≈ hcat(Distributions.logcdf.(l3, Y[:,8]) + log1mexp.(Distributions.logcdf.(l3, Y[:,5]) - Distributions.logcdf.(l3, Y[:,8])),
                                                     Distributions.logcdf.(l4, Y[:,8]) + log1mexp.(Distributions.logcdf.(l4, Y[:,5]) - Distributions.logcdf.(l4, Y[:,8])))
 
-        @test expert_tn_bar_pos_list(Y, model)[1] ≈ hcat(fill(-Inf, length(Y[:,2])),
-                                                    log1mexp.(Distributions.logcdf.(l2, Y[:,4]) + log1mexp.(Distributions.logcdf.(l2, Y[:,1]) - Distributions.logcdf.(l2, Y[:,4]))))
-        @test expert_tn_bar_pos_list(Y, model)[2] ≈ hcat(log1mexp.(Distributions.logcdf.(l3, Y[:,8]) + log1mexp.(Distributions.logcdf.(l3, Y[:,5]) - Distributions.logcdf.(l3, Y[:,8]))),
-                                                    log1mexp.(Distributions.logcdf.(l4, Y[:,8]) + log1mexp.(Distributions.logcdf.(l4, Y[:,5]) - Distributions.logcdf.(l4, Y[:,8]))))
+        # @test expert_tn_bar_pos_list(Y, model)[1] ≈ hcat(fill(-Inf, length(Y[:,2])),
+        #                                             log1mexp.(Distributions.logcdf.(l2, Y[:,4]) + log1mexp.(Distributions.logcdf.(l2, Y[:,1]) - Distributions.logcdf.(l2, Y[:,4]))))
+        # @test expert_tn_bar_pos_list(Y, model)[2] ≈ hcat(log1mexp.(Distributions.logcdf.(l3, Y[:,8]) + log1mexp.(Distributions.logcdf.(l3, Y[:,5]) - Distributions.logcdf.(l3, Y[:,8]))),
+        #                                             log1mexp.(Distributions.logcdf.(l4, Y[:,8]) + log1mexp.(Distributions.logcdf.(l4, Y[:,5]) - Distributions.logcdf.(l4, Y[:,8]))))
 
-        @test expert_ll_list(Y, model)[1] ≈ hcat(Distributions.logcdf.(l1, Y[:,3]) + log1mexp.(Distributions.logcdf.(l1, Y[:,2]) - Distributions.logcdf.(l1, Y[:,3])),
-                                                log(1-p1) .+ Distributions.logcdf.(l2, Y[:,3]) + log1mexp.(Distributions.logcdf.(l2, Y[:,2]) - Distributions.logcdf.(l2, Y[:,3])))
-        @test expert_ll_list(Y, model)[2] ≈ hcat(log(1-p2) .+ Distributions.logcdf.(l3, Y[:,7]) + log1mexp.(Distributions.logcdf.(l3, Y[:,6]) - Distributions.logcdf.(l3, Y[:,7])),
-                                                    Distributions.logcdf.(l4, Y[:,7]) + log1mexp.(Distributions.logcdf.(l4, Y[:,6]) - Distributions.logcdf.(l4, Y[:,7])))
+        # @test expert_ll_list(Y, model)[1] ≈ hcat(Distributions.logcdf.(l1, Y[:,3]) + log1mexp.(Distributions.logcdf.(l1, Y[:,2]) - Distributions.logcdf.(l1, Y[:,3])),
+        #                                         log(1-p1) .+ Distributions.logcdf.(l2, Y[:,3]) + log1mexp.(Distributions.logcdf.(l2, Y[:,2]) - Distributions.logcdf.(l2, Y[:,3])))
+        # @test expert_ll_list(Y, model)[2] ≈ hcat(log(1-p2) .+ Distributions.logcdf.(l3, Y[:,7]) + log1mexp.(Distributions.logcdf.(l3, Y[:,6]) - Distributions.logcdf.(l3, Y[:,7])),
+        #                                             Distributions.logcdf.(l4, Y[:,7]) + log1mexp.(Distributions.logcdf.(l4, Y[:,6]) - Distributions.logcdf.(l4, Y[:,7])))
 
         @test expert_tn_list(Y, model)[1] ≈ hcat(fill(0.0, length(Y[:,2])),
                                                 fill(0.0, length(Y[:,2])))
+
+
         # @test expert_tn_list(Y, model)[2] ≈ hcat(log(1-p2) .+ Distributions.logcdf.(l3, Y[:,8]) .+ log1mexp.(Distributions.logcdf.(l3, Y[:,5]) - Distributions.logcdf.(l3, Y[:,8])),
         #                                         Distributions.logcdf.(l4, Y[:,8]) + log1mexp.(Distributions.logcdf.(l4, Y[:,5]) - Distributions.logcdf.(l4, Y[:,8])))
         
@@ -169,6 +171,7 @@ using StatsFuns
         
         @test expert_tn_bar_list(Y, model)[1] ≈ hcat(fill(-Inf, length(Y[:,2])),
                                                     fill(-Inf, length(Y[:,2])))
+
         # @test expert_tn_bar_list(Y, model)[2] ≈ hcat(log.(p2.+ (1-p2) .* (1 .- exp.(Distributions.logcdf.(l3, Y[:,8]) + log1mexp.(Distributions.logcdf.(l3, Y[:,5]) - Distributions.logcdf.(l3, Y[:,8]))))),
         #                                             log1mexp.(Distributions.logcdf.(l4, Y[:,8]) + log1mexp.(Distributions.logcdf.(l4, Y[:,5]) - Distributions.logcdf.(l4, Y[:,8]))))
         
