@@ -1,6 +1,6 @@
 module LRMoE
 
-import Base: size, length, convert, show, getindex, rand, vec, inv
+import Base: size, length, convert, show, getindex, rand, vec, inv, expm1
 import Base: sum, maximum, minimum, ceil, floor, extrema, +, -, *, ==
 import Base: convert, copy
 import Base.Math: @horner
@@ -55,12 +55,19 @@ export
     loglik_aggre_gate_dim_comp,
     loglik_np,
 
+    penalty_α,
+    penalty_params,
+    penalize,
+
     # gating
     LogitGating,
 
     # experts
     LogNormalExpert, ZILogNormalExpert,
-    PoissonExpert, ZIPoissonExpert
+    PoissonExpert, ZIPoissonExpert,
+
+    # fitting
+    fit_main
 
 
 
@@ -71,6 +78,9 @@ include("utils.jl")
 include("gating.jl")
 include("expert.jl")
 include("loglik.jl")
+include("penalty.jl")
+
+include("fit.jl")
 
 # include("experts/ll/expert_ll_pos.jl")
 
