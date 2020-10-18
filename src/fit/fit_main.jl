@@ -38,12 +38,7 @@ function fit_main(Y, X, α_init, model;
             z_e_obs = EM_E_z_obs(ll_em_list.gate_expert_ll_comp, ll_em_list.gate_expert_ll)
             z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp, ll_em_list.gate_expert_tn_bar)
             k_e = EM_E_k(ll_em_list.gate_expert_tn)
-
-            # println("$(ll_em_list.ll)")
-            # println("$(z_e_obs)")
-            # println("$(z_e_lat)")
-            # println("$(k_e)")
-        
+       
 
             # M-Step: α
             α_em = EM_M_α(X, α_em, z_e_obs, z_e_lat, k_e, α_iter_max = α_iter_max, penalty = penalty, pen_α = pen_α)
@@ -54,10 +49,32 @@ function fit_main(Y, X, α_init, model;
             ll_em = ll_em_np + ll_em_penalty
 
             if print_steps
-                println("Iteration $(iter), updating α:  $(ll_em_old) ->  $(ll_em)")
-                # println(α_em)
+                println("Iteration $(iter), updating α: $(ll_em_old) ->  $(ll_em)")
             end
-            # ll_em_old = ll_em
+            ll_em_temp = ll_em
+
+            # M-Step: component distributions
+            for j in 1:size(model)[1] # by dimension
+                for k in 1:size(model)[2] # by component
+                    
+                    model_em[j,k] = EM_M_expert(model_em[j,k], 
+                                                Y[:, 4*(j-1)+1], Y[:, 4*(j-1)+2], Y[:, 4*(j-1)+3],Y[:, 4*(j-1)+4],
+                                                ll_em_list.expert_ll_pos_dim_comp[j][:,k],
+                                                ll_em_list.expert_tn_pos_dim_comp[j][:,k],
+                                                ll_em_list.expert_tn_bar_pos_dim_comp[j][:,k],
+                                                vec(z_e_obs[:,k]), vec(z_e_lat[:,k]), vec(k_e),
+                                                penalty = penalty, pen_pararms_jk = pen_params[j][k])
+
+                    ll_em_list = loglik_np(Y, gate_em, model_em)
+                    ll_em_np = ll_em_list.ll
+                    ll_em_penalty = penalty ? (pen_α(α_em) + penalty_params(model_em, pen_params)) : 0.0
+                    ll_em = ll_em_np + ll_em_penalty
+                    if print_steps
+                        println("Iteration $(iter), updating model[$j, $k]: $(ll_em_temp) ->  $(ll_em)")
+                    end
+                    ll_em_temp = ll_em
+                end
+            end
 
 
             α_em = α_em
@@ -69,11 +86,7 @@ function fit_main(Y, X, α_init, model;
             ll_em = ll_em_np + ll_em_penalty
         end
 
-        # α_em[1,1] = Inf
-        # model_em[1,1] = LogNormalExpert(2, 3)
-
-        # println("$(α_em), $(α_init), $(model), $(model_em), $(ll_em), $(ll_em_old)")
-        return α_em
+        return model_em
     end 
     
 

@@ -36,4 +36,38 @@ logpdf(d::ZILogNormalExpert, x...) = Distributions.logpdf.(Distributions.LogNorm
 pdf(d::ZILogNormalExpert, x...) = Distributions.pdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 logcdf(d::ZILogNormalExpert, x...) = Distributions.logcdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 cdf(d::ZILogNormalExpert, x...) = Distributions.cdf.(Distributions.LogNormal(d.μ, d.σ), x...)
-penalize(d::ZILogNormalExpert, p) = (p[1]-1)*log(d.μ) - d.μ/p[2] + (p[3]-1)*log(d.σ) - d.σ/p[4]
+penalize(d::ZILogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
+
+## EM: M-Step
+function EM_M_expert(d::ZILogNormalExpert,
+                     tl, yl, yu, tu,
+                     expert_ll_pos,
+                     expert_tn_pos,
+                     expert_tn_bar_pos,
+                     z_e_obs, z_e_lat, k_e;
+                     penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
+    
+    # Old parameters
+    μ_old = d.μ
+    σ_old = d.σ
+    p_old = d.p
+
+    # Update zero probability
+    z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(yl, p_old, expert_ll_pos)
+    z_pos_e_obs = z_e_obs .- z_zero_e_obs
+    z_zero_e_lat = z_e_lat .* EM_E_z_zero_lat(tl, p_old, expert_tn_bar_pos)
+    z_pos_e_lat = z_e_lat .- z_zero_e_lat
+    p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, z_zero_e_lat, z_pos_e_lat, k_e)
+
+    # Update parameters: call its positive part
+    tmp_exp = LogNormalExpert(d.μ, d.σ)
+    tmp_update = EM_M_expert(tmp_exp,
+                            tl, yl, yu, tu,
+                            expert_ll_pos,
+                            expert_tn_pos,
+                            expert_tn_bar_pos,
+                            z_e_obs, z_e_lat, k_e,
+                            penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+
+    return ZILogNormalExpert(p_new, tmp_update.μ, tmp_update.σ)
+end

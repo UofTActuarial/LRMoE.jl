@@ -4,14 +4,16 @@ import Base: size, length, convert, show, getindex, rand, vec, inv, expm1
 import Base: sum, maximum, minimum, ceil, floor, extrema, +, -, *, ==
 import Base: convert, copy
 import Base.Math: @horner
+import Base: π
 
 using StatsFuns
 import StatsFuns: log1mexp, log1pexp, logsumexp
+import StatsFuns: sqrt2, invsqrt2π
 
 using Distributions
 import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf
 import Distributions: UnivariateDistribution, DiscreteUnivariateDistribution, ContinuousUnivariateDistribution
-import Distributions: LogNormal
+import Distributions: LogNormal, Normal, Poisson
 
 using InvertedIndices
 import InvertedIndices: Not
@@ -19,6 +21,8 @@ import InvertedIndices: Not
 using LinearAlgebra
 import LinearAlgebra: I, Cholesky
 
+using SpecialFunctions
+import SpecialFunctions: erf
 
 export
     # generic types
@@ -73,6 +77,10 @@ export
     EM_M_α,
     EM_M_dQdα,
     EM_M_dQ2dα2,
+    EM_E_z_zero_obs_update,
+    EM_E_z_zero_lat_update,
+    EM_E_z_zero_obs,
+    EM_E_z_zero_lat,
 
     fit_main,
 

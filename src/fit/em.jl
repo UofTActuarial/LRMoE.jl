@@ -1,9 +1,3 @@
-function nan2num(x, g)
-    for i in eachindex(x)
-        @inbounds x[i] = ifelse(isnan(x[i]), g, x[i])
-    end
-end
-
 function EM_E_z_obs(gate_expert_ll_comp, gate_expert_ll)
     return exp.(gate_expert_ll_comp .- gate_expert_ll)
 end
@@ -19,8 +13,21 @@ function EM_E_k(gate_expert_tn)
     return expm1.( - gate_expert_tn )
 end
 
+function EM_E_z_zero_obs_update(lower, prob, ll_vec)
+    return lower == 0.0 ? prob/(prob + (1-prob)*exp(ll_vec)) : 0.0
+end
 
+function EM_E_z_zero_lat_update(lower, prob, ll_vec)
+    return lower > 0.0 ? prob/(prob + (1-prob)*exp(ll_vec)) : 0.0
+end
 
+function EM_E_z_zero_obs(yl, p_old, gate_expert_ll_pos_comp)
+    return EM_E_z_zero_obs_update.(yl, p_old, gate_expert_ll_pos_comp)
+end
+
+function EM_E_z_zero_lat(tl, p_old, gate_expert_tn_bar_pos_comp)
+    return EM_E_z_zero_lat_update.(tl, p_old, gate_expert_tn_bar_pos_comp)
+end
 
 # EM
 
@@ -67,4 +74,10 @@ function EM_M_α(X, α, z_e_obs, z_e_lat, k_e;
         return α_new
     end
     
+end
+
+function EM_M_zero(z_zero_e_obs, z_pos_e_obs, z_zero_e_lat, z_pos_e_lat, k_e)
+    num = sum(z_zero_e_obs .+ (z_zero_e_lat .* k_e))
+    denom = num + sum(z_pos_e_obs .+ (z_pos_e_lat .* k_e))
+    return num/denom
 end
