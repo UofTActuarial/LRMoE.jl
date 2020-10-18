@@ -13,6 +13,12 @@ import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf
 import Distributions: UnivariateDistribution, DiscreteUnivariateDistribution, ContinuousUnivariateDistribution
 import Distributions: LogNormal
 
+using InvertedIndices
+import InvertedIndices: Not
+
+using LinearAlgebra
+import LinearAlgebra: I, Cholesky
+
 
 export
     # generic types
@@ -58,6 +64,18 @@ export
     penalty_α,
     penalty_params,
     penalize,
+
+    # EM related
+    nan2num,
+    EM_E_z_obs,
+    EM_E_z_lat,
+    EM_E_k,
+    EM_M_α,
+    EM_M_dQdα,
+    EM_M_dQ2dα2,
+
+    fit_main,
+
 
     # gating
     LogitGating,

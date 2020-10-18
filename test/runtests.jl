@@ -18,7 +18,8 @@ const tests = [
     "pdfcdf",
     "expert_loglik",
     "gating",
-    "loglik"
+    "loglik",
+    "fit_functions"
 ]
 
 printstyled("Running tests:\n", color=:blue)

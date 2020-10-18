@@ -18,3 +18,53 @@ end
 function EM_E_k(gate_expert_tn)
     return expm1.( - gate_expert_tn )
 end
+
+
+
+
+# EM
+
+function EM_M_dQdα(X, comp_zkz_j, comp_zkz_marg, pp_j)
+    
+    return vec(sum(X .* (comp_zkz_j - comp_zkz_marg .* pp_j), dims = 1))
+
+end
+
+function EM_M_dQ2dα2(X, comp_zkz_marg, pp_j, qq_j)
+    return -X' * (comp_zkz_marg .* pp_j .* qq_j .* X)
+end
+
+function EM_M_α(X, α, z_e_obs, z_e_lat, k_e;
+                α_iter_max = 5, penalty = true, pen_α = 5)
+    let comp_zkz, comp_zkz_marg, α_new, α_old, iter
+        # X, α_old, α_new, z_e_obs, z_e_lat, k_e, α_iter_max, penalty, pen_α, comp_zkz, comp_zkz_marg, iter
+        
+        comp_zkz = z_e_obs .+ (k_e .* z_e_lat)
+        comp_zkz_marg = vec(sum(comp_zkz, dims = 2))
+
+        α_new = copy(α)
+        α_old = copy(α_new) .- Inf
+
+        iter = fill(0, size(α_new)[1])
+    
+        for j in 1:(size(α)[1]-1)
+            while (iter[j] < α_iter_max) & (sum((α_new[j,:] - α_old[j,:]).^2) > 1e-08)
+
+                α_old[j,:] = α_new[j,:]
+                gate_body = X * α_new'
+                pp = exp.(LogitGating(α_new, X))
+                qqj = exp.(rowlogsumexp(gate_body[:, Not(j)]) - rowlogsumexp(gate_body))
+                
+                dQ = EM_M_dQdα(X, comp_zkz[:,j], comp_zkz_marg, pp[:,j]) .- (penalty ? vec(α_new[j,:] ./ pen_α^2) : 0.0)
+                dQ2 = EM_M_dQ2dα2(X, comp_zkz_marg, pp[:,j], qqj) - (penalty ? (1.0 ./ pen_α^2) * I(size(α_new)[2]) : (1e-07) * I(size(α_new)[2]))
+                
+                α_new[j,:] = α_new[j,:] .- inv(dQ2) * dQ
+                iter[j] = iter[j] + 1
+
+            end
+        end
+
+        return α_new
+    end
+    
+end
