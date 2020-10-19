@@ -12,8 +12,9 @@ import StatsFuns: sqrt2, invsqrt2π
 
 using Distributions
 import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf
+import Distributions: rand
 import Distributions: UnivariateDistribution, DiscreteUnivariateDistribution, ContinuousUnivariateDistribution
-import Distributions: LogNormal, Normal, Poisson
+import Distributions: LogNormal, Normal, Poisson, Bernoulli
 
 using InvertedIndices
 import InvertedIndices: Not

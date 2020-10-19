@@ -33,6 +33,12 @@ logpdf(d::LogNormalExpert, x...) = Distributions.logpdf.(Distributions.LogNormal
 pdf(d::LogNormalExpert, x...) = Distributions.pdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 logcdf(d::LogNormalExpert, x...) = Distributions.logcdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 cdf(d::LogNormalExpert, x...) = Distributions.cdf.(Distributions.LogNormal(d.μ, d.σ), x...)
+
+## Simululation
+sim_expert(d::LogNormalExpert, sample_size) = Distributions.rand(Distributions.LogNormal(d.μ, d.σ), sample_size)
+
+## penalty
+penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]
 penalize(d::LogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 
 ## Misc functions for E-Step

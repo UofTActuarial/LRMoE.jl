@@ -32,4 +32,10 @@ logpdf(d::PoissonExpert, x...) = isinf(x...) ? 0.0 : Distributions.logpdf.(Distr
 pdf(d::PoissonExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distributions.Poisson(d.λ), x...)
 logcdf(d::PoissonExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.Poisson(d.λ), x...)
 cdf(d::PoissonExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.Poisson(d.λ), x...)
+
+## Simululation
+sim_expert(d::PoissonExpert, sample_size) = Distributions.rand(Distributions.Poisson(d.λ), sample_size)
+
+## penalty
+penalty_init(d::PoissonExpert) = [2.0 1.0]
 penalize(d::PoissonExpert, p) = (p[1]-1)*log(d.λ) - d.λ/p[2]

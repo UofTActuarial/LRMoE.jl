@@ -36,6 +36,12 @@ logpdf(d::ZILogNormalExpert, x...) = Distributions.logpdf.(Distributions.LogNorm
 pdf(d::ZILogNormalExpert, x...) = Distributions.pdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 logcdf(d::ZILogNormalExpert, x...) = Distributions.logcdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 cdf(d::ZILogNormalExpert, x...) = Distributions.cdf.(Distributions.LogNormal(d.μ, d.σ), x...)
+
+## Simululation
+sim_expert(d::ZILogNormalExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.LogNormal(d.μ, d.σ), sample_size)
+
+## penalty
+penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]
 penalize(d::ZILogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 
 ## EM: M-Step
