@@ -34,6 +34,9 @@ pdf(d::LogNormalExpert, x...) = Distributions.pdf.(Distributions.LogNormal(d.μ,
 logcdf(d::LogNormalExpert, x...) = Distributions.logcdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 cdf(d::LogNormalExpert, x...) = Distributions.cdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 
+## Parameters
+params(d::LogNormalExpert) = (d.μ, d.σ)
+
 ## Simululation
 sim_expert(d::LogNormalExpert, sample_size) = Distributions.rand(Distributions.LogNormal(d.μ, d.σ), sample_size)
 

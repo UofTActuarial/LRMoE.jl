@@ -37,6 +37,9 @@ pdf(d::ZILogNormalExpert, x...) = Distributions.pdf.(Distributions.LogNormal(d.�
 logcdf(d::ZILogNormalExpert, x...) = Distributions.logcdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 cdf(d::ZILogNormalExpert, x...) = Distributions.cdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 
+## Parameters
+params(d::ZILogNormalExpert) = (d.p, d.μ, d.σ)
+
 ## Simululation
 sim_expert(d::ZILogNormalExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.LogNormal(d.μ, d.σ), sample_size)
 

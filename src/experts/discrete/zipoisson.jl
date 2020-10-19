@@ -34,6 +34,9 @@ pdf(d::ZIPoissonExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distribu
 logcdf(d::ZIPoissonExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.Poisson(d.λ), x...)
 cdf(d::ZIPoissonExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.Poisson(d.λ), x...)
 
+## Parameters
+params(d::ZIPoissonExpert) = (d.p, d.λ)
+
 ## Simululation
 sim_expert(d::ZIPoissonExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.Poisson(d.λ), sample_size)
 

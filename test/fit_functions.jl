@@ -80,10 +80,10 @@ end
         # result = fit_main(Y, X, α_guess, model_guess, penalty = false, pen_params = pen_params)
 
         # With truncation
-        # Y = hcat(fill(0.0, length(Y_sim[:,1])), Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), 0.30.*Y_sim[:,2], 0.80.*Y_sim[:,2], 1.20.*Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
-        # Y = hcat( 0.80.*Y_sim[:,1], Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), 0.30.*Y_sim[:,2], 0.80.*Y_sim[:,2], 1.20.*Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+        Y = hcat(fill(0.0, length(Y_sim[:,1])), Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), 0.30.*Y_sim[:,2], 0.80.*Y_sim[:,2], 1.20.*Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+        Y = hcat( 0.80.*Y_sim[:,1], Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), 0.30.*Y_sim[:,2], 0.80.*Y_sim[:,2], 1.20.*Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
         # Y = hcat(fill(0, length(Y_sim[:,1])), Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), fill(0.0, length(Y_sim[:,2])), 0.80.*Y_sim[:,2], 1.20.*Y_sim[:,2], 2.50.*Y_sim[:,2])
-        # result = fit_main(Y, X, α_guess, model_guess, penalty = false, pen_params = pen_params)
+        result = fit_main(Y, X, α_guess, model_guess, penalty = false, pen_params = pen_params)
 
         # Y = hcat(fill(0, length(Y_sim[:,1])), Y_sim[:,1], Y_sim[:,1], 2.0 .*Y_sim[:,1], fill(0.0, length(Y_sim[:,2])), Y_sim[:,2], Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
         # result = fit_main(Y, X, α_guess, model_guess, penalty = false, pen_params = pen_params, ecm_iter_max = 20)

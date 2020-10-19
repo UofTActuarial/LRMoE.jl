@@ -91,6 +91,7 @@ export
     LogitGating,
 
     # experts
+    params,
     LogNormalExpert, ZILogNormalExpert,
     PoissonExpert, ZIPoissonExpert,
 

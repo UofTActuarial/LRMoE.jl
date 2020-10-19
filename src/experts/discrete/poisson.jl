@@ -33,6 +33,9 @@ pdf(d::PoissonExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distributi
 logcdf(d::PoissonExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.Poisson(d.λ), x...)
 cdf(d::PoissonExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.Poisson(d.λ), x...)
 
+## Parameters
+params(d::PoissonExpert) = (d.λ)
+
 ## Simululation
 sim_expert(d::PoissonExpert, sample_size) = Distributions.rand(Distributions.Poisson(d.λ), sample_size)
 
