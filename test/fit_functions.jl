@@ -1,10 +1,14 @@
 using Test
 using Distributions
 using StatsFuns
+using Random
 
 μ = 1
 σ = 2
 using LRMoE
+
+Random.seed!(1234)
+
 
 @testset "fitting" begin
 
@@ -90,12 +94,29 @@ end
 
 
 
+        model = [LRMoE.ZILogNormalExpert(0.3, μ, σ) LRMoE.ZILogNormalExpert(0.2, 0.5*μ, 0.6*σ) LRMoE.ZILogNormalExpert(0.10, 1.5*μ, 2.0*σ);
+                 LRMoE.ZILogNormalExpert(0.4, μ, σ) LRMoE.ZILogNormalExpert(0.5, 0.5*μ, 0.6*σ) LRMoE.ZILogNormalExpert(0.80, 1.5*μ, 2.0*σ)]
+
+
+        model_guess = [LRMoE.ZILogNormalExpert(0.50, 0.8*μ, 1.2*σ) LRMoE.ZILogNormalExpert(0.50, μ, 0.9*σ) LRMoE.ZILogNormalExpert(0.50, 1.0*μ, 2.5*σ);
+                       LRMoE.ZILogNormalExpert(0.50, 2.0*μ, 1.2*σ) LRMoE.ZILogNormalExpert(0.50, 0.75*μ, 0.3*σ) LRMoE.ZILogNormalExpert(0.50, 1.75*μ, 1.0*σ)]
+        
+        Y = hcat(fill(0, length(Y_sim[:,1])), Y_sim[:,1], Y_sim[:,1], 2.0 .*Y_sim[:,1], fill(0.0, length(Y_sim[:,2])), Y_sim[:,2], Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+        result = fit_main(Y, X, α_guess, model_guess, penalty = false, pen_params = pen_params, ecm_iter_max = 20)
+
+
         # model_guess = [LRMoE.ZILogNormalExpert(0.50, 0.8*μ, 1.2*σ) LRMoE.ZILogNormalExpert(0.50, μ, 0.9*σ) LRMoE.ZILogNormalExpert(0.50, 1.0*μ, 2.5*σ);
         #                LRMoE.ZILogNormalExpert(0.50, 2.0*μ, 1.2*σ) LRMoE.ZILogNormalExpert(0.50, 0.75*μ, 0.3*σ) LRMoE.ZILogNormalExpert(0.50, 1.75*μ, 1.0*σ)]
         
         # Y = hcat(fill(0, length(Y_sim[:,1])), Y_sim[:,1], Y_sim[:,1], 2.0 .*Y_sim[:,1], fill(0.0, length(Y_sim[:,2])), Y_sim[:,2], Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
         # result = fit_main(Y, X, α_guess, model_guess, penalty = false, pen_params = pen_params, ecm_iter_max = 20)
 
+        gate_tmp = LogitGating(α_true, X)
+        ll_tmp = loglik_np(Y, gate_tmp, model_guess)
+
+        hcat(Y, expm1.( - ll_tmp.gate_expert_tn ), exp.(ll_tmp.gate_expert_tn_bar_comp) ./ exp.(ll_tmp.gate_expert_tn_bar))
+        
+        hcat(Y, expm1.( - ll_tmp.gate_expert_tn ), EM_E_z_lat(ll_tmp.gate_expert_tn_bar_comp, ll_tmp.gate_expert_tn_bar))
         
         
     end

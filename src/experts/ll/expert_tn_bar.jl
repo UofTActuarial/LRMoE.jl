@@ -1,7 +1,13 @@
 ## Non-zero inflated, continuous. e.g. LogNormal
 function expert_tn_bar(d::e, tl::Real, yl::Real, yu::Real, tu::Real) where {e<:NonZIContinuousExpert}
     # There is no zero inflation: only from the component
-    return expert_tn_bar_pos(d, tl, yl, yu, tu)
+    # return expert_tn_bar_pos(d, tl, yl, yu, tu)
+
+    # Possibly coming from the zero probability mass
+    expert_tn_bar = (tl > 0.) ? log.(0.0 + (1-0.0)*exp.(expert_tn_bar_pos(d, tl, yl, yu, tu))) : log.(0.0 + (1-0.0)*exp.(expert_tn_bar_pos(d, tl, yl, yu, tu)))
+
+    return expert_tn_bar
+
 end
 
 ## Zero inflated, continuous. e.g. ZILogNormal
