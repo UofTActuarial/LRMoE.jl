@@ -18,3 +18,24 @@ function nan2num(x, g)
         @inbounds x[i] = ifelse(isnan(x[i]), g, x[i])
     end
 end
+
+# matching functions for fast integration
+function unique_bounds(l, u)
+    return unique(hcat(vec(l), vec(u)), dims = 1)
+end
+
+matchrow(a, B) = findfirst( i -> all(j->a[j] == B[i,j], 1:size(B,2)), 1:size(B,1) )
+
+function match_unique_bounds(all_bounds, unique_bounds)
+    return [matchrow(all_bounds[i,:], unique_bounds) for i in 1:size(all_bounds)[1]]
+end
+
+# yl = vec([1 2 3 4 5 6 1 2 3 4 5 6])
+# yu = vec([7 8 9 10 11 12 7 9 8 12 11 10])
+
+# ab = hcat(vec(yl), vec(yu))
+# ub = unique_bounds(yl, yu)
+# match_unique_bounds(ab, ub)
+
+# unique_bounds(yl, yu)
+# match_unique_bounds(yl, yu)

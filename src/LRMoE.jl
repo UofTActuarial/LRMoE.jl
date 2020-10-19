@@ -2,7 +2,7 @@ module LRMoE
 
 import Base: size, length, convert, show, getindex, rand, vec, inv, expm1, abs
 import Base: sum, maximum, minimum, ceil, floor, extrema, +, -, *, ==
-import Base: convert, copy
+import Base: convert, copy, findfirst
 import Base.Math: @horner
 import Base: π
 
