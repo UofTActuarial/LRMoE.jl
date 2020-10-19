@@ -86,7 +86,7 @@ function fit_main(Y, X, α_init, model;
             ll_em = ll_em_np + ll_em_penalty
         end
 
-        return model_em
+        return (α_em, model_em)
     end 
     
 
