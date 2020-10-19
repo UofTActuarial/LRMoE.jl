@@ -36,10 +36,10 @@ function fit_main(Y, X, α_init, model;
 
             # E-Step
             z_e_obs = EM_E_z_obs(ll_em_list.gate_expert_ll_comp, ll_em_list.gate_expert_ll)
-            # z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp, ll_em_list.gate_expert_tn_bar)
-            z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp_k, ll_em_list.gate_expert_tn_bar_k)
-            # k_e = EM_E_k(ll_em_list.gate_expert_tn)
-            k_e = EM_E_k(ll_em_list.gate_expert_tn_bar_k)
+            z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp, ll_em_list.gate_expert_tn_bar)
+            # z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp_k, ll_em_list.gate_expert_tn_bar_k)
+            k_e = EM_E_k(ll_em_list.gate_expert_tn)
+            # k_e = EM_E_k(ll_em_list.gate_expert_tn_bar_k)
        
 
             # M-Step: α
