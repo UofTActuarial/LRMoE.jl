@@ -101,8 +101,8 @@ function EM_M_expert(d::LogNormalExpert,
     # Update parameters
     pos_idx = (yu .!= 0.0)
     term_zkz = z_e_obs[pos_idx] .+ (z_e_lat[pos_idx] .* k_e[pos_idx])
-    term_zkz_logY = (z_e_obs[pos_idx] .* logY_e_obs) .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_e_lat)
-    term_zkz_logY_sq = (z_e_obs[pos_idx] .* logY_sq_e_obs) .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_sq_e_lat)
+    term_zkz_logY = (z_e_obs[pos_idx] .* logY_e_obs[pos_idx]) .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_e_lat[pos_idx])
+    term_zkz_logY_sq = (z_e_obs[pos_idx] .* logY_sq_e_obs[pos_idx]) .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_sq_e_lat[pos_idx])
 
     μ_new = sum(term_zkz_logY)[1] / sum(term_zkz)[1]
     σ_new = sqrt( 1/sum(term_zkz)[1] * (sum(term_zkz_logY_sq)[1] - 2.0*μ_new*sum(term_zkz_logY)[1] + (μ_new)^2*sum(term_zkz)[1] ) )
