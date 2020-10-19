@@ -6,7 +6,7 @@ function fit_main(Y, X, α_init, model;
                   print_steps = true)
 
     # Make variables accessible with in the scope of `let`
-    let α_em, gate_em, model_em, ll_em_list, ll_em, ll_em_np, ll_em_old, ll_em_np_old, iter
+    let α_em, gate_em, model_em, ll_em_list, ll_em, ll_em_np, ll_em_old, ll_em_np_old, iter, z_e_obs, z_e_lat, k_e
         # Initial loglik
         gate_init = LogitGating(α_init, X)
         ll_np_list = loglik_np(Y, gate_init, model)
@@ -37,7 +37,8 @@ function fit_main(Y, X, α_init, model;
             # E-Step
             z_e_obs = EM_E_z_obs(ll_em_list.gate_expert_ll_comp, ll_em_list.gate_expert_ll)
             z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp, ll_em_list.gate_expert_tn_bar)
-            k_e = EM_E_k(ll_em_list.gate_expert_tn)
+            # k_e = EM_E_k(ll_em_list.gate_expert_tn)
+            k_e = EM_E_k(ll_em_list.gate_expert_tn_bar_k)
        
 
             # M-Step: α
@@ -55,6 +56,7 @@ function fit_main(Y, X, α_init, model;
 
             # M-Step: component distributions
             for j in 1:size(model)[1] # by dimension
+            # for j in 1:1
                 for k in 1:size(model)[2] # by component
                     
                     model_em[j,k] = EM_M_expert(model_em[j,k], 
@@ -69,8 +71,11 @@ function fit_main(Y, X, α_init, model;
                     ll_em_np = ll_em_list.ll
                     ll_em_penalty = penalty ? (pen_α(α_em) + penalty_params(model_em, pen_params)) : 0.0
                     ll_em = ll_em_np + ll_em_penalty
+
+                    s = ll_em - ll_em_temp > 0 ? "+" : "-"
+                    pct = abs((ll_em - ll_em_temp) / ll_em_temp) * 100
                     if print_steps
-                        println("Iteration $(iter), updating model[$j, $k]: $(ll_em_temp) ->  $(ll_em)")
+                        println("Iteration $(iter), updating model[$j, $k]: $(ll_em_temp) ->  $(ll_em), ( $(s) $(pct) % )")
                     end
                     ll_em_temp = ll_em
                 end
@@ -86,7 +91,7 @@ function fit_main(Y, X, α_init, model;
             ll_em = ll_em_np + ll_em_penalty
         end
 
-        return (α_em, model_em)
+        return (α_em = α_em, model_em = model_em, z_e_obs = z_e_obs, z_e_lat = z_e_lat, k_e = k_e)
     end 
     
 

@@ -95,6 +95,8 @@ function EM_M_expert(d::LogNormalExpert,
     μ_old = d.μ
     σ_old = d.σ
 
+    # println("$(μ_old), $(σ_old)")
+
     # Further E-Step
     logY_e_obs = vec( int_obs_logY.(d, yl, yu, expert_ll_pos) )
     logY_e_lat = vec( int_lat_logY.(d, tl, tu, expert_tn_bar_pos) )
@@ -112,6 +114,8 @@ function EM_M_expert(d::LogNormalExpert,
 
     μ_new = sum(term_zkz_logY)[1] / sum(term_zkz)[1]
     σ_new = sqrt( 1/sum(term_zkz)[1] * (sum(term_zkz_logY_sq)[1] - 2.0*μ_new*sum(term_zkz_logY)[1] + (μ_new)^2*sum(term_zkz)[1] ) )
+
+    # println("$(μ_new), $(σ_new)")
 
     return LogNormalExpert(μ_new, σ_new)
 end

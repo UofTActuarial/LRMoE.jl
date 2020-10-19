@@ -72,7 +72,8 @@ function EM_M_expert(d::ZILogNormalExpert,
                             expert_ll_pos,
                             expert_tn_pos,
                             expert_tn_bar_pos,
-                            z_e_obs, z_e_lat, k_e,
+                            # z_e_obs, z_e_lat, k_e,
+                            z_pos_e_obs, z_pos_e_lat, k_e,
                             penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     return ZILogNormalExpert(p_new, tmp_update.μ, tmp_update.σ)

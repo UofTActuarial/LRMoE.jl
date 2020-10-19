@@ -9,8 +9,13 @@ function EM_E_z_lat(gate_expert_tn_bar_comp, gate_expert_tn_bar)
     return tmp
 end
 
-function EM_E_k(gate_expert_tn)
-    return expm1.( - gate_expert_tn )
+# function EM_E_k(gate_expert_tn)
+#     return expm1.( - gate_expert_tn )
+# end
+
+function EM_E_k(gate_expert_tn_bar_k)
+    # return exp.( gate_expert_tn_bar_k )
+    return expm1.( - log1mexp.(gate_expert_tn_bar_k) )
 end
 
 function EM_E_z_zero_obs_update(lower, prob, ll_vec)

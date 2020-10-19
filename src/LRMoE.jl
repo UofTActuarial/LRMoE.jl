@@ -1,6 +1,6 @@
 module LRMoE
 
-import Base: size, length, convert, show, getindex, rand, vec, inv, expm1
+import Base: size, length, convert, show, getindex, rand, vec, inv, expm1, abs
 import Base: sum, maximum, minimum, ceil, floor, extrema, +, -, *, ==
 import Base: convert, copy
 import Base.Math: @horner
@@ -14,7 +14,8 @@ using Distributions
 import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf
 import Distributions: rand
 import Distributions: UnivariateDistribution, DiscreteUnivariateDistribution, ContinuousUnivariateDistribution
-import Distributions: LogNormal, Normal, Poisson, Bernoulli
+import Distributions: Bernoulli, Multinomial
+import Distributions: LogNormal, Normal, Poisson
 
 using InvertedIndices
 import InvertedIndices: Not
@@ -94,8 +95,12 @@ export
     PoissonExpert, ZIPoissonExpert,
 
     # fitting
-    fit_main
+    fit_main,
 
+    # simulation
+    sim_expert,
+    sim_logit_gating,
+    sim_dataset
 
 
 ### source files
@@ -108,6 +113,8 @@ include("loglik.jl")
 include("penalty.jl")
 
 include("fit.jl")
+
+include("simulation.jl")
 
 # include("experts/ll/expert_ll_pos.jl")
 
