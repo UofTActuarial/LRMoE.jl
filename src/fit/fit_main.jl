@@ -5,7 +5,7 @@ function fit_main(Y, X, α_init, model;
                   grad_jump = true, grad_seq = nothing,
                   print_steps = true)
 
-    # Make variables accessible with in the scope of `let`
+    # Make variables accessible within the scope of `let`
     let α_em, gate_em, model_em, ll_em_list, ll_em, ll_em_np, ll_em_old, ll_em_np_old, iter, z_e_obs, z_e_lat, k_e, params_old
         # Initial loglik
         gate_init = LogitGating(α_init, X)
@@ -83,7 +83,7 @@ function fit_main(Y, X, α_init, model;
                         s = ll_em - ll_em_temp > 0 ? "+" : "-"
                         pct = abs((ll_em - ll_em_temp) / ll_em_temp) * 100
                         println("Iteration $(iter), updating model[$j, $k]: $(ll_em_temp) ->  $(ll_em), ( $(s) $(pct) % )")
-                        if s=="-" println("Change of params: $(params_old) ->  $(params(model_em[j,k]))") end
+                        if s=="-" println("Intended update of params: $(params_old) ->  $(params(model_em[j,k]))") end
                     end
                     ll_em_temp = ll_em
                 end
@@ -99,7 +99,7 @@ function fit_main(Y, X, α_init, model;
             ll_em = ll_em_np + ll_em_penalty
         end
 
-        return (α_em = α_em, model_em = model_em, z_e_obs = z_e_obs, z_e_lat = z_e_lat, k_e = k_e)
+        return (α_fit = α_em, model_fit = model_em)
     end 
     
 
