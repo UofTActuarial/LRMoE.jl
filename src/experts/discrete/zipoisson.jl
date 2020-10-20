@@ -43,3 +43,37 @@ sim_expert(d::ZIPoissonExpert, sample_size) = (1 .- Distributions.rand(Distribut
 ## penalty
 penalty_init(d::ZIPoissonExpert) = [2.0 1.0]
 penalize(d::ZIPoissonExpert, p) = (p[1]-1)*log(d.λ) - d.λ/p[2]
+
+## EM: M-Step
+function EM_M_expert(d::ZIPoissonExpert,
+                     tl, yl, yu, tu,
+                     expert_ll_pos,
+                     expert_tn_pos,
+                     expert_tn_bar_pos,
+                     z_e_obs, z_e_lat, k_e;
+                     penalty = true, pen_pararms_jk = [2.0 1.0])
+    
+    # Old parameters
+    λ_old = d.λ
+    p_old = d.p
+
+    # Update zero probability
+    z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(yl, p_old, expert_ll_pos)
+    z_pos_e_obs = z_e_obs .- z_zero_e_obs
+    z_zero_e_lat = z_e_lat .* EM_E_z_zero_lat(tl, p_old, expert_tn_bar_pos)
+    z_pos_e_lat = z_e_lat .- z_zero_e_lat
+    p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, z_zero_e_lat, z_pos_e_lat, k_e)
+
+    # Update parameters: call its positive part
+    tmp_exp = PoissonExpert(d.λ)
+    tmp_update = EM_M_expert(tmp_exp,
+                            tl, yl, yu, tu,
+                            expert_ll_pos,
+                            expert_tn_pos,
+                            expert_tn_bar_pos,
+                            # z_e_obs, z_e_lat, k_e,
+                            z_pos_e_obs, z_pos_e_lat, k_e,
+                            penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+
+    return ZIPoissonExpert(p_new, tmp_update.λ)
+end
