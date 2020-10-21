@@ -11,7 +11,7 @@ function fit_main(Y, X, α_init, model;
         gate_init = LogitGating(α_init, X)
         ll_np_list = loglik_np(Y, gate_init, model)
         ll_init_np = ll_np_list.ll
-        ll_penalty = penalty ? (pen_α(α_init) + penalty_params(model, pen_params)) : 0.0
+        ll_penalty = penalty ? (penalty_α(α_init, pen_α) + penalty_params(model, pen_params)) : 0.0
         ll_init = ll_init_np + ll_penalty 
 
         if print_steps
@@ -36,10 +36,13 @@ function fit_main(Y, X, α_init, model;
 
             # E-Step
             z_e_obs = EM_E_z_obs(ll_em_list.gate_expert_ll_comp, ll_em_list.gate_expert_ll)
-            z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp, ll_em_list.gate_expert_tn_bar)
+            # z_e_obs = EM_E_z_obs(ll_em_list.gate_expert_tn_bar_comp_k, ll_em_list.gate_expert_tn_bar_k)
+            # z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp, ll_em_list.gate_expert_tn_bar)
             # z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp_k, ll_em_list.gate_expert_tn_bar_k)
-            k_e = EM_E_k(ll_em_list.gate_expert_tn)
-            # k_e = EM_E_k(ll_em_list.gate_expert_tn_bar_k)
+            z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp_z_lat, ll_em_list.gate_expert_tn_bar_z_lat)
+            # k_e = EM_E_k(ll_em_list.gate_expert_tn)
+            k_e = EM_E_k(ll_em_list.gate_expert_tn_bar_k)
+            
        
 
             # M-Step: α
@@ -48,7 +51,7 @@ function fit_main(Y, X, α_init, model;
             gate_em = LogitGating(α_em, X)
             ll_em_list = loglik_np(Y, gate_em, model_em)
             ll_em_np = ll_em_list.ll
-            ll_em_penalty = penalty ? (pen_α(α_em) + penalty_params(model_em, pen_params)) : 0.0
+            ll_em_penalty = penalty ? (penalty_α(α_em, pen_α) + penalty_params(model_em, pen_params)) : 0.0
             ll_em = ll_em_np + ll_em_penalty
 
             s = ll_em - ll_em_temp > 0 ? "+" : "-"
@@ -75,7 +78,7 @@ function fit_main(Y, X, α_init, model;
 
                     ll_em_list = loglik_np(Y, gate_em, model_em)
                     ll_em_np = ll_em_list.ll
-                    ll_em_penalty = penalty ? (pen_α(α_em) + penalty_params(model_em, pen_params)) : 0.0
+                    ll_em_penalty = penalty ? (penalty_α(α_em, pen_α) + penalty_params(model_em, pen_params)) : 0.0
                     ll_em = ll_em_np + ll_em_penalty
 
                     
@@ -95,7 +98,7 @@ function fit_main(Y, X, α_init, model;
             gate_em = LogitGating(α_em, X)
             ll_em_list = loglik_np(Y, gate_em, model_em)
             ll_em_np = ll_em_list.ll
-            ll_em_penalty = penalty ? (pen_α(α_em) + penalty_params(model_em, pen_params)) : 0.0
+            ll_em_penalty = penalty ? (penalty_α(α_em, pen_α) + penalty_params(model_em, pen_params)) : 0.0
             ll_em = ll_em_np + ll_em_penalty
         end
 

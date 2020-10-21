@@ -75,7 +75,8 @@ function loglik_np(Y, gate, model)
     gate_expert_ll_comp = loglik_aggre_gate_dim(gate, expert_ll_comp)
     gate_expert_tn_comp = loglik_aggre_gate_dim(gate, expert_tn_comp)
     gate_expert_tn_bar_comp = gate + log1mexp.(expert_tn_comp)
-    # gate_expert_tn_bar_comp_k = gate + expert_tn_bar_comp
+    gate_expert_tn_bar_comp_k = gate + log1mexp.(expert_tn_bar_comp)
+    gate_expert_tn_bar_comp_z_lat = loglik_aggre_gate_dim(gate, expert_tn_bar_comp)
 
     # Aggregate by component
     gate_expert_ll_pos = loglik_aggre_gate_dim_comp(gate_expert_ll_pos_comp)
@@ -86,11 +87,13 @@ function loglik_np(Y, gate, model)
     gate_expert_ll = loglik_aggre_gate_dim_comp(gate_expert_ll_comp)
     gate_expert_tn = loglik_aggre_gate_dim_comp(gate_expert_tn_comp)
     gate_expert_tn_bar = loglik_aggre_gate_dim_comp(gate_expert_tn_bar_comp)
-    # gate_expert_tn_bar_k = loglik_aggre_gate_dim_comp(gate_expert_tn_bar_comp_k)
+    gate_expert_tn_bar_k = loglik_aggre_gate_dim_comp(gate_expert_tn_bar_comp_k)
+    gate_expert_tn_bar_z_lat = loglik_aggre_gate_dim_comp(gate_expert_tn_bar_comp_z_lat)
 
     # Normalize by tn & tn_bar
-    norm_gate_expert_ll_pos = gate_expert_ll_pos - gate_expert_tn_pos
-    norm_gate_expert_ll = gate_expert_ll - gate_expert_tn
+    # norm_gate_expert_ll_pos = gate_expert_ll_pos - gate_expert_tn_pos
+    # norm_gate_expert_ll = gate_expert_ll - gate_expert_tn
+    norm_gate_expert_ll = gate_expert_ll - gate_expert_tn_bar_k
 
     # Sum over all observations
     ll = sum(norm_gate_expert_ll)
@@ -119,7 +122,8 @@ function loglik_np(Y, gate, model)
             gate_expert_ll_comp = gate_expert_ll_comp,
             gate_expert_tn_comp = gate_expert_tn_comp,
             gate_expert_tn_bar_comp = gate_expert_tn_bar_comp,
-            # gate_expert_tn_bar_comp_k = gate_expert_tn_bar_comp_k,
+            gate_expert_tn_bar_comp_k = gate_expert_tn_bar_comp_k,
+            gate_expert_tn_bar_comp_z_lat = gate_expert_tn_bar_comp_z_lat,
 
             gate_expert_ll_pos = gate_expert_ll_pos,
             gate_expert_tn_pos = gate_expert_tn_pos,
@@ -129,9 +133,10 @@ function loglik_np(Y, gate, model)
             gate_expert_ll = gate_expert_ll,
             gate_expert_tn = gate_expert_tn,
             gate_expert_tn_bar = gate_expert_tn_bar,
-            # gate_expert_tn_bar_k = gate_expert_tn_bar_k,
+            gate_expert_tn_bar_k = gate_expert_tn_bar_k,
+            gate_expert_tn_bar_z_lat = gate_expert_tn_bar_z_lat,
 
-            norm_gate_expert_ll_pos = norm_gate_expert_ll_pos,
+            # norm_gate_expert_ll_pos = norm_gate_expert_ll_pos,
             norm_gate_expert_ll = norm_gate_expert_ll,
 
             ll = ll
