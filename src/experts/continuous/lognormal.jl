@@ -53,7 +53,7 @@ function _diff_dist_series(d::LogNormalExpert, yl, yu)
     return ( 0.5 + 0.5*erf((log(yu)-d.μ)/(sqrt2*d.σ)) ) - ( 0.5 + 0.5*erf((log(yl)-d.μ)/(sqrt2*d.σ)) )
 end
 
-function int_obs_logY(d::LogNormalExpert, yl, yu, expert_ll)
+function _int_obs_logY(d::LogNormalExpert, yl, yu, expert_ll)
     if yl == yu
         return log(yl)
     else
@@ -61,7 +61,7 @@ function int_obs_logY(d::LogNormalExpert, yl, yu, expert_ll)
     end
 end
 
-function int_lat_logY(d::LogNormalExpert, tl, tu, expert_tn_bar)
+function _int_lat_logY(d::LogNormalExpert, tl, tu, expert_tn_bar)
     return exp(-expert_tn_bar) * (d.μ - ( d.σ*invsqrt2π*0.5*_diff_dens_series(d, tl, tu) + d.μ*_diff_dist_series(d, tl, tu) ) )
 end
 
@@ -73,7 +73,7 @@ function _diff_zdensz_series(d::LogNormalExpert, yl, yu)
     return _zdensz_series((log(yl)-d.μ)/d.σ) - _zdensz_series((log(yu)-d.μ)/d.σ)
 end
 
-function int_obs_logY_sq(d::LogNormalExpert, yl, yu, expert_ll)
+function _int_obs_logY_sq(d::LogNormalExpert, yl, yu, expert_ll)
     if yl == yu
         return (log(yl))^2
     else
@@ -81,7 +81,7 @@ function int_obs_logY_sq(d::LogNormalExpert, yl, yu, expert_ll)
     end
 end
 
-function int_lat_logY_sq(d::LogNormalExpert, tl, tu, expert_tn_bar)
+function _int_lat_logY_sq(d::LogNormalExpert, tl, tu, expert_tn_bar)
     return exp(-expert_tn_bar) * ( ((d.σ)^2 + (d.μ)^2) - ( ((d.σ)^2 + (d.μ)^2)*_diff_dist_series(d, tl, tu) + d.σ*d.μ*invsqrt2π*_diff_dens_series(d, tl, tu) + (d.σ)^2*invsqrt2π*_diff_zdensz_series(d, tl, tu) ))
 end
 
@@ -101,12 +101,12 @@ function EM_M_expert(d::LogNormalExpert,
     # println("$(μ_old), $(σ_old)")
 
     # Further E-Step
-    logY_e_obs = vec( int_obs_logY.(d, yl, yu, expert_ll_pos) )
-    logY_e_lat = vec( int_lat_logY.(d, tl, tu, expert_tn_bar_pos) )
+    logY_e_obs = vec( _int_obs_logY.(d, yl, yu, expert_ll_pos) )
+    logY_e_lat = vec( _int_lat_logY.(d, tl, tu, expert_tn_bar_pos) )
     nan2num(logY_e_lat, 0.0) # get rid of NaN
     
-    logY_sq_e_obs = vec( int_obs_logY_sq.(d, yl, yu, expert_ll_pos) )
-    logY_sq_e_lat = vec( int_lat_logY_sq.(d, tl, tu, expert_tn_bar_pos) )
+    logY_sq_e_obs = vec( _int_obs_logY_sq.(d, yl, yu, expert_ll_pos) )
+    logY_sq_e_lat = vec( _int_lat_logY_sq.(d, tl, tu, expert_tn_bar_pos) )
     nan2num(logY_sq_e_lat, 0.0) # get rid of NaN
     
     # Update parameters

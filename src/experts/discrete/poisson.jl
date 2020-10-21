@@ -55,7 +55,7 @@ function _sum_densy_series(d::PoissonExpert, yl, yu)
     end
 end
 
-function int_obs_Y_raw(d::PoissonExpert, yl, yu)
+function _int_obs_Y_raw(d::PoissonExpert, yl, yu)
     # if yl == yu
     #     return yl
     # else
@@ -64,7 +64,7 @@ function int_obs_Y_raw(d::PoissonExpert, yl, yu)
     return _sum_densy_series(d, yl, yu)
 end
 
-function int_lat_Y_raw(d::PoissonExpert, tl, tu)
+function _int_lat_Y_raw(d::PoissonExpert, tl, tu)
     return d.λ - _sum_densy_series(d, tl, tu)
 end
 
@@ -82,12 +82,12 @@ function EM_M_expert(d::PoissonExpert,
 
     # Further E-Step
     yl_yu_unique = unique_bounds(yl, yu)
-    int_obs_Y_tmp = int_obs_Y_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
+    int_obs_Y_tmp = _int_obs_Y_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
     Y_e_obs = exp.(-expert_ll_pos) .* int_obs_Y_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
     nan2num(Y_e_obs, 0.0) # get rid of NaN
 
     tl_tu_unique = unique_bounds(tl, tu)
-    int_lat_Y_tmp = int_lat_Y_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
+    int_lat_Y_tmp = _int_lat_Y_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
     Y_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_Y_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
     nan2num(Y_e_lat, 0.0) # get rid of NaN
 
@@ -112,12 +112,12 @@ function EM_M_expert_exact(d::PoissonExpert,
 
     # Further E-Step
     # yl_yu_unique = unique_bounds(yl, yu)
-    # int_obs_Y_tmp = int_obs_Y_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
+    # int_obs_Y_tmp = _int_obs_Y_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
     # Y_e_obs = exp.(-expert_ll_pos) .* int_obs_Y_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
     # nan2num(Y_e_obs, 0.0) # get rid of NaN
 
     # tl_tu_unique = unique_bounds(tl, tu)
-    # int_lat_Y_tmp = int_lat_Y_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
+    # int_lat_Y_tmp = _int_lat_Y_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
     # Y_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_Y_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
     # nan2num(Y_e_lat, 0.0) # get rid of NaN
 
