@@ -4,8 +4,8 @@ end
 
 function EM_E_z_lat(gate_expert_tn_bar_comp, gate_expert_tn_bar)
     tmp = exp.(gate_expert_tn_bar_comp .- gate_expert_tn_bar)
-    # nan2num(tmp, 1/size(gate_expert_tn_bar_comp)[2])
-    nan2num(tmp, 0.0)
+    nan2num(tmp, 1/size(gate_expert_tn_bar_comp)[2])
+    # nan2num(tmp, 0.0)
         # Slower: # tmp[isnan.(tmp)] .= 1/size(gate_expert_tn_bar_comp)[2]
     return tmp
 end
