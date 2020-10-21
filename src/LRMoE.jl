@@ -66,6 +66,7 @@ export
     loglik_aggre_gate_dim,
     loglik_aggre_gate_dim_comp,
     loglik_np,
+    loglik_exact,
 
     penalty_α,
     penalty_params,
@@ -97,6 +98,7 @@ export
 
     # fitting
     fit_main,
+    fit_exact,
 
     # simulation
     sim_expert,

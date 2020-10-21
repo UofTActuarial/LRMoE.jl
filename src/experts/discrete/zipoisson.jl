@@ -77,3 +77,33 @@ function EM_M_expert(d::ZIPoissonExpert,
 
     return ZIPoissonExpert(p_new, tmp_update.λ)
 end
+
+## EM: M-Step, exact observations
+function EM_M_expert_exact(d::ZIPoissonExpert,
+                     ye,
+                     expert_ll_pos,
+                     z_e_obs;
+                     penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
+    
+    # Old parameters
+    λ_old = d.λ
+    p_old = d.p
+
+    # Update zero probability
+    z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(ye, p_old, expert_ll_pos)
+    z_pos_e_obs = z_e_obs .- z_zero_e_obs
+    z_zero_e_lat = 0.0
+    z_pos_e_lat = 0.0
+    p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, 0.0, 0.0, 0.0)
+        # EM_M_zero(z_zero_e_obs, z_pos_e_obs, z_zero_e_lat, z_pos_e_lat, k_e)
+
+    # Update parameters: call its positive part
+    tmp_exp = PoissonExpert(d.λ)
+    tmp_update = EM_M_expert_exact(tmp_exp,
+                            ye,
+                            expert_ll_pos,
+                            z_pos_e_obs;
+                            penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+
+    return ZIPoissonExpert(p_new, tmp_update.λ)
+end

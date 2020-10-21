@@ -81,3 +81,34 @@ function EM_M_expert(d::ZILogNormalExpert,
 
     return ZILogNormalExpert(p_new, tmp_update.μ, tmp_update.σ)
 end
+
+## EM: M-Step, exact observations
+function EM_M_expert_exact(d::ZILogNormalExpert,
+                     ye,
+                     expert_ll_pos,
+                     z_e_obs;
+                     penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
+    
+    # Old parameters
+    μ_old = d.μ
+    σ_old = d.σ
+    p_old = d.p
+
+    # Update zero probability
+    z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(ye, p_old, expert_ll_pos)
+    z_pos_e_obs = z_e_obs .- z_zero_e_obs
+    z_zero_e_lat = 0.0
+    z_pos_e_lat = 0.0
+    p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, 0.0, 0.0, 0.0)
+        # EM_M_zero(z_zero_e_obs, z_pos_e_obs, z_zero_e_lat, z_pos_e_lat, k_e)
+
+    # Update parameters: call its positive part
+    tmp_exp = LogNormalExpert(d.μ, d.σ)
+    tmp_update = EM_M_expert_exact(tmp_exp,
+                            ye,
+                            expert_ll_pos,
+                            z_pos_e_obs;
+                            penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+
+    return ZILogNormalExpert(p_new, tmp_update.μ, tmp_update.σ)
+end

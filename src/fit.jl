@@ -1,6 +1,7 @@
 const fit = [
     "fit_main",
-    "em"
+    "em",
+    "fit_exact"
 ]
 
 for dname in fit
