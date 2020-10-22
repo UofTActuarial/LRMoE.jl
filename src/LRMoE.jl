@@ -100,6 +100,7 @@ export
     # experts
     params,
     GammaExpert, ZIGammaExpert,
+    InverseGaussianExpert, ZIInverseGaussianExpert,
     LogNormalExpert, ZILogNormalExpert,
     PoissonExpert, ZIPoissonExpert,
 

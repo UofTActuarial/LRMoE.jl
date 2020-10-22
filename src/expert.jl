@@ -33,12 +33,6 @@ Broadcast.broadcastable(d::ZIContinuousExpert) = Ref(d)
 Broadcast.broadcastable(d::NonZIDiscreteExpert) = Ref(d) 
 Broadcast.broadcastable(d::NonZIContinuousExpert) = Ref(d) 
 
-## Progress (DONE):
-# expert_ll_pos: ZIContinuousExpert, NonZIContinuousExpert, ZIDiscreteExpert, NonZIDiscreteExpert
-# expert_tn_pos: ZIContinuousExpert, NonZIContinuousExpert, ZIDiscreteExpert, NonZIDiscreteExpert
-# expert_tn_bar_pos: ZIContinuousExpert, NonZIContinuousExpert, ZIDiscreteExpert, NonZIDiscreteExpert
-
-
 ##### specific distributions #####
 
 const discrete_experts = [
@@ -47,6 +41,7 @@ const discrete_experts = [
 
 const continuous_experts = [
     "gamma", "zigamma",
+    "inversegaussian", "ziinversegaussian",
     "lognormal", "zilognormal"
     
 ]
