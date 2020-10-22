@@ -24,7 +24,7 @@ using LinearAlgebra
 import LinearAlgebra: I, Cholesky
 
 using SpecialFunctions
-import SpecialFunctions: erf, loggamma
+import SpecialFunctions: erf, loggamma, gamma_inc, gamma
 
 using QuadGK
 import QuadGK: quadgk
@@ -102,6 +102,8 @@ export
     GammaExpert, ZIGammaExpert,
     InverseGaussianExpert, ZIInverseGaussianExpert,
     LogNormalExpert, ZILogNormalExpert,
+    WeibullExpert, ZIWeibullExpert,
+
     PoissonExpert, ZIPoissonExpert,
 
     # fitting

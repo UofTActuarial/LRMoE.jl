@@ -42,7 +42,8 @@ const discrete_experts = [
 const continuous_experts = [
     "gamma", "zigamma",
     "inversegaussian", "ziinversegaussian",
-    "lognormal", "zilognormal"
+    "lognormal", "zilognormal",
+    "weibull", "ziweibull"
     
 ]
 
