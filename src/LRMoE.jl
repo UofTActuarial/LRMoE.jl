@@ -24,7 +24,13 @@ using LinearAlgebra
 import LinearAlgebra: I, Cholesky
 
 using SpecialFunctions
-import SpecialFunctions: erf
+import SpecialFunctions: erf, loggamma
+
+using QuadGK
+import QuadGK: quadgk
+
+using Optim
+import Optim: optimize, minimizer
 
 export
     # generic types
@@ -93,6 +99,7 @@ export
 
     # experts
     params,
+    GammaExpert, ZIGammaExpert,
     LogNormalExpert, ZILogNormalExpert,
     PoissonExpert, ZIPoissonExpert,
 

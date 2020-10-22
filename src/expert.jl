@@ -46,7 +46,7 @@ const discrete_experts = [
 ]
 
 const continuous_experts = [
-
+    "gamma", "zigamma",
     "lognormal", "zilognormal"
     
 ]
