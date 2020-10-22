@@ -66,7 +66,7 @@ function _int_lat_Y(d::GammaExpert, tl, tu, expert_tn_bar)
 end
 
 function _int_logy_func(d::GammaExpert, x)
-    return (iszero(x) || isinf(x)) ? 0.0 : log(x) * pdf.(Distributions.Gamma(d.k, d.θ), x)
+    return (iszero(x) || isinf(x)) ? 0.0 : log(x) * pdf.(d, x)
 end
 
 function _int_obs_logY_raw(d::GammaExpert, yl, yu)
