@@ -15,7 +15,8 @@ import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf
 import Distributions: rand
 import Distributions: UnivariateDistribution, DiscreteUnivariateDistribution, ContinuousUnivariateDistribution
 import Distributions: Bernoulli, Multinomial
-import Distributions: LogNormal, Normal, Poisson
+import Distributions: Binomial, Poisson
+import Distributions: Gamma, InverseGaussian, LogNormal, Normal, Weibull
 
 using InvertedIndices
 import InvertedIndices: Not
@@ -104,6 +105,7 @@ export
     LogNormalExpert, ZILogNormalExpert,
     WeibullExpert, ZIWeibullExpert,
 
+    BinomialExpert, ZIBinomialExpert,
     PoissonExpert, ZIPoissonExpert,
 
     # fitting

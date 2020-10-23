@@ -36,6 +36,7 @@ Broadcast.broadcastable(d::NonZIContinuousExpert) = Ref(d)
 ##### specific distributions #####
 
 const discrete_experts = [
+    "binomial", "zibinomial",
     "poisson", "zipoisson"
 ]
 
