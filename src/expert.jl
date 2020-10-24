@@ -37,6 +37,7 @@ Broadcast.broadcastable(d::NonZIContinuousExpert) = Ref(d)
 
 const discrete_experts = [
     "binomial", "zibinomial",
+    "negativebinomial", "zinegativebinomial",
     "poisson", "zipoisson"
 ]
 

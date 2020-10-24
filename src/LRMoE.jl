@@ -11,7 +11,7 @@ import StatsFuns: log1mexp, log1pexp, logsumexp
 import StatsFuns: sqrt2, invsqrt2π
 
 using Distributions
-import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf
+import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf, quantile
 import Distributions: rand
 import Distributions: UnivariateDistribution, DiscreteUnivariateDistribution, ContinuousUnivariateDistribution
 import Distributions: Bernoulli, Multinomial
@@ -106,6 +106,7 @@ export
     WeibullExpert, ZIWeibullExpert,
 
     BinomialExpert, ZIBinomialExpert,
+    NegativeBinomialExpert, ZINegativeBinomialExpert,
     PoissonExpert, ZIPoissonExpert,
 
     # fitting
