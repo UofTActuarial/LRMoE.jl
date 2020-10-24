@@ -14,12 +14,12 @@ using Random
 using Test
 
 const tests = [
-    "dummytest",
-    "pdfcdf",
-    "expert_loglik",
-    "gating",
-    "loglik",
-    "fit_functions"
+    # "dummytest",
+    # "pdfcdf",
+    # "expert_loglik",
+    # "gating",
+    # "loglik",
+    # "fit_functions"
 ]
 
 printstyled("Running tests:\n", color=:blue)
