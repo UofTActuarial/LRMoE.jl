@@ -75,7 +75,7 @@ function EM_M_expert(d::ZIBinomialExpert,
                             z_pos_e_obs, z_pos_e_lat, k_e,
                             penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
-    return ZIBinomialExpert(p_new, tmp_exp.n, tmp_exp.p)
+    return ZIBinomialExpert(p_new, tmp_update.n, tmp_update.p)
 
 end
 
@@ -104,6 +104,6 @@ function EM_M_expert_exact(d::ZIBinomialExpert,
                             z_pos_e_obs;
                             penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
-    return ZIBinomialExpert(p_new, tmp_exp.n, tmp_exp.p)
+    return ZIBinomialExpert(p_new, tmp_update.n, tmp_update.p)
 
 end
