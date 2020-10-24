@@ -9,4 +9,4 @@ The package **LRMoE** offers several new distinctive features which are motivate
 * A collection of insurance rate making and reserving functions; and
 * Model selection and visualization tools.
 
-While *LRMoE* was initially developed for actuarial application, this package also allows for customized expert functions for various modelling problems outside of the insurance context. For more details, see here.
+While **LRMoE** was initially developed for actuarial application, this package also allows for customized expert functions for various modelling problems outside of the insurance context. For more details, see here.
