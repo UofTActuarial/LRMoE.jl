@@ -11,10 +11,15 @@ Given ``\mathbf{x}_i``, the ``i``-th observation is classified into one of ``g``
 
  Conditional on the latent class ``j``, the distribution of the response ``\mathbf{y}_i`` is given by an **expert function** with density
 
- ```math
-\f_j(\mathbf{y}_i; \mathbf{\psi}_j) = \prod_{d=1}^{D} f_{jd}(\mathbf{y}_{id}; \mathbf{\psi}_{jd})
+```math
+f_j(\mathbf{y}_i; \mathbf{\psi}_j) = \prod_{d=1}^{D} f_{jd}(\mathbf{y}_{id}; \mathbf{\psi}_{jd})
 ```
-where we assume conditional independence of dimensions ``1, 2, \dots, D`` of ``\mathbf{y}_i``, if it is a vector of responses. 
+where we assume conditional independence of dimensions ``1, 2, \dots, D`` of ``\mathbf{y}_i``, if it is a vector of responses.
+
+The likelihood function is therefore
+```math
+L(\mathbf{\alpha}, \mathbf{\psi}; \mathbf{x}, \mathbf{y}) = \prod_{i=1}^{n} \left\{ \sum_{j=1}^{g} \pi_j(\mathbf{x}_i; \mathbf{\alpha}) f_j(\mathbf{y}_i; \mathbf{\psi}_j) \right\}
+```
 
 Notice that the parameters ``\mathbf{\psi}_j`` does not involve regression on the covariates ``\mathbf{x}_i``, hence the model is termed as **reduced**. For an introduction to the general mixture-of-experts models, see e.g. [here](https://en.wikipedia.org/wiki/Mixture_of_experts).
 
