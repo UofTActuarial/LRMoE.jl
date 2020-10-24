@@ -5,7 +5,8 @@ makedocs(
     modules = [LRMoE],
 	sitename = "LRMoE.jl",
 	pages = [
-		"Home" => "index.md",
+		"Overview" => "index.md",
+		"Modelling Framework" => "framework.md",
 		# "Tutorials" => Any[
 		# 	"Tutorials Intro" => "tutorials/tutorial_main.md",
 		# 	"1 Install Mimi" => "tutorials/tutorial_1.md",
