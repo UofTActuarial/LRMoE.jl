@@ -1,7 +1,7 @@
 """
     GammaExpert(k, θ)
 
-Expert function: `Gamma(k, θ)`.
+Expert function: `GammaExpert(k, θ)`.
 
 """
 struct GammaExpert{T<:Real} <: NonZIContinuousExpert

@@ -21,7 +21,7 @@ The likelihood function is therefore
 L(\mathbf{\alpha}, \mathbf{\psi}; \mathbf{x}, \mathbf{y}) = \prod_{i=1}^{n} \left\{ \sum_{j=1}^{g} \pi_j(\mathbf{x}_i; \mathbf{\alpha}) f_j(\mathbf{y}_i; \mathbf{\psi}_j) \right\}
 ```
 
-Notice that the parameters ``\mathbf{\psi}_j`` does not involve regression on the covariates ``\mathbf{x}_i``, hence the model is termed as **reduced**. For an introduction to the general mixture-of-experts models, see e.g. [here](https://en.wikipedia.org/wiki/Mixture_of_experts).
+Notice that the parameters ``\mathbf{\psi}_j`` do not involve regression on the covariates ``\mathbf{x}_i``, hence the model is termed as **reduced**. For an introduction to the general mixture-of-experts models, see e.g. [here](https://en.wikipedia.org/wiki/Mixture_of_experts).
 
  [Fung et al. (2019)](https://www.sciencedirect.com/science/article/pii/S0167668719303956) have shown that such simplification of model structure will not reduce its flexibility, and will significantly reduce the computation efforts in model inference. The parameters to estimate are the regression coefficients ``\mathbf{\alpha}_j`` and parameters of the expert functions ``\mathbf{\psi}_j``, which is implemented by the standard Expectation-Conditional-Maximization algorithm (details omitted).
 
