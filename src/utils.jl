@@ -39,3 +39,25 @@ end
 
 # unique_bounds(yl, yu)
 # match_unique_bounds(yl, yu)
+
+# recursively solve for quantiles of discrete distributions
+function _solve_discrete_quantile(d::DiscreteUnivariateDistribution, q::Real)
+    l, u = 1, 2*1
+    while cdf.(d, u) < q
+        l = u+1
+        u = 2*l
+    end
+    while u-l > 1
+        tmp = ceil((u+l)/2)
+        if cdf.(d, tmp) >= q
+            l, u = l, tmp
+        else
+            l, u = tmp, u
+        end
+    end
+    if cdf.(d, l) >= q
+        return l
+    else
+        return u
+    end
+end

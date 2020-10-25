@@ -35,6 +35,10 @@ Broadcast.broadcastable(d::NonZIContinuousExpert) = Ref(d)
 
 ##### specific distributions #####
 
+const add_experts = [
+    "gammacount"
+]
+
 const discrete_experts = [
     "binomial", "zibinomial",
     "negativebinomial", "zinegativebinomial",
@@ -57,6 +61,10 @@ const calcs = [
     "expert_tn",
     "expert_tn_bar"
 ]
+
+for dname in add_experts
+    include(joinpath("experts", "add_dist", "$(dname).jl"))
+end
 
 for dname in discrete_experts
     include(joinpath("experts", "discrete", "$(dname).jl"))

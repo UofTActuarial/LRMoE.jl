@@ -10,10 +10,14 @@ using StatsFuns
 import StatsFuns: log1mexp, log1pexp, logsumexp
 import StatsFuns: sqrt2, invsqrt2π
 
+using Statistics
+import Statistics: quantile
+
 using Distributions
 import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf, quantile
-import Distributions: rand
+import Distributions: rand, AbstractRNG
 import Distributions: UnivariateDistribution, DiscreteUnivariateDistribution, ContinuousUnivariateDistribution
+import Distributions: @distr_support, RecursiveProbabilityEvaluator
 import Distributions: Bernoulli, Multinomial
 import Distributions: Binomial, Poisson
 import Distributions: Gamma, InverseGaussian, LogNormal, Normal, Weibull
@@ -99,6 +103,8 @@ export
     LogitGating,
 
     # experts
+    GammaCount,
+
     params,
     GammaExpert, ZIGammaExpert,
     InverseGaussianExpert, ZIInverseGaussianExpert,
