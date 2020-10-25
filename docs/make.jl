@@ -7,6 +7,7 @@ makedocs(
 	pages = [
 		"Overview" => "index.md",
 		"Modelling Framework" => "framework.md",
+		"Expert Functions" => "experts.md",
 		# "Tutorials" => Any[
 		# 	"Tutorials Intro" => "tutorials/tutorial_main.md",
 		# 	"1 Install Mimi" => "tutorials/tutorial_1.md",
