@@ -85,6 +85,34 @@ function rand(rng::AbstractRNG, d::GammaCount)
     return quantile(d, 1 - Base.rand(rng))
 end
 
+function _gc_moments(d::GammaCount, m)
+    upper_finite = quantile(d, 1-1e-10)
+    series = 0:upper_finite
+    return sum( (series.^m) .* pdf.(d, series) )[1]
+end
+
+### Statistics
+
+mean(d::GammaCount) = _gc_moments(d, 1)
+
+# mode(d::GammaCount) = floor(Int,d.λ)
+
+# function modes(d::Poisson)
+#     λ = d.λ
+#     isinteger(λ) ? [round(Int, λ) - 1, round(Int, λ)] : [floor(Int, λ)]
+# end
+
+var(d::GammaCount) = _gc_moments(d, 2) - (_gc_moments(d, 1))^2
+
+function skewness(d::GammaCount)
+    m1, m2, m3 = _gc_moments(d, 1), _gc_moments(d, 2), _gc_moments(d, 3)
+    return (m3 - 3*m1*m2 - m1^3)/(m2^1.5)
+end
+
+function kurtosis(d::GammaCount)
+    m1, m2, m3, m4 = _gc_moments(d, 1), _gc_moments(d, 2), _gc_moments(d, 3), _gc_moments(d, 4)
+    return (m4 - 4*m1*m3 + 6*(m1^2)*m2 - 3*(m1)^4)/(m2^2)
+end
 
 # struct RecursiveGammaCountProbEvaluator <: RecursiveProbabilityEvaluator
 #     m::Real
@@ -103,22 +131,7 @@ end
 
 
 
-### Statistics
 
-# mean(d::Poisson) = d.λ
-
-# mode(d::Poisson) = floor(Int,d.λ)
-
-# function modes(d::Poisson)
-#     λ = d.λ
-#     isinteger(λ) ? [round(Int, λ) - 1, round(Int, λ)] : [floor(Int, λ)]
-# end
-
-# var(d::Poisson) = d.λ
-
-# skewness(d::Poisson) = one(typeof(d.λ)) / sqrt(d.λ)
-
-# kurtosis(d::Poisson) = one(typeof(d.λ)) / d.λ
 
 # function entropy(d::Poisson{T}) where T<:Real
 #     λ = rate(d)
