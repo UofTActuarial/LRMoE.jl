@@ -104,6 +104,7 @@ export
     LogitGating,
 
     # experts
+    Burr,
     GammaCount,
 
     params,
