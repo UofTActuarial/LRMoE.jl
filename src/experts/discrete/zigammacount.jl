@@ -1,0 +1,109 @@
+"""
+        ZIGammaCountExpert(p, m, s)
+
+Expert function: `ZIGammaCountExpert(p, m, s)`.
+
+"""
+struct ZIGammaCountExpert{T<:Real} <: ZIDiscreteExpert
+    p::T
+    m::T
+    s::T
+    ZIGammaCountExpert{T}(p, m, s) where {T<:Real} = new{T}(p, m, s)
+end
+
+function ZIGammaCountExpert(p::T, m::T, s::T; check_args=true) where {T <: Real}
+    check_args && @check_args(ZIGammaCountExpert, 0 <= p <= 1 && m > zero(m) && s > zero(s))
+    return ZIGammaCountExpert{T}(p, m, s)
+end
+
+## Outer constructors
+ZIGammaCountExpert(p::Real, m::Real, s::Real) = ZIGammaCountExpert(promote(p, m, s)...)
+ZIGammaCountExpert(p::Integer, m::Integer, s::Integer) = ZIGammaCountExpert(float(p), float(m), float(s))
+
+## Conversion
+function convert(::Type{ZIGammaCountExpert{T}}, n::S, p::S) where {T <: Real, S <: Real}
+    ZIGammaCountExpert(T(p), T(m), T(s))
+end
+function convert(::Type{ZIGammaCountExpert{T}}, d::ZIGammaCountExpert{S}) where {T <: Real, S <: Real}
+    ZIGammaCountExpert(T(d.p), T(d.m), T(d.s), check_args=false)
+end
+copy(d::ZIGammaCountExpert) = ZIGammaCountExpert(d.p, d.m, d.s, check_args=false)
+
+## Loglikelihood of Expoert
+logpdf(d::ZIGammaCountExpert, x...) = isinf(x...) ? 0.0 : Distributions.logpdf.(LRMoE.GammaCount(d.m, d.s), x...)
+pdf(d::ZIGammaCountExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(LRMoE.GammaCount(d.m, d.s), x...)
+logcdf(d::ZIGammaCountExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(LRMoE.GammaCount(d.m, d.s), x...)
+cdf(d::ZIGammaCountExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(LRMoE.GammaCount(d.m, d.s), x...)
+
+## Parameters
+params(d::ZIGammaCountExpert) = (d.p, d.m, d.s)
+
+## Simululation
+sim_expert(d::ZIGammaCountExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(LRMoE.GammaCount(d.m, d.s), sample_size)
+
+## penalty
+penalty_init(d::ZIGammaCountExpert) = [1.0 Inf 1.0 Inf]
+penalize(d::ZIGammaCountExpert, p) = (p[1]-1)*log(d.m) - d.m/p[2] + (p[3]-1)*log(d.s) - d.s/p[4]
+
+## EM: M-Step
+function EM_M_expert(d::ZIGammaCountExpert,
+                    tl, yl, yu, tu,
+                    expert_ll_pos,
+                    expert_tn_pos,
+                    expert_tn_bar_pos,
+                    z_e_obs, z_e_lat, k_e;
+                    penalty = true, pen_pararms_jk = [2.0 1.0])
+
+    # Old parameters
+    p_old = d.p
+
+    # Update zero probability
+    z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(yl, p_old, expert_ll_pos)
+    z_pos_e_obs = z_e_obs .- z_zero_e_obs
+    z_zero_e_lat = z_e_lat .* EM_E_z_zero_lat(tl, p_old, expert_tn_bar_pos)
+    z_pos_e_lat = z_e_lat .- z_zero_e_lat
+    p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, z_zero_e_lat, z_pos_e_lat, k_e)
+
+    # Update parameters: call its positive part
+    tmp_exp = GammaCountExpert(d.m, d.s)
+    tmp_update = EM_M_expert(tmp_exp,
+                            tl, yl, yu, tu,
+                            expert_ll_pos,
+                            expert_tn_pos,
+                            expert_tn_bar_pos,
+                            # z_e_obs, z_e_lat, k_e,
+                            z_pos_e_obs, z_pos_e_lat, k_e,
+                            penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+
+    return ZIGammaCountExpert(p_new, tmp_update.m, tmp_update.s)
+
+end
+
+## EM: M-Step, exact observations
+function EM_M_expert_exact(d::ZIGammaCountExpert,
+                    ye,
+                    expert_ll_pos,
+                    z_e_obs; 
+                    penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
+
+    # Old parameters
+    p_old = d.p
+
+    # Update zero probability
+    z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(ye, p_old, expert_ll_pos)
+    z_pos_e_obs = z_e_obs .- z_zero_e_obs
+    z_zero_e_lat = 0.0
+    z_pos_e_lat = 0.0
+    p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, 0.0, 0.0, 0.0)
+
+    # Update parameters: call its positive part
+    tmp_exp = GammaCountExpert(d.m, d.s)
+    tmp_update = EM_M_expert_exact(tmp_exp,
+                            ye,
+                            expert_ll_pos,
+                            z_pos_e_obs;
+                            penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+
+    return ZIGammaCountExpert(p_new, tmp_update.m, tmp_update.s)
+
+end

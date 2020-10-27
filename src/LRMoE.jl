@@ -113,6 +113,7 @@ export
     WeibullExpert, ZIWeibullExpert,
 
     BinomialExpert, ZIBinomialExpert,
+    GammaCountExpert, ZIGammaCountExpert,
     NegativeBinomialExpert, ZINegativeBinomialExpert,
     PoissonExpert, ZIPoissonExpert,
 

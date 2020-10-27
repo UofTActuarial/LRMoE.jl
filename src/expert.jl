@@ -41,6 +41,7 @@ const add_experts = [
 
 const discrete_experts = [
     "binomial", "zibinomial",
+    "gammacount", "zigammacount",
     "negativebinomial", "zinegativebinomial",
     "poisson", "zipoisson"
 ]
