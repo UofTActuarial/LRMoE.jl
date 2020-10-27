@@ -16,6 +16,7 @@ import Statistics: quantile
 using Distributions
 import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf, quantile
 import Distributions: rand, AbstractRNG
+import Distributions: mean, var, skewness, kurtosis
 import Distributions: UnivariateDistribution, DiscreteUnivariateDistribution, ContinuousUnivariateDistribution
 import Distributions: @distr_support, RecursiveProbabilityEvaluator
 import Distributions: Bernoulli, Multinomial

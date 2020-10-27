@@ -35,38 +35,42 @@ partype(::GammaCount{T}) where {T} = T
 # @_delegate_statsfuns Poisson pois λ
 
 function pdf(d::GammaCount, x::T) where {T <: Integer}
-    if x < 0 || x != floor(x)
+    if x < 0 || x != floor(x) || isinf(x)
         return 0.0
     elseif x == 0
         return ccdf.(Gamma((0+1)*d.s, 1), d.m*d.s) # 1-cdf.(Gamma((0+1)*d.s, 1), d.m*d.s)    
     else
-        cdf.(Gamma((floor(x))*d.s, 1), d.m*d.s) - cdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s) 
+        return cdf.(Gamma((floor(x))*d.s, 1), d.m*d.s) - cdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s) 
     end
 end
 
 function logpdf(d::GammaCount, x::T) where {T <: Integer}
-    if x < 0 || x != floor(x)
+    if x < 0 || x != floor(x) || isinf(x)
         return -Inf
     elseif x == 0
         return logccdf.(Gamma((0+1)*d.s, 1), d.m*d.s) 
     else
-        logcdf.(Gamma((floor(x))*d.s, 1), d.m*d.s) + log1mexp.(logcdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s) - logcdf.(Gamma((floor(x))*d.s, 1), d.m*d.s)) 
+        return logcdf.(Gamma((floor(x))*d.s, 1), d.m*d.s) + log1mexp.(logcdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s) - logcdf.(Gamma((floor(x))*d.s, 1), d.m*d.s)) 
     end
 end
 
 function cdf(d::GammaCount, x::T) where {T <: Integer}
-    if x < 0 || x != floor(x)
+    if isinf(x)
+        return 1.0
+    elseif x < 0
         return 0.0
     else
-        ccdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s)
+        return ccdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s)
     end
 end
 
 function logcdf(d::GammaCount, x::T) where {T <: Integer}
-    if x < 0 || x != floor(x)
+    if isinf(x)
         return 0.0
+    elseif x < 0
+        return -Inf
     else
-        log1mexp.(logcdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s)) 
+        return log1mexp.(logcdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s)) 
     end
 end
 
