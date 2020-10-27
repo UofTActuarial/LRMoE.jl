@@ -121,7 +121,7 @@ function _gamma_optim_k(logk,
     θ_tmp = _gamma_k_to_θ(k_tmp, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     obj = (k_tmp-1)*sum_term_zkzlogy - (1/θ_tmp)*sum_term_zkzy - (k_tmp*log(θ_tmp) + loggamma(k_tmp))*sum_term_zkz
-    p = penalty ? (pen_pararms_jk[1]-1)*log(k_tmp) + k_tmp/pen_pararms_jk[2] + (pen_pararms_jk[3]-1)*log(θ_tmp) + θ_tmp/pen_pararms_jk[4] : 0.0
+    p = penalty ? (pen_pararms_jk[1]-1)*log(k_tmp) - k_tmp/pen_pararms_jk[2] + (pen_pararms_jk[3]-1)*log(θ_tmp) - θ_tmp/pen_pararms_jk[4] : 0.0
     return (obj + p) * (-1.0)
 end
 
