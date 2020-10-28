@@ -1,6 +1,6 @@
 module LRMoE
 
-import Base: size, length, convert, show, getindex, rand, vec, inv, expm1, abs
+import Base: size, length, convert, show, getindex, rand, vec, inv, expm1, abs, log1p
 import Base: sum, maximum, minimum, ceil, floor, extrema, +, -, *, ==
 import Base: convert, copy, findfirst
 import Base.Math: @horner
@@ -108,6 +108,8 @@ export
     GammaCount,
 
     params,
+
+    BurrExpert, ZIBurrExpert,
     GammaExpert, ZIGammaExpert,
     InverseGaussianExpert, ZIInverseGaussianExpert,
     LogNormalExpert, ZILogNormalExpert,
