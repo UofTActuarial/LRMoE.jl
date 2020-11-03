@@ -1,7 +1,7 @@
 """
     BurrExpert(k, c, λ)
 
-    PDF:
+PDF:
 
 ```math
 f(x; k, c, \\lambda) = \\frac{kc}{\\lambda} \\left( \\frac{x}{\\lambda} \\right)^{c-1} \\left( 1+ \\left( \\frac{x}{\\lambda} \\right)^{c} \\right)^{-k-1},
