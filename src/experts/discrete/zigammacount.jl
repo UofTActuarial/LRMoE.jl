@@ -1,9 +1,3 @@
-"""
-        ZIGammaCountExpert(p, m, s)
-
-Expert function: `ZIGammaCountExpert(p, m, s)`.
-
-"""
 struct ZIGammaCountExpert{T<:Real} <: ZIDiscreteExpert
     p::T
     m::T

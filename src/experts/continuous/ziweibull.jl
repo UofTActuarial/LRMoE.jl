@@ -1,9 +1,3 @@
-"""
-    ZIWeibullExpert(p, k, θ)
-
-Expert function: `ZIWeibullExpert(p, k, θ)`.
-
-"""
 struct ZIWeibullExpert{T<:Real} <: ZIContinuousExpert
     p::T
     k::T

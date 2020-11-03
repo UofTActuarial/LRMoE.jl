@@ -1,9 +1,3 @@
-"""
-    ZIPoissonExpert(λ)
-
-Expert function: `ZIPoissonExpert(λ)`.
-
-"""
 struct ZIPoissonExpert{T<:Real} <: ZIDiscreteExpert
     p::T
     λ::T

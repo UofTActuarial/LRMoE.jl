@@ -1,9 +1,3 @@
-"""
-    ZIBinomialExpert(p0, n, p)
-
-Expert function: `ZIBinomialExpert(p0, n, p)`.
-
-"""
 struct ZIBinomialExpert{T<:Real} <: NonZIDiscreteExpert
     p0::T
     n::Int

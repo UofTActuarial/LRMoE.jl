@@ -1,9 +1,3 @@
-"""
-    ZINegativeBinomialExpert(p0, n, p)
-
-Expert function: `ZINegativeBinomialExpert(p0, n, p)`.
-
-"""
 struct ZINegativeBinomialExpert{T<:Real} <: ZIDiscreteExpert
     p0::T
     n::T

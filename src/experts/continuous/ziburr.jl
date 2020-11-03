@@ -1,9 +1,3 @@
-"""
-    ZIBurrExpert(p, k, c, λ)
-
-Expert function: `ZIBurrExpert(p, k, c, λ)`.
-
-"""
 struct ZIBurrExpert{T<:Real} <: ZIContinuousExpert
     p::T
     k::T

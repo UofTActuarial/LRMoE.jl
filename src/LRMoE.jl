@@ -38,6 +38,9 @@ import QuadGK: quadgk
 using Optim
 import Optim: optimize, minimizer
 
+using Clustering
+import Clustering: kmeans
+
 export
     # generic types
     convert,

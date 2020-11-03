@@ -1,9 +1,3 @@
-"""
-    ZILogNormalExpert(p, μ, σ)
-
-Expert function: `ZILogNormalExpert(p, μ, σ)`.
-
-"""
 struct ZILogNormalExpert{T<:Real} <: ZIContinuousExpert
     p::T
     μ::T

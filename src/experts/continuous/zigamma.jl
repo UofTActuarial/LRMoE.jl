@@ -1,9 +1,3 @@
-"""
-    ZIGammaExpert(p, k, θ)
-
-Expert function: `ZIGammaExpert(p, k, θ)`.
-
-"""
 struct ZIGammaExpert{T<:Real} <: ZIContinuousExpert
     p::T
     k::T

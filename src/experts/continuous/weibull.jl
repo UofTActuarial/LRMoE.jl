@@ -1,7 +1,14 @@
 """
     WeibullExpert(k, θ)
 
-Expert function: `WeibullExpert(k, θ)`.
+    PDF:
+
+    ```math
+    f(x; k, \\theta) = \\frac{k}{\\theta} \\left( \\frac{x}{\\theta} \\right)^{k-1} e^{-(x/\\theta)^k},
+    \\quad x \\geq 0
+    ```
+
+    See also: [Weibull Distribution](https://en.wikipedia.org/wiki/Weibull_distribution) (Wikipedia) 
 
 """
 struct WeibullExpert{T<:Real} <: NonZIContinuousExpert

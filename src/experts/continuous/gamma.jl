@@ -1,7 +1,14 @@
 """
     GammaExpert(k, θ)
 
-Expert function: `GammaExpert(k, θ)`.
+    PDF:
+
+    ```math
+    f(x; k, \\theta) = \\frac{x^{k-1} e^{-x/\\theta}}{\\Gamma(k) \\theta^k},
+    \\quad x > 0
+    ```
+
+    See also: [Gamma Distribution](https://en.wikipedia.org/wiki/Gamma_distribution) (Wikipedia), shape-scale parameterization 
 
 """
 struct GammaExpert{T<:Real} <: NonZIContinuousExpert

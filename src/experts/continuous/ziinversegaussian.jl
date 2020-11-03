@@ -1,9 +1,3 @@
-"""
-    ZIInverseGaussianExpert(p, μ, λ)
-
-Expert function: `ZIInverseGaussianExpert(p, μ, λ)`.
-
-"""
 struct ZIInverseGaussianExpert{T<:Real} <: ZIContinuousExpert
     p::T
     μ::T
