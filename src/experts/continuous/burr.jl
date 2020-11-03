@@ -3,13 +3,13 @@
 
     PDF:
 
-    ```math
-    f(x; k, c, \\lambda) = \\frac{kc}{\\lambda} \\left( \\frac{x}{\\lambda} \\right)^{c-1} \\left( 1+ \\left( \\frac{x}{\\lambda} \\right)^{c} \\right)^{-k-1},
-    \\quad x \\geq 0
-    ```
+```math
+f(x; k, c, \\lambda) = \\frac{kc}{\\lambda} \\left( \\frac{x}{\\lambda} \\right)^{c-1} \\left( 1+ \\left( \\frac{x}{\\lambda} \\right)^{c} \\right)^{-k-1},
+\\quad x \\geq 0
+```
 
-    See also: [Burr Distribution](https://www.mathworks.com/help/stats/burr-type-xii-distribution.html) (Mathworks, implemented in this package),
-        [Burr Distribution](https://en.wikipedia.org/wiki/Burr_distribution) (Wikipedia, with λ = 1)
+See also: [Burr Distribution](https://www.mathworks.com/help/stats/burr-type-xii-distribution.html) (Mathworks, implemented in this package),
+    [Burr Distribution](https://en.wikipedia.org/wiki/Burr_distribution) (Wikipedia, with λ = 1)
 
 """
 struct BurrExpert{T<:Real} <: NonZIContinuousExpert

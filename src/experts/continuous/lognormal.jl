@@ -1,15 +1,15 @@
 """
     LogNormalExpert(μ, σ)
 
-    PDF:
+PDF:
 
-    ```math
-    f(x; \\mu, \\sigma) = \\frac{1}{x \\sqrt{2 \\pi \\sigma^2}}
-    \\exp \\left( - \\frac{(\\log(x) - \\mu)^2}{2 \\sigma^2} \\right),
-    \\quad x > 0
-    ```
+```math
+f(x; \\mu, \\sigma) = \\frac{1}{x \\sqrt{2 \\pi \\sigma^2}}
+\\exp \\left( - \\frac{(\\log(x) - \\mu)^2}{2 \\sigma^2} \\right),
+\\quad x > 0
+```
 
-    See also: [Lognormal Distribution](https://en.wikipedia.org/wiki/Log-normal_distribution) (Wikipedia)
+See also: [Lognormal Distribution](https://en.wikipedia.org/wiki/Log-normal_distribution) (Wikipedia)
 
 """
 struct LogNormalExpert{T<:Real} <: NonZIContinuousExpert

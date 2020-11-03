@@ -1,13 +1,13 @@
 """
     BinomialExpert(n, p)
 
-    PMF:
+PMF:
 
-    ```math
-    P(X = k) = {n \\choose k}p^k(1-p)^{n-k},  \\quad \\text{ for } k = 0,1,2, \\ldots, n.
-    ```
+```math
+P(X = k) = {n \\choose k}p^k(1-p)^{n-k},  \\quad \\text{ for } k = 0,1,2, \\ldots, n.
+```
 
-    See also: [Binomial Distribution](https://en.wikipedia.org/wiki/Binomial_distribution) (Wikipedia) 
+See also: [Binomial Distribution](https://en.wikipedia.org/wiki/Binomial_distribution) (Wikipedia) 
 
 """
 struct BinomialExpert{T<:Real} <: NonZIDiscreteExpert

@@ -1,15 +1,15 @@
 """
     InverseGaussianExpert(μ, λ)
 
-    PDF:
+PDF:
 
-    ```math
-    f(x; \\mu, \\lambda) = \\sqrt{\\frac{\\lambda}{2\\pi x^3}}
-    \\exp\\left(\\frac{-\\lambda(x-\\mu)^2}{2\\mu^2x}\\right), 
-    \\quad x > 0
-    ```
+```math
+f(x; \\mu, \\lambda) = \\sqrt{\\frac{\\lambda}{2\\pi x^3}}
+\\exp\\left(\\frac{-\\lambda(x-\\mu)^2}{2\\mu^2x}\\right), 
+\\quad x > 0
+```
 
-    See also: [Inverse Gaussian Distribution](https://en.wikipedia.org/wiki/Inverse_Gaussian_distribution) (Wikipedia) 
+See also: [Inverse Gaussian Distribution](https://en.wikipedia.org/wiki/Inverse_Gaussian_distribution) (Wikipedia) 
 
 """
 struct InverseGaussianExpert{T<:Real} <: NonZIContinuousExpert

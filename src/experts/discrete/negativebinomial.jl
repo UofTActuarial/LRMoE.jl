@@ -1,13 +1,13 @@
 """
     NegativeBinomialExpert(n, p)
 
-    PMF:
+PMF:
 
-    ```math
-    P(X = k) = \\frac{\\Gamma(k+r)}{k! \\Gamma(r)} p^r (1 - p)^k, \\quad \\text{for } k = 0,1,2,\\ldots.
-    ```
+```math
+P(X = k) = \\frac{\\Gamma(k+r)}{k! \\Gamma(r)} p^r (1 - p)^k, \\quad \\text{for } k = 0,1,2,\\ldots.
+```
 
-    See also: [Negative Binomial Distribution](https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html) (Wolfram) 
+See also: [Negative Binomial Distribution](https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html) (Wolfram) 
 
 """
 struct NegativeBinomialExpert{T<:Real} <: NonZIDiscreteExpert

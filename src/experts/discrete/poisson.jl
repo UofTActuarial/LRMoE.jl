@@ -1,13 +1,13 @@
 """
     PoissonExpert(λ)
 
-    PMF:
+PMF:
 
-    ```math
-    P(X = k) = \\frac{\\lambda^k}{k!} e^{-\\lambda}, \\quad \\text{ for } k = 0,1,2,\\ldots.
-    ```
+```math
+P(X = k) = \\frac{\\lambda^k}{k!} e^{-\\lambda}, \\quad \\text{ for } k = 0,1,2,\\ldots.
+```
 
-    See also: [Poisson Distribution](https://en.wikipedia.org/wiki/Poisson_distribution) (Wikipedia) 
+See also: [Poisson Distribution](https://en.wikipedia.org/wiki/Poisson_distribution) (Wikipedia) 
 
 """
 struct PoissonExpert{T<:Real} <: NonZIDiscreteExpert
