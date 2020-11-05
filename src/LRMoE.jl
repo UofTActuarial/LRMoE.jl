@@ -2,7 +2,7 @@ module LRMoE
 
 import Base: size, length, convert, show, getindex, rand, vec, inv, expm1, abs, log1p
 import Base: sum, maximum, minimum, ceil, floor, extrema, +, -, *, ==
-import Base: convert, copy, findfirst
+import Base: convert, copy, findfirst, summary
 import Base.Math: @horner
 import Base: π
 
@@ -58,6 +58,13 @@ export
     ZIContinuousExpert,
     NonZIDiscreteExpert,
     NonZIContinuousExpert,
+
+    # model related
+    summary,
+    LRMoEModel,
+    LRMoESTD,
+    LRMoEFittingResult,
+    LRMoESTDFit,
 
     # loglikelihood functions
     pdf, logpdf,
@@ -136,6 +143,7 @@ export
 ### source files
 
 include("utils.jl")
+include("modelstruct.jl")
 
 include("gating.jl")
 include("expert.jl")
