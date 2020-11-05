@@ -11,7 +11,7 @@ import StatsFuns: log1mexp, log1pexp, logsumexp
 import StatsFuns: sqrt2, invsqrt2π
 
 using Statistics
-import Statistics: quantile
+import Statistics: quantile, mean, var
 
 using Distributions
 import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf, quantile
@@ -39,7 +39,7 @@ using Optim
 import Optim: optimize, minimizer
 
 using Clustering
-import Clustering: kmeans
+import Clustering: kmeans, assignments, counts
 
 export
     # generic types
@@ -150,6 +150,7 @@ include("expert.jl")
 include("loglik.jl")
 include("penalty.jl")
 
+include("paramsinit.jl")
 include("fit.jl")
 
 include("simulation.jl")
