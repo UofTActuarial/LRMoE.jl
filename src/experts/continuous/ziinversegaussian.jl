@@ -15,6 +15,7 @@ end
 #### Outer constructors
 ZIInverseGaussianExpert(p::Real, μ::Real, λ::Real) = ZIInverseGaussianExpert(promote(p, μ, λ)...)
 ZIInverseGaussianExpert(p::Integer, μ::Integer, λ::Integer) = ZIInverseGaussianExpert(float(p), float(μ), float(λ))
+ZIInverseGaussianExpert() = ZIInverseGaussianExpert(0.5, 1.0, 1.0)
 
 ## Conversion
 function convert(::Type{ZIInverseGaussianExpert{T}}, p::S, μ::S, λ::S) where {T <: Real, S <: Real}
@@ -33,6 +34,18 @@ cdf(d::ZIInverseGaussianExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(D
 
 ## Parameters
 params(d::ZIInverseGaussianExpert) = (d.p, d.μ, d.λ)
+function params_init(y, d::ZIInverseGaussianExpert)
+    p_init = sum(y .== 0.0) / sum(y .>= 0.0)
+    pos_idx = (y .> 0.0)
+    μ, σ2 = mean(y[pos_idx]), var(y[pos_idx])
+    μ_init = μ
+    λ_init = σ2 / μ^3
+    if isnan(μ_init) || isnan(λ_init)
+        return ZIInverseGaussianExpert()
+    else
+        return ZIInverseGaussianExpert(p_init, μ_init, λ_init)
+    end
+end
 
 ## Simululation
 sim_expert(d::ZIInverseGaussianExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.InverseGaussian(d.μ, d.λ), sample_size)

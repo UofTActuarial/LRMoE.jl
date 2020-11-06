@@ -15,6 +15,7 @@ end
 #### Outer constructors
 ZIGammaExpert(p::Real, k::Real, θ::Real) = ZIGammaExpert(promote(p, k, θ)...)
 ZIGammaExpert(p::Integer, k::Integer, θ::Integer) = ZIGammaExpert(float(p), float(k), float(θ))
+ZIGammaExpert() = ZIGammaExpert(0.50, 1.0, 1.0)
 
 ## Conversion
 function convert(::Type{ZIGammaExpert{T}}, p::S, k::S, θ::S) where {T <: Real, S <: Real}
@@ -33,6 +34,18 @@ cdf(d::ZIGammaExpert, x...) = Distributions.cdf.(Distributions.Gamma(d.k, d.θ),
 
 ## Parameters
 params(d::ZIGammaExpert) = (d.p, d.k, d.θ)
+function params_init(y, d::ZIGammaExpert)
+    p_init = sum(y .== 0.0) / sum(y .>= 0.0)
+    pos_idx = (y .> 0.0)
+    μ, σ2 = mean(y[pos_idx]), var(y[pos_idx])
+    θ_init = σ2/μ
+    k_init = μ/θ_init
+    if isnan(θ_init) || isnan(k_init)
+        return ZIGammaExpert()
+    else
+        return ZIGammaExpert(p_init, k_init, θ_init)
+    end
+end
 
 ## Simululation
 sim_expert(d::ZIGammaExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.Gamma(d.k, d.θ), sample_size)

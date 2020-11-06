@@ -15,6 +15,7 @@ end
 #### Outer constructors
 ZILogNormalExpert(p::Real, μ::Real, σ::Real) = ZILogNormalExpert(promote(p, μ, σ)...)
 ZILogNormalExpert(p::Integer, μ::Integer, σ::Integer) = ZILogNormalExpert(float(p), float(μ), float(σ))
+ZILogNormalExpert() = ZILogNormalExpert(0.5, 0.0, 1.0)
 
 ## Conversion
 function convert(::Type{ZILogNormalExpert{T}}, p::S, μ::S, σ::S) where {T <: Real, S <: Real}
@@ -33,6 +34,14 @@ cdf(d::ZILogNormalExpert, x...) = Distributions.cdf.(Distributions.LogNormal(d.�
 
 ## Parameters
 params(d::ZILogNormalExpert) = (d.p, d.μ, d.σ)
+function params_init(y, d::ZILogNormalExpert)
+    p_init = sum(y .== 0.0) / sum(y .>= 0.0)
+    pos_idx = (y .> 0.0)
+    μ_init, σ_init = mean(log.(y[pos_idx])), sqrt(var(log.(y[pos_idx])))
+    μ_init = isnan(μ_init) ? 0.0 : μ_init
+    σ_init = isnan(σ_init) ? 1.0 : σ_init
+    return ZILogNormalExpert(p_init, μ_init, σ_init)
+end
 
 ## Simululation
 sim_expert(d::ZILogNormalExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.LogNormal(d.μ, d.σ), sample_size)

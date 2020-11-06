@@ -25,6 +25,7 @@ end
 ## Outer constructors
 GammaExpert(k::Real, θ::Real) = GammaExpert(promote(k, θ)...)
 GammaExpert(k::Integer, θ::Integer) = GammaExpert(float(k), float(θ))
+GammaExpert() = GammaExpert(1.0, 1.0)
 
 ## Conversion
 function convert(::Type{GammaExpert{T}}, k::S, θ::S) where {T <: Real, S <: Real}
@@ -43,6 +44,17 @@ cdf(d::GammaExpert, x...) = Distributions.cdf.(Distributions.Gamma(d.k, d.θ), x
 
 ## Parameters
 params(d::GammaExpert) = (d.k, d.θ)
+function params_init(y, d::GammaExpert)
+    pos_idx = (y .> 0.0)
+    μ, σ2 = mean(y[pos_idx]), var(y[pos_idx])
+    θ_init = σ2/μ
+    k_init = μ/θ_init
+    if isnan(θ_init) || isnan(k_init)
+        return GammaExpert()
+    else
+        return GammaExpert(k_init, θ_init)
+    end
+end
 
 ## Simululation
 sim_expert(d::GammaExpert, sample_size) = Distributions.rand(Distributions.Gamma(d.k, d.θ), sample_size)

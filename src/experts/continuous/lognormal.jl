@@ -26,6 +26,7 @@ end
 ## Outer constructors
 LogNormalExpert(μ::Real, σ::Real) = LogNormalExpert(promote(μ, σ)...)
 LogNormalExpert(μ::Integer, σ::Integer) = LogNormalExpert(float(μ), float(σ))
+LogNormalExpert() = LogNormalExpert(0.0, 1.0)
 
 ## Conversion
 function convert(::Type{LogNormalExpert{T}}, μ::S, σ::S) where {T <: Real, S <: Real}
@@ -44,6 +45,13 @@ cdf(d::LogNormalExpert, x...) = Distributions.cdf.(Distributions.LogNormal(d.μ,
 
 ## Parameters
 params(d::LogNormalExpert) = (d.μ, d.σ)
+function params_init(y, d::LogNormalExpert)
+    pos_idx = (y .> 0.0)
+    μ_init, σ_init = mean(log.(y[pos_idx])), sqrt(var(log.(y[pos_idx])))
+    μ_init = isnan(μ_init) ? 0.0 : μ_init
+    σ_init = isnan(σ_init) ? 1.0 : σ_init
+    return LogNormalExpert(μ_init, σ_init)
+end
 
 ## Simululation
 sim_expert(d::LogNormalExpert, sample_size) = Distributions.rand(Distributions.LogNormal(d.μ, d.σ), sample_size)

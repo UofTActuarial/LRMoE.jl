@@ -26,6 +26,7 @@ end
 ## Outer constructors
 InverseGaussianExpert(μ::Real, λ::Real) = InverseGaussianExpert(promote(μ, λ)...)
 InverseGaussianExpert(μ::Integer, λ::Integer) = InverseGaussianExpert(float(μ), float(λ))
+InverseGaussianExpert() = InverseGaussianExpert(1.0, 1.0)
 
 ## Conversion
 function convert(::Type{InverseGaussianExpert{T}}, μ::S, λ::S) where {T <: Real, S <: Real}
@@ -44,6 +45,17 @@ cdf(d::InverseGaussianExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Dis
 
 ## Parameters
 params(d::InverseGaussianExpert) = (d.μ, d.λ)
+function params_init(y, d::InverseGaussianExpert)
+    pos_idx = (y .> 0.0)
+    μ, σ2 = mean(y[pos_idx]), var(y[pos_idx])
+    μ_init = μ
+    λ_init = σ2 / μ^3
+    if isnan(μ_init) || isnan(λ_init)
+        return InverseGaussianExpert()
+    else
+        return InverseGaussianExpert(μ_init, λ_init)
+    end
+end
 
 ## Simululation
 sim_expert(d::InverseGaussianExpert, sample_size) = Distributions.rand(Distributions.InverseGaussian(d.μ, d.λ), sample_size)

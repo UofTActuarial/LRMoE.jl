@@ -118,6 +118,7 @@ export
     GammaCount,
 
     params,
+    params_init,
 
     BurrExpert, ZIBurrExpert,
     GammaExpert, ZIGammaExpert,
@@ -150,7 +151,7 @@ include("expert.jl")
 include("loglik.jl")
 include("penalty.jl")
 
-include("paramsinit.jl")
+# include("paramsinit.jl")
 include("fit.jl")
 
 include("simulation.jl")
