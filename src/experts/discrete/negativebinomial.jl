@@ -24,6 +24,7 @@ end
 ## Outer constructors
 NegativeBinomialExpert(n::Real, p::Real) = NegativeBinomialExpert(promote(n, p)...)
 NegativeBinomialExpert(n::Integer, p::Integer) = NegativeBinomialExpert(float(n), float(p))
+NegativeBinomialExpert() = NegativeBinomialExpert(1, 0.5)
 
 ## Conversion
 function convert(::Type{NegativeBinomialExpert{T}}, n::S, p::S) where {T <: Real, S <: Real}
@@ -42,6 +43,16 @@ cdf(d::NegativeBinomialExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Di
 
 ## Parameters
 params(d::NegativeBinomialExpert) = (d.n, d.p)
+function params_init(y, d::NegativeBinomialExpert)
+    μ, σ2 = mean(y), var(y)
+    p_init = μ / σ2
+    n_init = μ*p_init/(1-p_init)
+    try 
+        NegativeBinomialExpert(n_init, p_init) 
+    catch; 
+        NegativeBinomialExpert() 
+    end
+end
 
 ## Simululation
 sim_expert(d::NegativeBinomialExpert, sample_size) = Distributions.rand(Distributions.NegativeBinomial(d.n, d.p), sample_size)

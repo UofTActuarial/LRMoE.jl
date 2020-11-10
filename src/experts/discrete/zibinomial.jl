@@ -13,6 +13,7 @@ end
 ## Outer constructors
 # ZIBinomialExpert(p0::Real, n::Integer, p::Real) = ZIBinomialExpert(p0, n, float(p))
 ZIBinomialExpert(p0::Integer, n::Integer, p::Integer) = ZIBinomialExpert(float(p0), n, float(p))
+ZIBinomialExpert() = ZIBinomialExpert(0.50, 2, 0.50)
 
 ## Conversion
 function convert(::Type{ZIBinomialExpert{T}}, p0::S, n::Int, p::S) where {T <: Real, S <: Real}
@@ -31,6 +32,17 @@ cdf(d::ZIBinomialExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distribu
 
 ## Parameters
 params(d::ZIBinomialExpert) = (d.p0, d.n, d.p)
+function params_init(y, d::ZIBinomialExpert)
+    n_init = Int(maximum(vec(y))) + 2
+    μ, σ2 = mean(y), var(y)
+    p_init = ( (σ2+μ*μ)/μ - 1 ) / (n_init - 1)
+    p0_init = 1 - μ/(n_init*p_init)
+    try 
+        return ZIBinomialExpert(p0_init, n_init, p_init)
+    catch; 
+        return ZIBinomialExpert() 
+    end
+end
 
 ## Simululation
 sim_expert(d::ZIBinomialExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p0), sample_size)) .* Distributions.rand(Distributions.Binomial(d.n, d.p), sample_size)

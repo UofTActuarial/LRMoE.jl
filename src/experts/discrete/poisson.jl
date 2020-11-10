@@ -23,6 +23,7 @@ end
 ## Outer constructors
 # PoissonExpert(λ::Real) = PoissonExpert(promote(λ)...)
 PoissonExpert(λ::Integer) = PoissonExpert(float(λ))
+PoissonExpert() = PoissonExpert(1.0)
 
 ## Conversion
 function convert(::Type{PoissonExpert{T}}, λ::S) where {T <: Real, S <: Real}
@@ -41,6 +42,14 @@ cdf(d::PoissonExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributio
 
 ## Parameters
 params(d::PoissonExpert) = (d.λ)
+function params_init(y, d::PoissonExpert)
+    λ_init = mean(y)
+    try 
+        return PoissonExpert(λ_init)
+    catch; 
+        PoissonExpert() 
+    end
+end
 
 ## Simululation
 sim_expert(d::PoissonExpert, sample_size) = Distributions.rand(Distributions.Poisson(d.λ), sample_size)

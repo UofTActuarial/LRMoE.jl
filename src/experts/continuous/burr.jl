@@ -27,6 +27,7 @@ end
 ## Outer constructors
 BurrExpert(k::Real, c::Real, λ::Real) = BurrExpert(promote(k, c, λ)...)
 BurrExpert(k::Integer, c::Integer, λ::Integer) = BurrExpert(float(k), float(c), float(λ))
+BurrExpert() = BurrExpert(1.0, 1.0, 1.0)
 
 ## Conversion
 function convert(::Type{BurrExpert{T}}, k::S, c::S, λ::S) where {T <: Real, S <: Real}
@@ -48,6 +49,30 @@ params(d::BurrExpert) = (d.k, d.c, d.λ)
 
 ## Simululation
 sim_expert(d::BurrExpert, sample_size) = Distributions.rand(LRMoE.Burr(d.k, d.c, d.λ), sample_size)
+function params_init(y, d::BurrExpert)
+    pos_idx = (y .> 0.0)
+    
+    function init_obj(logparams, y)
+        n = length(y)
+        c_tmp = exp(logparams[1])
+        λ_tmp = exp(logparams[2])
+
+        k_tmp = n / (sum(log1p.((y ./ λ_tmp).^c_tmp)))
+        return -1 * ( n*log(c_tmp*k_tmp) - n*(c_tmp-1)*log(λ_tmp) + c_tmp*sum(log.(y)) - (k_tmp+1)*sum(log1p.((y ./ λ_tmp).^c_tmp)) )
+    end
+    
+    logparams_init = Optim.minimizer( Optim.optimize(x -> init_obj(x, y[pos_idx]),  [0.0, 0.0] ))
+    
+    c_init = exp(logparams_init[1])
+    λ_init = exp(logparams_init[2])
+    k_init = length(y[pos_idx]) / (sum(log1p.((y[pos_idx] ./ λ_init).^c_init)))
+
+    try 
+        return BurrExpert(k_init, c_init, λ_init)
+    catch; 
+        BurrExpert() 
+    end
+end
 
 ## penalty
 penalty_init(d::BurrExpert) = [1.0 Inf 1.0 Inf 1.0 Inf]

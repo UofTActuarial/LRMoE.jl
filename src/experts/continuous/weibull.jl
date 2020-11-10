@@ -25,6 +25,7 @@ end
 ## Outer constructors
 WeibullExpert(k::Real, θ::Real) = WeibullExpert(promote(k, θ)...)
 WeibullExpert(k::Integer, θ::Integer) = WeibullExpert(float(k), float(θ))
+WeibullExpert() = WeibullExpert(2.0, 1.0)
 
 ## Conversion
 function convert(::Type{WeibullExpert{T}}, k::S, θ::S) where {T <: Real, S <: Real}
@@ -43,6 +44,27 @@ cdf(d::WeibullExpert, x...) = Distributions.cdf.(Distributions.Weibull(d.k, d.θ
 
 ## Parameters
 params(d::WeibullExpert) = (d.k, d.θ)
+function params_init(y, d::WeibullExpert)
+    pos_idx = (y .> 0.0)
+    
+    function init_obj(logk, y)
+        n = length(y)
+        k_tmp = exp(logk)
+        θ_tmp = ( sum(y.^k_tmp) / n)^(1/k_tmp)
+        return -1 * (n*logk - n*log(θ_tmp) + k_tmp*sum(log.(y)) - n*(k_tmp-1)*log(θ_tmp) - 1/(θ_tmp^k_tmp)*sum(y.^k_tmp) )
+    end
+    
+    logk_init = Optim.minimizer( Optim.optimize(x -> init_obj(x, y[pos_idx]),  0.0, 2.0 ))
+    
+    k_init = exp(logk_init)
+    θ_init = ( sum(y[pos_idx].^k_init) / length(y[pos_idx]))^(1/k_init)
+
+    try 
+        return WeibullExpert(k_init, θ_init)
+    catch; 
+        WeibullExpert() 
+    end
+end
 
 ## Simululation
 sim_expert(d::WeibullExpert, sample_size) = Distributions.rand(Distributions.Weibull(d.k, d.θ), sample_size)

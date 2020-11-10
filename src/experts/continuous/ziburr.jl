@@ -16,6 +16,7 @@ end
 #### Outer constructors
 ZIBurrExpert(p::Real, k::Real, c::Real, λ::Real) = ZIBurrExpert(promote(p, k, c, λ)...)
 ZIBurrExpert(p::Integer, k::Integer, c::Integer, λ::Integer) = ZIBurrExpert(float(p), float(k), float(c), float(λ))
+ZIBurrExpert() = ZIBurrExpert(0.50, 1.0, 1.0, 1.0)
 
 ## Conversion
 function convert(::Type{ZIBurrExpert{T}}, p::S, k::S, θ::S) where {T <: Real, S <: Real}
@@ -34,6 +35,17 @@ cdf(d::ZIBurrExpert, x...) = Distributions.cdf.(LRMoE.Burr(d.k, d.c, d.λ), x...
 
 ## Parameters
 params(d::ZIBurrExpert) = (d.p, d.k, d.c, d.λ)
+function params_init(y, d::ZIBurrExpert)
+    p_init = sum(y .== 0.0) / sum(y .>= 0.0)
+    pos_idx = (y .> 0.0)
+
+    c_init, k_init, θ_init = params(params_init(y[pos_idx], BurrExpert()))
+    try 
+        return ZIBurrExpert(p_init, c_init, k_init, θ_init)
+    catch; 
+        ZIWeibullExpert()
+    end
+end
 
 ## Simululation
 sim_expert(d::ZIBurrExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(LRMoE.Burr(d.k, d.c, d.λ), sample_size)

@@ -13,6 +13,7 @@ end
 ## Outer constructors
 ZINegativeBinomialExpert(p0::Real, n::Real, p::Real) = ZINegativeBinomialExpert(promote(p0, n, p)...)
 ZINegativeBinomialExpert(p0::Integer, n::Integer, p::Integer) = ZINegativeBinomialExpert(float(p0), n, float(p))
+ZINegativeBinomialExpert() = ZINegativeBinomialExpert(0.50, 1, 0.50)
 
 ## Conversion
 function convert(::Type{ZINegativeBinomialExpert{T}}, p0::S, n::Int, p::S) where {T <: Real, S <: Real}
@@ -31,6 +32,18 @@ cdf(d::ZINegativeBinomialExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(
 
 ## Parameters
 params(d::ZINegativeBinomialExpert) = (d.p0, d.n, d.p)
+function params_init(y, d::ZINegativeBinomialExpert)
+    pos_idx = (y .> 0.0)
+    μ, σ2 = mean(y[pos_idx]), var(y[pos_idx])
+    p_init = μ / σ2
+    n_init = μ*p_init/(1-p_init)
+    p0_init = 1 - mean(y)/μ
+    try 
+        ZINegativeBinomialExpert(p0_init, n_init, p_init) 
+    catch; 
+        ZINegativeBinomialExpert() 
+    end
+end
 
 ## Simululation
 sim_expert(d::ZINegativeBinomialExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p0), sample_size)) .* Distributions.rand(Distributions.NegativeBinomial(d.n, d.p), sample_size)

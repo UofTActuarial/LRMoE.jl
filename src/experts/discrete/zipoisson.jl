@@ -12,6 +12,7 @@ end
 ## Outer constructors
 ZIPoissonExpert(p::Real, λ::Real) = ZIPoissonExpert(promote(p, λ)...)
 ZIPoissonExpert(p::Integer, λ::Integer) = ZIPoissonExpert(float(p), float(λ))
+ZIPoissonExpert() = ZIPoissonExpert(0.5, 1.0)
 
 ## Conversion
 function convert(::Type{ZIPoissonExpert{T}}, p::S, λ::S) where {T <: Real, S <: Real}
@@ -30,6 +31,18 @@ cdf(d::ZIPoissonExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distribut
 
 ## Parameters
 params(d::ZIPoissonExpert) = (d.p, d.λ)
+function params_init(y, d::ZIPoissonExpert)
+    μ, σ2 = mean(y), var(y)
+    λp = (σ2-μ) / μ
+    tmp = λp / μ
+    p_init = tmp / (1+tmp)
+    λ_init = λp / p_init
+    try 
+        ZIPoissonExpert(p_init, λ_init)
+    catch; 
+        ZIPoissonExpert() 
+    end
+end
 
 ## Simululation
 sim_expert(d::ZIPoissonExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.Poisson(d.λ), sample_size)

@@ -13,6 +13,7 @@ end
 ## Outer constructors
 ZIGammaCountExpert(p::Real, m::Real, s::Real) = ZIGammaCountExpert(promote(p, m, s)...)
 ZIGammaCountExpert(p::Integer, m::Integer, s::Integer) = ZIGammaCountExpert(float(p), float(m), float(s))
+ZIGammaCountExpert() = ZIGammaCountExpert(0.50, 2.0, 1.0)
 
 ## Conversion
 function convert(::Type{ZIGammaCountExpert{T}}, n::S, p::S) where {T <: Real, S <: Real}
@@ -31,6 +32,19 @@ cdf(d::ZIGammaCountExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(LRMoE.
 
 ## Parameters
 params(d::ZIGammaCountExpert) = (d.p, d.m, d.s)
+function params_init(y, d::ZIGammaCountExpert)
+    
+    p_init = sum(y .== 0.0) / sum(y .>= 0.0)
+    pos_idx = (y .> 0.0)
+
+    m_init, s_init = params(params_init(y[pos_idx], GammaCountExpert()))
+
+    try 
+        ZIGammaCountExpert(p_init, m_init, s_init) 
+    catch; 
+        ZIGammaCountExpert() 
+    end
+end
 
 ## Simululation
 sim_expert(d::ZIGammaCountExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(LRMoE.GammaCount(d.m, d.s), sample_size)

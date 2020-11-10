@@ -24,6 +24,7 @@ end
 ## Outer constructors
 # BinomialExpert(n::Integer, p::Real) = BinomialExpert(n, float(p))
 BinomialExpert(n::Integer, p::Integer) = BinomialExpert(n, float(p))
+BinomialExpert() = BinomialExpert(2, 0.50)
 
 ## Conversion
 function convert(::Type{BinomialExpert{T}}, n::Int, p::S) where {T <: Real, S <: Real}
@@ -42,6 +43,15 @@ cdf(d::BinomialExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributi
 
 ## Parameters
 params(d::BinomialExpert) = (d.n, d.p)
+function params_init(y, d::BinomialExpert)
+    n_init = Int(maximum(vec(y))) + 2
+    p_init = mean(y) / n_init
+    try 
+        return BinomialExpert(n_init, p_init)
+    catch; 
+        return BinomialExpert() 
+    end
+end
 
 ## Simululation
 sim_expert(d::BinomialExpert, sample_size) = Distributions.rand(Distributions.Binomial(d.n, d.p), sample_size)

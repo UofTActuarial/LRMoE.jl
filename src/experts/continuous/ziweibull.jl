@@ -15,6 +15,7 @@ end
 #### Outer constructors
 ZIWeibullExpert(p::Real, k::Real, θ::Real) = ZIWeibullExpert(promote(p, k, θ)...)
 ZIWeibullExpert(p::Integer, k::Integer, θ::Integer) = ZIWeibullExpert(float(p), float(k), float(θ))
+ZIWeibullExpert() = ZIWeibullExpert(0.5, 2.0, 1.0)
 
 ## Conversion
 function convert(::Type{ZIWeibullExpert{T}}, p::S, k::S, θ::S) where {T <: Real, S <: Real}
@@ -33,6 +34,17 @@ cdf(d::ZIWeibullExpert, x...) = Distributions.cdf.(Distributions.Weibull(d.k, d.
 
 ## Parameters
 params(d::ZIWeibullExpert) = (d.p, d.k, d.θ)
+function params_init(y, d::ZIWeibullExpert)
+    p_init = sum(y .== 0.0) / sum(y .>= 0.0)
+    pos_idx = (y .> 0.0)
+
+    k_init, θ_init = params(params_init(y[pos_idx], WeibullExpert()))
+    try 
+        return ZIWeibullExpert(p_init, k_init, θ_init)
+    catch; 
+        ZIWeibullExpert()
+    end
+end
 
 ## Simululation
 sim_expert(d::ZIWeibullExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.Weibull(d.k, d.θ), sample_size)

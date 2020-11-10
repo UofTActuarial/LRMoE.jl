@@ -18,6 +18,7 @@ end
 ## Outer constructors
 GammaCountExpert(m::Real, s::Real) = GammaCountExpert(promote(m, s)...)
 GammaCountExpert(m::Integer, s::Integer) = GammaCountExpert(float(m), float(s))
+GammaCountExpert() = GammaCountExpert(2.0, 1.0)
 
 ## Conversion
 function convert(::Type{GammaCountExpert{T}}, m::S, s::S) where {T <: Real, S <: Real}
@@ -36,6 +37,27 @@ cdf(d::GammaCountExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(LRMoE.Ga
 
 ## Parameters
 params(d::GammaCountExpert) = (d.m, d.s)
+function params_init(y, d::GammaCountExpert)
+    
+    function init_obj(logparams, y)
+        n = length(y)
+        m_tmp = exp(logparams[1])
+        s_tmp = exp(logparams[2])
+
+        return -1 * ( sum(logpdf.(GammaCountExpert(m_tmp, s_tmp), y) ))
+    end
+
+    logparams_init = Optim.minimizer( Optim.optimize(x -> init_obj(x, y),  [log(2.0), 0.0] ))
+
+    m_init = exp(logparams_init[1])
+    s_init = exp(logparams_init[2])
+
+    try 
+        GammaCountExpert(m_init, s_init) 
+    catch; 
+        GammaCountExpert() 
+    end
+end
 
 ## Simululation
 sim_expert(d::GammaCountExpert, sample_size) = Distributions.rand(LRMoE.GammaCount(d.m, d.s), sample_size)
