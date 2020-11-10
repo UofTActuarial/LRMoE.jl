@@ -18,7 +18,7 @@ struct GammaExpert{T<:Real} <: NonZIContinuousExpert
 end
 
 function GammaExpert(k::T, θ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(GammaExpert, k >= one(k) && θ > zero(θ))
+    check_args && @check_args(GammaExpert, k >= zero(k) && θ > zero(θ))
     return GammaExpert{T}(k, θ)
 end
 
@@ -37,10 +37,10 @@ end
 copy(d::GammaExpert) = GammaExpert(d.k, d.θ, check_args=false)
 
 ## Loglikelihood of Expert
-logpdf(d::GammaExpert, x...) = Distributions.logpdf.(Distributions.Gamma(d.k, d.θ), x...)
-pdf(d::GammaExpert, x...) = Distributions.pdf.(Distributions.Gamma(d.k, d.θ), x...)
-logcdf(d::GammaExpert, x...) = Distributions.logcdf.(Distributions.Gamma(d.k, d.θ), x...)
-cdf(d::GammaExpert, x...) = Distributions.cdf.(Distributions.Gamma(d.k, d.θ), x...)
+logpdf(d::GammaExpert, x...) = (d.k < 1 && x <= 0.0) ? -Inf : Distributions.logpdf.(Distributions.Gamma(d.k, d.θ), x...)
+pdf(d::GammaExpert, x...) = (d.k < 1 && x <= 0.0) ? 0.0 : Distributions.pdf.(Distributions.Gamma(d.k, d.θ), x...)
+logcdf(d::GammaExpert, x...) = (d.k < 1 && x <= 0.0) ? -Inf : Distributions.logcdf.(Distributions.Gamma(d.k, d.θ), x...)
+cdf(d::GammaExpert, x...) = (d.k < 1 && x <= 0.0) ? 0.0 : Distributions.cdf.(Distributions.Gamma(d.k, d.θ), x...)
 
 ## Parameters
 params(d::GammaExpert) = (d.k, d.θ)
