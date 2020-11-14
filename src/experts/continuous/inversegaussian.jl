@@ -57,6 +57,12 @@ function params_init(y, d::InverseGaussianExpert)
     end
 end
 
+## KS stats for parameter initialization
+function ks_distance(y, d::InverseGaussianExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-0.0), (1-0.0)*HypothesisTests.ksstats(y[y .> 0.0], Distributions.InverseGaussian(d.μ, d.λ))[2])
+end
+
 ## Simululation
 sim_expert(d::InverseGaussianExpert, sample_size) = Distributions.rand(Distributions.InverseGaussian(d.μ, d.λ), sample_size)
 

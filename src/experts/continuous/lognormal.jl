@@ -53,6 +53,12 @@ function params_init(y, d::LogNormalExpert)
     return LogNormalExpert(μ_init, σ_init)
 end
 
+## KS stats for parameter initialization
+function ks_distance(y, d::LogNormalExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-0.0), (1-0.0)*HypothesisTests.ksstats(y[y .> 0.0], Distributions.LogNormal(d.μ, d.σ))[2])
+end
+
 ## Simululation
 sim_expert(d::LogNormalExpert, sample_size) = Distributions.rand(Distributions.LogNormal(d.μ, d.σ), sample_size)
 

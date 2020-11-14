@@ -47,6 +47,12 @@ function params_init(y, d::ZIGammaExpert)
     end
 end
 
+## KS stats for parameter initialization
+function ks_distance(y, d::ZIGammaExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-d.p), (1-d.p)*HypothesisTests.ksstats(y[y .> 0.0], Distributions.Gamma(d.k, d.θ))[2])
+end
+
 ## Simululation
 sim_expert(d::ZIGammaExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.Gamma(d.k, d.θ), sample_size)
 

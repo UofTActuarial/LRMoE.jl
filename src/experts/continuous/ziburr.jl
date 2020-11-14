@@ -43,8 +43,14 @@ function params_init(y, d::ZIBurrExpert)
     try 
         return ZIBurrExpert(p_init, c_init, k_init, θ_init)
     catch; 
-        ZIWeibullExpert()
+        ZIBurrExpert()
     end
+end
+
+## KS stats for parameter initialization
+function ks_distance(y, d::ZIBurrExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-d.p), (1-d.p)*HypothesisTests.ksstats(y[y .> 0.0], LRMoE.Burr(d.k, d.c, d.λ))[2])
 end
 
 ## Simululation

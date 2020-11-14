@@ -46,9 +46,6 @@ cdf(d::BurrExpert, x...) = Distributions.cdf.(LRMoE.Burr(d.k, d.c, d.λ), x...)
 
 ## Parameters
 params(d::BurrExpert) = (d.k, d.c, d.λ)
-
-## Simululation
-sim_expert(d::BurrExpert, sample_size) = Distributions.rand(LRMoE.Burr(d.k, d.c, d.λ), sample_size)
 function params_init(y, d::BurrExpert)
     pos_idx = (y .> 0.0)
     
@@ -74,6 +71,16 @@ function params_init(y, d::BurrExpert)
         BurrExpert() 
     end
 end
+
+## KS stats for parameter initialization
+function ks_distance(y, d::BurrExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-0.0), (1-0.0)*HypothesisTests.ksstats(y[y .> 0.0], LRMoE.Burr(d.k, d.c, d.λ))[2])
+end
+
+## Simululation
+sim_expert(d::BurrExpert, sample_size) = Distributions.rand(LRMoE.Burr(d.k, d.c, d.λ), sample_size)
+
 
 ## penalty
 penalty_init(d::BurrExpert) = [1.0 Inf 1.0 Inf 1.0 Inf]

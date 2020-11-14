@@ -43,6 +43,12 @@ function params_init(y, d::ZILogNormalExpert)
     return ZILogNormalExpert(p_init, μ_init, σ_init)
 end
 
+## KS stats for parameter initialization
+function ks_distance(y, d::ZILogNormalExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-d.p), (1-d.p)*HypothesisTests.ksstats(y[y .> 0.0], Distributions.LogNormal(d.μ, d.σ))[2])
+end
+
 ## Simululation
 sim_expert(d::ZILogNormalExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.LogNormal(d.μ, d.σ), sample_size)
 

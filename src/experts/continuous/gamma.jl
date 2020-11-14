@@ -56,6 +56,12 @@ function params_init(y, d::GammaExpert)
     end
 end
 
+## KS stats for parameter initialization
+function ks_distance(y, d::GammaExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-0.0), (1-0.0)*HypothesisTests.ksstats(y[y .> 0.0], Distributions.Gamma(d.k, d.θ))[2])
+end
+
 ## Simululation
 sim_expert(d::GammaExpert, sample_size) = Distributions.rand(Distributions.Gamma(d.k, d.θ), sample_size)
 

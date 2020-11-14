@@ -46,6 +46,12 @@ function params_init(y, d::ZIWeibullExpert)
     end
 end
 
+## KS stats for parameter initialization
+function ks_distance(y, d::ZIWeibullExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-d.p), (1-d.p)*HypothesisTests.ksstats(y[y .> 0.0], Distributions.Weibull(d.k, d.θ))[2])
+end
+
 ## Simululation
 sim_expert(d::ZIWeibullExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.Weibull(d.k, d.θ), sample_size)
 

@@ -47,6 +47,12 @@ function params_init(y, d::ZIInverseGaussianExpert)
     end
 end
 
+## KS stats for parameter initialization
+function ks_distance(y, d::ZIInverseGaussianExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-d.p), (1-d.p)*HypothesisTests.ksstats(y[y .> 0.0], Distributions.InverseGaussian(d.μ, d.λ))[2])
+end
+
 ## Simululation
 sim_expert(d::ZIInverseGaussianExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.InverseGaussian(d.μ, d.λ), sample_size)
 
