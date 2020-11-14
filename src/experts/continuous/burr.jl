@@ -58,7 +58,8 @@ function params_init(y, d::BurrExpert)
         λ_tmp = exp(logparams[2])
 
         k_tmp = n / (sum(log1p.((y ./ λ_tmp).^c_tmp)))
-        return -1 * ( n*log(c_tmp*k_tmp) - n*(c_tmp-1)*log(λ_tmp) + c_tmp*sum(log.(y)) - (k_tmp+1)*sum(log1p.((y ./ λ_tmp).^c_tmp)) )
+        return -1 * ( n*log(c_tmp*k_tmp) - n*(c_tmp-1)*log(λ_tmp) + c_tmp*sum(log.(y)) - (k_tmp+1)*sum(log1p.((y ./ λ_tmp).^c_tmp))
+                      + log(c_tmp) - c_tmp/100 + log(λ_tmp) - λ_tmp/100)  # to avoid spurious models
     end
     
     logparams_init = Optim.minimizer( Optim.optimize(x -> init_obj(x, y[pos_idx]),  [0.0, 0.0] ))

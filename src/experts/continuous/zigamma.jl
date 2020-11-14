@@ -27,10 +27,10 @@ end
 copy(d::ZIGammaExpert) = ZIGammaExpert(d.p, d.k, d.θ, check_args=false)
 
 ## Loglikelihood of Expoert
-logpdf(d::ZIGammaExpert, x...) = (d.k < 1 && x <= 0.0) ? -Inf : Distributions.logpdf.(Distributions.Gamma(d.k, d.θ), x...)
-pdf(d::ZIGammaExpert, x...) = (d.k < 1 && x <= 0.0) ? 0.0 : Distributions.pdf.(Distributions.Gamma(d.k, d.θ), x...)
-logcdf(d::ZIGammaExpert, x...) = (d.k < 1 && x <= 0.0) ? -Inf : Distributions.logcdf.(Distributions.Gamma(d.k, d.θ), x...)
-cdf(d::ZIGammaExpert, x...) = (d.k < 1 && x <= 0.0) ? 0.0 : Distributions.cdf.(Distributions.Gamma(d.k, d.θ), x...)
+logpdf(d::ZIGammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? -Inf : Distributions.logpdf.(Distributions.Gamma(d.k, d.θ), x...)
+pdf(d::ZIGammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? 0.0 : Distributions.pdf.(Distributions.Gamma(d.k, d.θ), x...)
+logcdf(d::ZIGammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? -Inf : Distributions.logcdf.(Distributions.Gamma(d.k, d.θ), x...)
+cdf(d::ZIGammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? 0.0 : Distributions.cdf.(Distributions.Gamma(d.k, d.θ), x...)
 
 ## Parameters
 params(d::ZIGammaExpert) = (d.p, d.k, d.θ)
