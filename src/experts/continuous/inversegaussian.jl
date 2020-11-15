@@ -68,6 +68,7 @@ sim_expert(d::InverseGaussianExpert, sample_size) = Distributions.rand(Distribut
 
 ## penalty
 penalty_init(d::InverseGaussianExpert) = [1.0 Inf 1.0 Inf]
+no_penalty_init(d::InverseGaussianExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::InverseGaussianExpert, p) = (p[1]-1)*log(d.μ) - d.μ/p[2] + (p[3]-1)*log(d.λ) - d.λ/p[4]
 
 ## Misc functions for E-Step

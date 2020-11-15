@@ -83,7 +83,8 @@ sim_expert(d::BurrExpert, sample_size) = Distributions.rand(LRMoE.Burr(d.k, d.c,
 
 
 ## penalty
-penalty_init(d::BurrExpert) = [1.0 Inf 1.0 Inf 1.0 Inf]
+penalty_init(d::BurrExpert) = [2.0 10.0 2.0 10.0 2.0 10.0]
+no_penalty_init(d::BurrExpert) = [1.0 Inf 1.0 Inf 1.0 Inf]
 penalize(d::BurrExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.c) - d.c/p[4] + (p[5]-1)*log(d.λ) - d.λ/p[6]
 
 ## Misc functions for E-Step

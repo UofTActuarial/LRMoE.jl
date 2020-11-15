@@ -58,7 +58,8 @@ end
 sim_expert(d::NegativeBinomialExpert, sample_size) = Distributions.rand(Distributions.NegativeBinomial(d.n, d.p), sample_size)
 
 ## penalty
-penalty_init(d::NegativeBinomialExpert) = [1.0 Inf]
+penalty_init(d::NegativeBinomialExpert) = [2.0 10.0]
+no_penalty_init(d::NegativeBinomialExpert) = [1.0 Inf]
 penalize(d::NegativeBinomialExpert, p) = (p[1]-1)*log(d.n) - d.n/p[2]
 
 ## Misc functions for E-Step

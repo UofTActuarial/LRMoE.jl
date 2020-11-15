@@ -58,6 +58,7 @@ sim_expert(d::ZIInverseGaussianExpert, sample_size) = (1 .- Distributions.rand(D
 
 ## penalty
 penalty_init(d::ZIInverseGaussianExpert) = [1.0 Inf 1.0 Inf]
+no_penalty_init(d::ZIInverseGaussianExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::ZIInverseGaussianExpert, p) = (p[1]-1)*log(d.μ) - d.μ/p[2] + (p[3]-1)*log(d.λ) - d.λ/p[4]
 
 ## EM: M-Step

@@ -64,6 +64,7 @@ sim_expert(d::LogNormalExpert, sample_size) = Distributions.rand(Distributions.L
 
 ## penalty
 penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]
+no_penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]
 penalize(d::LogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 
 ## Misc functions for E-Step

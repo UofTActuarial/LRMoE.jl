@@ -50,7 +50,8 @@ end
 sim_expert(d::ZIGammaCountExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(LRMoE.GammaCount(d.m, d.s), sample_size)
 
 ## penalty
-penalty_init(d::ZIGammaCountExpert) = [1.0 Inf 1.0 Inf]
+penalty_init(d::ZIGammaCountExpert) = [2.0 10.0 2.0 10.0]
+no_penalty_init(d::ZIGammaCountExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::ZIGammaCountExpert, p) = (p[1]-1)*log(d.m) - d.m/p[2] + (p[3]-1)*log(d.s) - d.s/p[4]
 
 ## EM: M-Step

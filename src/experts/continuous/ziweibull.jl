@@ -56,7 +56,8 @@ end
 sim_expert(d::ZIWeibullExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.Weibull(d.k, d.θ), sample_size)
 
 ## penalty
-penalty_init(d::ZIWeibullExpert) = [1.0 Inf 1.0 Inf]
+penalty_init(d::ZIWeibullExpert) = [2.0 10.0 2.0 10.0]
+no_penalty_init(d::ZIWeibullExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::ZIWeibullExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.θ) - d.θ/p[4]
 
 ## EM: M-Step

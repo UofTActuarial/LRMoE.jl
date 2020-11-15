@@ -54,6 +54,7 @@ sim_expert(d::ZILogNormalExpert, sample_size) = (1 .- Distributions.rand(Distrib
 
 ## penalty
 penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]
+no_penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]
 penalize(d::ZILogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 
 ## EM: M-Step

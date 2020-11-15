@@ -49,6 +49,7 @@ sim_expert(d::ZIPoissonExpert, sample_size) = (1 .- Distributions.rand(Distribut
 
 ## penalty
 penalty_init(d::ZIPoissonExpert) = [2.0 1.0]
+no_penalty_init(d::ZIPoissonExpert) = [1.0 Inf]
 penalize(d::ZIPoissonExpert, p) = (p[1]-1)*log(d.λ) - d.λ/p[2]
 
 ## EM: M-Step

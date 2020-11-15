@@ -77,7 +77,8 @@ end
 sim_expert(d::WeibullExpert, sample_size) = Distributions.rand(Distributions.Weibull(d.k, d.θ), sample_size)
 
 ## penalty
-penalty_init(d::WeibullExpert) = [1.0 Inf 1.0 Inf]
+penalty_init(d::WeibullExpert) = [2.0 10.0 2.0 10.0]
+no_penalty_init(d::WeibullExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::WeibullExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.θ) - d.θ/p[4]
 
 ## Misc functions for E-Step

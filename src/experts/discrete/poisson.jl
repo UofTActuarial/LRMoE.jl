@@ -56,6 +56,7 @@ sim_expert(d::PoissonExpert, sample_size) = Distributions.rand(Distributions.Poi
 
 ## penalty
 penalty_init(d::PoissonExpert) = [2.0 1.0]
+no_penalty_init(d::PoissonExpert) = [1.0 Inf]
 penalize(d::PoissonExpert, p) = (p[1]-1)*log(d.λ) - d.λ/p[2]
 
 ## Misc functions for E-Step

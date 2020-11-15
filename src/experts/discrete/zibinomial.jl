@@ -49,6 +49,7 @@ sim_expert(d::ZIBinomialExpert, sample_size) = (1 .- Distributions.rand(Distribu
 
 ## penalty
 penalty_init(d::ZIBinomialExpert) = []
+no_penalty_init(d::ZIBinomialExpert) = []
 penalize(d::ZIBinomialExpert, p) = 0.0
 
 ## EM: M-Step

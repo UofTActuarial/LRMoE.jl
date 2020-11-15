@@ -58,6 +58,7 @@ sim_expert(d::BinomialExpert, sample_size) = Distributions.rand(Distributions.Bi
 
 ## penalty
 penalty_init(d::BinomialExpert) = []
+no_penalty_init(d::BinomialExpert) = []
 penalize(d::BinomialExpert, p) = 0.0
 
 ## Misc functions for E-Step
