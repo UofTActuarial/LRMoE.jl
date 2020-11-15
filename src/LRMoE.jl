@@ -41,6 +41,9 @@ import Optim: optimize, minimizer
 using Clustering
 import Clustering: kmeans, assignments, counts
 
+using HypothesisTests
+import HypothesisTests: ExactOneSampleKSTest, pvalue, ksstats
+
 export
     # generic types
     convert,
@@ -107,6 +110,9 @@ export
     EM_E_z_zero_obs,
     EM_E_z_zero_lat,
 
+    # fitting
+    cmm_init,
+    cmm_init_exact,
     fit_main,
 
 
@@ -151,7 +157,7 @@ include("expert.jl")
 include("loglik.jl")
 include("penalty.jl")
 
-# include("paramsinit.jl")
+include("paramsinit.jl")
 include("fit.jl")
 
 include("simulation.jl")
