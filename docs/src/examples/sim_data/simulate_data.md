@@ -1,7 +1,3 @@
----
-author: "Spark Tseung"
-title: "Simulated data in LRMoE.jl"
----
 
 
 

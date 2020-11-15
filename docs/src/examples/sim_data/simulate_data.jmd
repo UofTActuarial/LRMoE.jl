@@ -1,6 +1,4 @@
 ---
-title : 'Simulated data in LRMoE.jl'
-author : Spark Tseung
 options:
   eval: true #Set this to true if you'd like to evaluate the code in this document
 ---
