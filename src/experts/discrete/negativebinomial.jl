@@ -139,7 +139,7 @@ function _negativebinomial_optim_n(logn,
     p_tmp = _negativebinomial_n_to_p(n_tmp, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     obj = sum_term_zkzlogy - sum_term_zkz*loggamma(n_tmp) + sum_term_zkz*n_tmp*log(p_tmp) + sum_term_zkzy*log(1-p_tmp)
-    p = penalty ? (pen_pararms_jk[1]-1)*log(d.n) - d.n/pen_pararms_jk[2] : 0.0
+    p = penalty ? (pen_pararms_jk[1]-1)*log(d_old.n) - d_old.n/pen_pararms_jk[2] : 0.0
     return (obj + p) * (-1.0)
 end
 
@@ -224,7 +224,7 @@ function _negativebinomial_optim_n_exact(logn,
     p_tmp = _negativebinomial_n_to_p(n_tmp, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     obj = sum_term_zkzlogy - sum_term_zkz*loggamma(n_tmp) + sum_term_zkz*n_tmp*log(p_tmp) + sum_term_zkzy*log(1-p_tmp)
-    p = penalty ? (pen_pararms_jk[1]-1)*log(d.n) - d.n/pen_pararms_jk[2] : 0.0
+    p = penalty ? (pen_pararms_jk[1]-1)*log(d_old.n) - d_old.n/pen_pararms_jk[2] : 0.0
     return (obj + p) * (-1.0)
 end
 function EM_M_expert_exact(d::NegativeBinomialExpert,
