@@ -44,6 +44,8 @@ import Clustering: kmeans, assignments, counts
 using HypothesisTests
 import HypothesisTests: ExactOneSampleKSTest, pvalue, ksstats
 
+using Logging
+
 export
     # generic types
     convert,

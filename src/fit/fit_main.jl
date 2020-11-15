@@ -15,7 +15,7 @@ function fit_main(Y, X, α_init, model;
         ll_init = ll_init_np + ll_penalty 
 
         if print_steps
-            println("Initial loglik: $(ll_init_np) (no penalty), $(ll_init) (with penalty)")
+            @info("Initial loglik: $(ll_init_np) (no penalty), $(ll_init) (with penalty)")
         end
 
         # start em
@@ -57,7 +57,7 @@ function fit_main(Y, X, α_init, model;
             s = ll_em - ll_em_temp > 0 ? "+" : "-"
             pct = abs((ll_em - ll_em_temp) / ll_em_temp) * 100
             if print_steps    
-                println("Iteration $(iter), updating α: $(ll_em_old) ->  $(ll_em), ( $(s) $(pct) % )")
+                @info("Iteration $(iter), updating α: $(ll_em_old) ->  $(ll_em), ( $(s) $(pct) % )")
             end
             ll_em_temp = ll_em
 
@@ -85,8 +85,8 @@ function fit_main(Y, X, α_init, model;
                     if print_steps
                         s = ll_em - ll_em_temp > 0 ? "+" : "-"
                         pct = abs((ll_em - ll_em_temp) / ll_em_temp) * 100
-                        println("Iteration $(iter), updating model[$j, $k]: $(ll_em_temp) ->  $(ll_em), ( $(s) $(pct) % )")
-                        if s=="-" println("Intended update of params: $(params_old) ->  $(params(model_em[j,k]))") end
+                        @info("Iteration $(iter), updating model[$j, $k]: $(ll_em_temp) ->  $(ll_em), ( $(s) $(pct) % )")
+                        if s=="-" @info("Intended update of params: $(params_old) ->  $(params(model_em[j,k]))") end
                     end
                     ll_em_temp = ll_em
                 end
