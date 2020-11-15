@@ -38,8 +38,8 @@ function summary(m::LRMoESTDFit)
     else
         println("Fitting NOT converged after $(m.iter) iterations")
     end
-    println("Dimension of response: $(size(m.model_fit.comp_dist)[2])")
-    println("Number of components: $(size(m.model_fit.comp_dist)[1])")
+    println("Dimension of response: $(size(m.model_fit.comp_dist)[1])")
+    println("Number of components: $(size(m.model_fit.comp_dist)[2])")
     println("Loglik: $(m.loglik)")
     println("Loglik (no penalty): $(m.loglik_np)")
     println("AIC: $(m.AIC)")
