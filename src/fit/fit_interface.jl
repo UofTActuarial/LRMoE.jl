@@ -1,13 +1,20 @@
 function fit_LRMoE(Y, X, α_init, model;
                     exact_Y = false,
-                    penalty = true, pen_α = 5.0, pen_params = nothing,
-                    ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
+                    penalty = true, pen_α = 1.0, pen_params = nothing,
+                    ϵ = 1e-03, α_iter_max = 5, ecm_iter_max = 200,
                     grad_jump = true, grad_seq = nothing,
                     print_steps = true)
     
     # Convert possible dataframes to arrays
     # Y = Array(Y)
     # X = Array(X)
+
+    if penalty == false
+        pen_α = Inf
+        pen_params = [LRMoE.no_penalty_init.(model[k,:]) for k in 1:size(model)[1]]
+    elseif isnothing(pen_params)
+        pen_params = [LRMoE.penalty_init.(model[k,:]) for k in 1:size(model)[1]]
+    end
 
     if exact_Y == true
         tmp = fit_exact(Array(Y), Array(X), Array(α_init), model;
