@@ -206,7 +206,15 @@ function fit_exact(Y, X, α_init, model;
             ll_em = ll_em_np + ll_em_penalty
         end
 
-        return (α_fit = α_em, model_fit = model_em)
+        converge = (ll_em - ll_em_old > ϵ) ? false : true
+        AIC = -2.0*ll_em_np + 2*(_count_α(α_em) + _count_params(model_em))
+        BIC = -2.0*ll_em_np + log(size(Y)[1])*(_count_α(α_em) + _count_params(model_em))
+
+        return (α_fit = α_em, model_fit = model_em,
+                converge = converge, iter = iter,
+                ll_np = ll_em_np, ll = ll_em,
+                AIC = AIC, BIC = BIC)
+                
     end 
     
 end

@@ -25,9 +25,10 @@ struct LRMoESTDFit <: LRMoEFittingResult
     converge::Bool
     iter::Integer
     loglik::Real
+    loglik_np::Real
     AIC::Real
     BIC::Real
-    LRMoESTDFit(model_fit, converge, iter, loglik, AIC, BIC) = new(model_fit, converge, iter, loglik, AIC, BIC)
+    LRMoESTDFit(model_fit, converge, iter, loglik, loglik_np, AIC, BIC) = new(model_fit, converge, iter, loglik, loglik_np, AIC, BIC)
 end
 
 function summary(m::LRMoESTDFit)
@@ -38,8 +39,9 @@ function summary(m::LRMoESTDFit)
         println("Fitting NOT converged after $(m.iter) iterations")
     end
     println("Dimension of response: $(size(m.model_fit.comp_dist)[2])")
-    println("Number of components: $(size(m.model_fit.α)[1])")
+    println("Number of components: $(size(m.model_fit.comp_dist)[1])")
     println("Loglik: $(m.loglik)")
+    println("Loglik (no penalty): $(m.loglik_np)")
     println("AIC: $(m.AIC)")
     println("BIC: $(m.BIC)")
     println("Fitted α:")

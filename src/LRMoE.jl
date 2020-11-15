@@ -110,11 +110,9 @@ export
     EM_E_z_zero_obs,
     EM_E_z_zero_lat,
 
-    # fitting
+    # init
     cmm_init,
     cmm_init_exact,
-    fit_main,
-
 
     # gating
     LogitGating,
@@ -140,6 +138,7 @@ export
     # fitting
     fit_main,
     fit_exact,
+    fit_LRMoE,
 
     # simulation
     sim_expert,
@@ -150,6 +149,7 @@ export
 ### source files
 
 include("utils.jl")
+include("AICBIC.jl")
 include("modelstruct.jl")
 
 include("gating.jl")
