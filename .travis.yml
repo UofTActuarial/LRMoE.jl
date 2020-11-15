@@ -1,11 +1,11 @@
 language: julia
 os:
   - linux
-  - osx
+  # - osx
 # arch: arm64-graviton2
 
 julia:
-  # - 1.0
+  - 1.0
   - 1.4
   - nightly
 
