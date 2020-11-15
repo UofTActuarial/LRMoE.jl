@@ -8,6 +8,10 @@ makedocs(
 		"Overview" => "index.md",
 		"Modelling Framework" => "framework.md",
 		"Expert Functions" => "experts.md",
+		"Examples & Tutorials" => Any[
+			"Simulated Data" => "examples/sim_data.md"
+		],
+		
 		# "Tutorials" => Any[
 		# 	"Tutorials Intro" => "tutorials/tutorial_main.md",
 		# 	"1 Install Mimi" => "tutorials/tutorial_1.md",
