@@ -16,7 +16,7 @@ ZINegativeBinomialExpert(p0::Integer, n::Integer, p::Integer) = ZINegativeBinomi
 ZINegativeBinomialExpert() = ZINegativeBinomialExpert(0.50, 1, 0.50)
 
 ## Conversion
-function convert(::Type{ZINegativeBinomialExpert{T}}, p0::S, n::Int, p::S) where {T <: Real, S <: Real}
+function convert(::Type{ZINegativeBinomialExpert{T}}, p0::S, n::S, p::S) where {T <: Real, S <: Real}
     ZINegativeBinomialExpert(T(p0), T(n), T(p))
 end
 function convert(::Type{ZINegativeBinomialExpert{T}}, d::ZINegativeBinomialExpert{S}) where {T <: Real, S <: Real}
@@ -25,8 +25,8 @@ end
 copy(d::ZINegativeBinomialExpert) = ZINegativeBinomialExpert(d.p0, d.n, d.p, check_args=false)
 
 ## Loglikelihood of Expoert
-logpdf(d::ZINegativeBinomialExpert, x...) = isinf(x...) ? 0.0 : Distributions.logpdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
-pdf(d::ZINegativeBinomialExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
+logpdf(d::ZINegativeBinomialExpert, x...) = isinf(x...) ? -Inf : Distributions.logpdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
+pdf(d::ZINegativeBinomialExpert, x...) = isinf(x...) ? 0.0 : Distributions.pdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
 logcdf(d::ZINegativeBinomialExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
 cdf(d::ZINegativeBinomialExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
 

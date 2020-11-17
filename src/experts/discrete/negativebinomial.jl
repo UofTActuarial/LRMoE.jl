@@ -36,8 +36,8 @@ end
 copy(d::NegativeBinomialExpert) = NegativeBinomialExpert(d.n, d.p, check_args=false)
 
 ## Loglikelihood of Expoert
-logpdf(d::NegativeBinomialExpert, x...) = isinf(x...) ? 0.0 : Distributions.logpdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
-pdf(d::NegativeBinomialExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
+logpdf(d::NegativeBinomialExpert, x...) = isinf(x...) ? -Inf : Distributions.logpdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
+pdf(d::NegativeBinomialExpert, x...) = isinf(x...) ? 0.0 : Distributions.pdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
 logcdf(d::NegativeBinomialExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
 cdf(d::NegativeBinomialExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
 
@@ -231,7 +231,7 @@ function EM_M_expert_exact(d::NegativeBinomialExpert,
                     ye,
                     expert_ll_pos,
                     z_e_obs; 
-                    penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
+                    penalty = true, pen_pararms_jk = [1.0 Inf])
 
     # Further E-Step
     # yl_yu_unique = unique_bounds(yl, yu)
