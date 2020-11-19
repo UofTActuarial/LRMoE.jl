@@ -92,7 +92,7 @@ function EM_M_expert_exact(d::ZINegativeBinomialExpert,
                     ye,
                     expert_ll_pos,
                     z_e_obs; 
-                    penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
+                    penalty = true, pen_pararms_jk = [2.0 1.0])
 
     # Old parameters
     p_old = d.p0

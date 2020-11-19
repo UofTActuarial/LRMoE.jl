@@ -139,7 +139,7 @@ function _negativebinomial_optim_n(logn,
     p_tmp = _negativebinomial_n_to_p(n_tmp, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     obj = sum_term_zkzlogy - sum_term_zkz*loggamma(n_tmp) + sum_term_zkz*n_tmp*log(p_tmp) + sum_term_zkzy*log(1-p_tmp)
-    p = penalty ? (pen_pararms_jk[1]-1)*log(d_old.n) - d_old.n/pen_pararms_jk[2] : 0.0
+    p = penalty ? (pen_pararms_jk[1]-1)*log(n_tmp) - n_tmp/pen_pararms_jk[2] : 0.0
     return (obj + p) * (-1.0)
 end
 
@@ -170,7 +170,8 @@ function EM_M_expert(d::NegativeBinomialExpert,
                                                 z_e_obs, z_e_lat, k_e,
                                                 Y_e_obs, Y_e_lat,
                                                 penalty = penalty, pen_pararms_jk = pen_pararms_jk),
-                                                max(log(d.n)-2.0, 0.0), log(d.n)+2.0 )) # ,
+                                                log(d.n)-0.5, log(d.n)+0.5 )) # ,
+                                                # max(log(d.n)-2.0, 0.0), log(d.n)+2.0 )) # ,
                                                 # log(d.k)-2.0, log(d.k)+2.0 )) # ,
                                                 # GoldenSection() )) 
                                                 # , rel_tol = 1e-8) )
@@ -224,7 +225,7 @@ function _negativebinomial_optim_n_exact(logn,
     p_tmp = _negativebinomial_n_to_p(n_tmp, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     obj = sum_term_zkzlogy - sum_term_zkz*loggamma(n_tmp) + sum_term_zkz*n_tmp*log(p_tmp) + sum_term_zkzy*log(1-p_tmp)
-    p = penalty ? (pen_pararms_jk[1]-1)*log(d_old.n) - d_old.n/pen_pararms_jk[2] : 0.0
+    p = penalty ? (pen_pararms_jk[1]-1)*log(n_tmp) - n_tmp/pen_pararms_jk[2] : 0.0
     return (obj + p) * (-1.0)
 end
 function EM_M_expert_exact(d::NegativeBinomialExpert,
@@ -251,7 +252,8 @@ function EM_M_expert_exact(d::NegativeBinomialExpert,
                                                 z_e_obs, # z_e_lat, k_e,
                                                 # Y_e_obs, Y_e_lat,
                                                 penalty = penalty, pen_pararms_jk = pen_pararms_jk),
-                                                max(log(d.n)-2.0, 0.0), log(d.n)+2.0 )) # ,
+                                                log(d.n)-0.5, log(d.n)+0.5 )) # ,
+                                                # max(log(d.n)-2.0, 0.0), log(d.n)+2.0 )) # ,
                                                 # log(d.k)-2.0, log(d.k)+2.0 )) # ,
                                                 # GoldenSection() )) 
                                                 # , rel_tol = 1e-8) )
