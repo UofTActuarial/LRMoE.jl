@@ -75,7 +75,7 @@ function logcdf(d::GammaCount, x::T) where {T <: Real}
 end
 
 function quantile(d::GammaCount, q::Real)
-    if q <= 0 || cdf(d, 0) >= q
+    if q <= 0 || LRMoE.cdf(d, 0) >= q
         return 0
     elseif q >= 1
         return Inf
@@ -92,7 +92,7 @@ end
 function _gc_moments(d::GammaCount, m)
     upper_finite = quantile(d, 1-1e-10)
     series = 0:upper_finite
-    return sum( (series.^m) .* pdf.(d, series) )[1]
+    return sum( (series.^m) .* LRMoE.pdf.(d, series) )[1]
 end
 
 ### Statistics
