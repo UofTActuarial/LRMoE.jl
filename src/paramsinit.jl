@@ -72,10 +72,11 @@ function cmm_init_exact(Y, X, n_comp, type)
     α_init[:,1] = log.(prop) .- log(prop[n_comp])
 
     # summary statistics
-    mean_y = [hcat([mean(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    var_y  = [hcat([var(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    skewness_y = [hcat([skewness(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    kurtosis_y = [hcat([kurtosis(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    zero_y = [hcat([sum(Y[label.==lb,j] .== 0.0)/length(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    mean_y_pos = [hcat([mean(Y[label.==lb,j][Y[label.==lb,j]>0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    var_y_pos  = [hcat([var(Y[label.==lb,j][Y[label.==lb,j]>0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    skewness_y_pos = [hcat([skewness(Y[label.==lb,j][Y[label.==lb,j]>0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    kurtosis_y_pos = [hcat([kurtosis(Y[label.==lb,j][Y[label.==lb,j]>0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
 
     # initialize component distributions
     params_init = [[_params_init_switch(Y[label.==lb,j], type[j]) for lb in unique(label)] for j in 1:size(Y)[2]]
@@ -100,7 +101,8 @@ function cmm_init_exact(Y, X, n_comp, type)
 
     return (α_init = α_init, params_init = params_init, ll_init = ll_init, ks_init = ks_init,
             ll_best = ll_best, ks_best = ks_best,
-            mean_y = mean_y, var_y = var_y, skewness_y = skewness_y, kurtosis_y = kurtosis_y)
+            zero_y = zero_y,
+            mean_y_pos = mean_y_pos, var_y_pos = var_y_pos, skewness_y_pos = skewness_y_pos, kurtosis_y_pos = kurtosis_y_pos)
 end
 
 function cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
@@ -113,7 +115,9 @@ function cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
         random_init = nothing
     end
 
-    return (mean_y = tmp.mean_y, var_y = tmp.var_y, skewness_y = tmp.skewness_y, kurtosis_y = tmp.kurtosis_y,
+    return (zero_y = tmp.zero_y,
+            mean_y_pos = tmp.mean_y_pos, var_y_pos = tmp.var_y_pos, 
+            skewness_y_pos = tmp.skewness_y_pos, kurtosis_y_pos = tmp.kurtosis_y_pos,
             α_init = tmp.α_init, params_init = tmp.params_init, 
             ll_init = tmp.ll_init, ks_init = tmp.ks_init,
             ll_best = tmp.ll_best, ks_best = tmp.ks_best,
