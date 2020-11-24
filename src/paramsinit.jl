@@ -71,6 +71,12 @@ function cmm_init_exact(Y, X, n_comp, type)
     α_init = fill(0.0, n_comp, n_cov)
     α_init[:,1] = log.(prop) .- log(prop[n_comp])
 
+    # summary statistics
+    mean_y = [hcat([mean(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    var_y  = [hcat([var(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    skewness_y = [hcat([skewness(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    kurtosis_y = [hcat([kurtosis(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+
     # initialize component distributions
     params_init = [[_params_init_switch(Y[label.==lb,j], type[j]) for lb in unique(label)] for j in 1:size(Y)[2]]
 
@@ -93,7 +99,8 @@ function cmm_init_exact(Y, X, n_comp, type)
     ks_best = vcat([hcat([params_init[j][lb][findmin.(ks_init[j])[lb][2]] for lb in unique(label)]...) for j in 1:size(Y)[2]]...)
 
     return (α_init = α_init, params_init = params_init, ll_init = ll_init, ks_init = ks_init,
-            ll_best = ll_best, ks_best = ks_best)
+            ll_best = ll_best, ks_best = ks_best,
+            mean_y = mean_y, var_y = var_y, skewness_y = skewness_y, kurtosis_y = kurtosis_y)
 end
 
 function cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
@@ -106,7 +113,8 @@ function cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
         random_init = nothing
     end
 
-    return (α_init = tmp.α_init, params_init = tmp.params_init, 
+    return (mean_y = tmp.mean_y, var_y = tmp.var_y, skewness_y = tmp.skewness_y, kurtosis_y = tmp.kurtosis_y,
+            α_init = tmp.α_init, params_init = tmp.params_init, 
             ll_init = tmp.ll_init, ks_init = tmp.ks_init,
             ll_best = tmp.ll_best, ks_best = tmp.ks_best,
             random_init = random_init)
