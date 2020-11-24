@@ -73,10 +73,10 @@ function cmm_init_exact(Y, X, n_comp, type)
 
     # summary statistics
     zero_y = [hcat([sum(Y[label.==lb,j] .== 0.0)/length(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    mean_y_pos = [hcat([mean(Y[label.==lb,j][Y[label.==lb,j]>0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    var_y_pos  = [hcat([var(Y[label.==lb,j][Y[label.==lb,j]>0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    skewness_y_pos = [hcat([skewness(Y[label.==lb,j][Y[label.==lb,j]>0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    kurtosis_y_pos = [hcat([kurtosis(Y[label.==lb,j][Y[label.==lb,j]>0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    mean_y_pos = [hcat([mean(Y[label.==lb,j][Y[label.==lb,j].>0.0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    var_y_pos  = [hcat([var(Y[label.==lb,j][Y[label.==lb,j].>0.0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    skewness_y_pos = [hcat([skewness(Y[label.==lb,j][Y[label.==lb,j].>0.0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    kurtosis_y_pos = [hcat([kurtosis(Y[label.==lb,j][Y[label.==lb,j].>0.0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
 
     # initialize component distributions
     params_init = [[_params_init_switch(Y[label.==lb,j], type[j]) for lb in unique(label)] for j in 1:size(Y)[2]]
