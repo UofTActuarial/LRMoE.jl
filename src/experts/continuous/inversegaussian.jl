@@ -49,7 +49,7 @@ function params_init(y, d::InverseGaussianExpert)
     pos_idx = (y .> 0.0)
     μ, σ2 = mean(y[pos_idx]), var(y[pos_idx])
     μ_init = μ
-    λ_init = σ2 / μ^3
+    λ_init = μ^3 / σ2
     if isnan(μ_init) || isnan(λ_init)
         return InverseGaussianExpert()
     else
