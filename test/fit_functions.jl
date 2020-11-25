@@ -735,33 +735,33 @@ end
 
     # for λ in λλ
 
-        n = 10 # 30
-        p = 3
+        # n = 10 # 30
+        # p = 3
 
-        X = rand(Uniform(-1, 1), 20000, 5)
-        α_true = rand(Uniform(-1, 1), 2, 5)
-        α_true[2, :] .= 0.0
-        model = [LRMoE.GammaCountExpert(n, p) LRMoE.GammaCountExpert(n, 0.80*p);
-                 LRMoE.ZIGammaCountExpert(0.4, n, p) LRMoE.ZIGammaCountExpert(0.20, n, 2.0*p)]
+        # X = rand(Uniform(-1, 1), 20000, 5)
+        # α_true = rand(Uniform(-1, 1), 2, 5)
+        # α_true[2, :] .= 0.0
+        # model = [LRMoE.GammaCountExpert(n, p) LRMoE.GammaCountExpert(n, 0.80*p);
+        #          LRMoE.ZIGammaCountExpert(0.4, n, p) LRMoE.ZIGammaCountExpert(0.20, n, 2.0*p)]
         
-        pen_params = [[[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]],
-                      [[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]]]             
+        # pen_params = [[[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]],
+        #               [[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]]]             
         
-        Y_sim = sim_dataset(α_true, X, model)    
-        α_guess = copy(α_true)
-        α_guess .= 0.0
+        # Y_sim = sim_dataset(α_true, X, model)    
+        # α_guess = copy(α_true)
+        # α_guess .= 0.0
 
-        model_guess = [LRMoE.GammaCountExpert(n, 0.5*p) LRMoE.GammaCountExpert(n, p);
-                 LRMoE.ZIGammaCountExpert(0.5, n, 2.0*p) LRMoE.ZIGammaCountExpert(0.50, n, 1.75*p)]
+        # model_guess = [LRMoE.GammaCountExpert(n, 0.5*p) LRMoE.GammaCountExpert(n, p);
+        #          LRMoE.ZIGammaCountExpert(0.5, n, 2.0*p) LRMoE.ZIGammaCountExpert(0.50, n, 1.75*p)]
 
 
-        # Exact observation
-        Y = hcat(Y_sim[:,1], Y_sim[:,2])
-        Y = hcat(fill(0, length(Y_sim[:,1])), floor.(0.60 .* Y_sim[:,1]), ceil.(1.50.*Y_sim[:,1]), fill(Inf, length(Y_sim[:,1])))
-        result = fit_exact(Y, X, α_guess, model_guess, penalty = false, pen_params = pen_params)
-        result = fit_exact(Y, X, α_guess, model_guess, penalty = true, pen_α = 10, pen_params = pen_params)
+        # # Exact observation
+        # Y = hcat(Y_sim[:,1], Y_sim[:,2])
+        # Y = hcat(fill(0, length(Y_sim[:,1])), floor.(0.60 .* Y_sim[:,1]), ceil.(1.50.*Y_sim[:,1]), fill(Inf, length(Y_sim[:,1])))
+        # result = fit_exact(Y, X, α_guess, model_guess, penalty = false, pen_params = pen_params)
+        # result = fit_exact(Y, X, α_guess, model_guess, penalty = true, pen_α = 10, pen_params = pen_params)
         
-        result = fit_main(Y, X, α_guess, model_guess, penalty = false, pen_params = pen_params)
+        # result = fit_main(Y, X, α_guess, model_guess, penalty = false, pen_params = pen_params)
 
 
 
