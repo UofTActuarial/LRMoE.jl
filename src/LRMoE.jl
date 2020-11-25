@@ -145,7 +145,16 @@ export
     # simulation
     sim_expert,
     sim_logit_gating,
-    sim_dataset
+    sim_dataset,
+
+    # prediction
+    mean, var, quantile,
+    predict_class_prior,
+    predict_class_posterior,
+    predict_mean_prior,
+    predict_mean_posterior,
+    predict_var_prior,
+    predict_var_posterior
 
 
 ### source files
@@ -163,6 +172,7 @@ include("paramsinit.jl")
 include("fit.jl")
 
 include("simulation.jl")
+include("predict.jl")
 
 # include("experts/ll/expert_ll_pos.jl")
 

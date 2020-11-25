@@ -81,6 +81,11 @@ penalty_init(d::WeibullExpert) = [2.0 10.0 1.0 Inf]
 no_penalty_init(d::WeibullExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::WeibullExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.θ) - d.θ/p[4]
 
+## statistics
+mean(d::WeibullExpert) = mean(Distributions.Weibull(d.k, d.θ))
+var(d::WeibullExpert) = var(Distributions.Weibull(d.k, d.θ))
+quantile(d::WeibullExpert, p) = quantile(Distributions.Weibull(d.k, d.θ), p)
+
 ## Misc functions for E-Step
 
 function _int_logy_func(d::WeibullExpert, x)

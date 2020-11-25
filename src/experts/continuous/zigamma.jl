@@ -61,6 +61,11 @@ penalty_init(d::ZIGammaExpert) = [2.0 10.0 2.0 10.0]
 no_penalty_init(d::ZIGammaExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::ZIGammaExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.θ) - d.θ/p[4]
 
+## statistics
+mean(d::ZIGammaExpert) = (1-d.p)*mean(Distributions.Gamma(d.k, d.θ))
+var(d::ZIGammaExpert) = (1-d.p)*var(Distributions.Gamma(d.k, d.θ)) + d.p*(1-d.p)*(mean(Distributions.Gamma(d.k, d.θ)))^2
+quantile(d::ZIGammaExpert, p) = p <= d.p ? 0.0 : quantile(Distributions.Gamma(d.k, d.θ), p-d.p)
+
 ## EM: M-Step
 function EM_M_expert(d::ZIGammaExpert,
                      tl, yl, yu, tu,

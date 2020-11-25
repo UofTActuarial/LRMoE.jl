@@ -67,6 +67,11 @@ penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]
 no_penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]
 penalize(d::LogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 
+## statistics
+mean(d::LogNormalExpert) = mean(Distributions.LogNormal(d.μ, d.σ))
+var(d::LogNormalExpert) = var(Distributions.LogNormal(d.μ, d.σ))
+quantile(d::LogNormalExpert, p) = quantile(Distributions.LogNormal(d.μ, d.σ), p)
+
 ## Misc functions for E-Step
 function _diff_dens_series(d::LogNormalExpert, yl, yu)
     return exp(-0.5*(log(yl)-d.μ)^2/(d.σ^2)) - exp(-0.5*(log(yu)-d.μ)^2/(d.σ^2))

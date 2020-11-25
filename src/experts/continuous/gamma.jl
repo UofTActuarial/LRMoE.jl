@@ -70,6 +70,11 @@ penalty_init(d::GammaExpert) = [2.0 10.0 2.0 10.0]
 no_penalty_init(d::GammaExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::GammaExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.θ) - d.θ/p[4]
 
+## statistics
+mean(d::GammaExpert) = mean(Distributions.Gamma(d.k, d.θ))
+var(d::GammaExpert) = var(Distributions.Gamma(d.k, d.θ))
+quantile(d::GammaExpert, p) = quantile(Distributions.Gamma(d.k, d.θ), p)
+
 ## Misc functions for E-Step
 function _diff_dist_series(d::GammaExpert, yl, yu)
     return cdf.(Distributions.Gamma(d.k+1, d.θ), yu) - cdf.(Distributions.Gamma(d.k+1, d.θ), yl)

@@ -87,6 +87,12 @@ penalty_init(d::BurrExpert) = [2.0 10.0 2.0 10.0 2.0 10.0]
 no_penalty_init(d::BurrExpert) = [1.0 Inf 1.0 Inf 1.0 Inf]
 penalize(d::BurrExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.c) - d.c/p[4] + (p[5]-1)*log(d.λ) - d.λ/p[6]
 
+
+## statistics
+mean(d::BurrExpert) = mean(LRMoE.Burr(d.k, d.c, d.λ))
+var(d::BurrExpert) = var(LRMoE.Burr(d.k, d.c, d.λ))
+quantile(d::BurrExpert, p) = quantile(LRMoE.Burr(d.k, d.c, d.λ), p)
+
 ## Misc functions for E-Step
 function _int_logy_func(d::BurrExpert, x)
     return (iszero(x) || isinf(x)) ? 0.0 : log(x) * pdf.(d, x)

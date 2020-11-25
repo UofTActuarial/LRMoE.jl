@@ -61,6 +61,11 @@ penalty_init(d::ZIInverseGaussianExpert) = [1.0 Inf 1.0 Inf]
 no_penalty_init(d::ZIInverseGaussianExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::ZIInverseGaussianExpert, p) = (p[1]-1)*log(d.μ) - d.μ/p[2] + (p[3]-1)*log(d.λ) - d.λ/p[4]
 
+## statistics
+mean(d::ZIInverseGaussianExpert) = (1-d.p)*mean(Distributions.InverseGaussian(d.μ, d.λ))
+var(d::ZIInverseGaussianExpert) = (1-d.p)*var(Distributions.InverseGaussian(d.μ, d.λ)) + d.p*(1-d.p)*(mean(Distributions.InverseGaussian(d.μ, d.λ)))^2
+quantile(d::ZIInverseGaussianExpert, p) = p <= d.p ? 0.0 : quantile(Distributions.InverseGaussian(d.μ, d.λ), p-d.p)
+
 ## EM: M-Step
 function EM_M_expert(d::ZIInverseGaussianExpert,
                      tl, yl, yu, tu,

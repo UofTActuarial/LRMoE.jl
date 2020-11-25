@@ -61,6 +61,11 @@ penalty_init(d::ZIBurrExpert) = [2.0 10.0 2.0 10.0 2.0 10.0]
 no_penalty_init(d::ZIBurrExpert) = [1.0 Inf 1.0 Inf 1.0 Inf]
 penalize(d::ZIBurrExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.c) - d.c/p[4] + (p[5]-1)*log(d.λ) - d.λ/p[6]
 
+## statistics
+mean(d::ZIBurrExpert) = (1-d.p)*mean(LRMoE.Burr(d.k, d.c, d.λ))
+var(d::ZIBurrExpert) = (1-d.p)*var(LRMoE.Burr(d.k, d.c, d.λ)) + d.p*(1-d.p)*(mean(LRMoE.Burr(d.k, d.c, d.λ)))^2
+quantile(d::ZIBurrExpert, p) = p <= d.p ? 0.0 : quantile(LRMoE.Burr(d.k, d.c, d.λ), p-d.p)
+
 ## EM: M-Step
 function EM_M_expert(d::ZIBurrExpert,
                      tl, yl, yu, tu,

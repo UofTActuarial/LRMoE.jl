@@ -57,6 +57,11 @@ penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]
 no_penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]
 penalize(d::ZILogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 
+## statistics
+mean(d::ZILogNormalExpert) = (1-d.p)*mean(Distributions.LogNormal(d.μ, d.σ))
+var(d::ZILogNormalExpert) = (1-d.p)*var(Distributions.LogNormal(d.μ, d.σ)) + d.p*(1-d.p)*(mean(Distributions.LogNormal(d.μ, d.σ)))^2
+quantile(d::ZILogNormalExpert, p) = p <= d.p ? 0.0 : quantile(Distributions.LogNormal(d.μ, d.σ), p-d.p)
+
 ## EM: M-Step
 function EM_M_expert(d::ZILogNormalExpert,
                      tl, yl, yu, tu,
