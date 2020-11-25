@@ -62,6 +62,11 @@ penalty_init(d::NegativeBinomialExpert) = [2.0 10.0]
 no_penalty_init(d::NegativeBinomialExpert) = [1.0 Inf]
 penalize(d::NegativeBinomialExpert, p) = (p[1]-1)*log(d.n) - d.n/p[2]
 
+## statistics
+mean(d::NegativeBinomialExpert) = mean(Distributions.NegativeBinomial(d.n, d.p))
+var(d::NegativeBinomialExpert) = var(Distributions.NegativeBinomial(d.n, d.p))
+quantile(d::NegativeBinomialExpert, p) = quantile(Distributions.NegativeBinomial(d.n, d.p), p)
+
 ## Misc functions for E-Step
 
 function _sum_densy_series(d::NegativeBinomialExpert, yl, yu)

@@ -52,6 +52,11 @@ penalty_init(d::ZIPoissonExpert) = [2.0 1.0]
 no_penalty_init(d::ZIPoissonExpert) = [1.0 Inf]
 penalize(d::ZIPoissonExpert, p) = (p[1]-1)*log(d.λ) - d.λ/p[2]
 
+## statistics
+mean(d::ZIPoissonExpert) = (1-d.p)*mean(Distributions.Poisson(d.λ))
+var(d::ZIPoissonExpert) = (1-d.p)*var(Distributions.Poisson(d.λ)) + d.p*(1-d.p)*(mean(Distributions.Poisson(d.λ)))^2
+quantile(d::ZIPoissonExpert, p) = p <= d.p ? 0.0 : quantile(Distributions.Poisson(d.λ), p-d.p)
+
 ## EM: M-Step
 function EM_M_expert(d::ZIPoissonExpert,
                      tl, yl, yu, tu,

@@ -52,6 +52,11 @@ penalty_init(d::ZIBinomialExpert) = []
 no_penalty_init(d::ZIBinomialExpert) = []
 penalize(d::ZIBinomialExpert, p) = 0.0
 
+## statistics
+mean(d::ZIBinomialExpert) = (1-d.p0)*mean(Distributions.Binomial(d.n, d.p))
+var(d::ZIBinomialExpert) = (1-d.p0)*var(Distributions.Binomial(d.n, d.p)) + d.p0*(1-d.p0)*(mean(Distributions.Binomial(d.n, d.p)))^2
+quantile(d::ZIBinomialExpert, p) = p <= d.p0 ? 0.0 : quantile(Distributions.Binomial(d.n, d.p), p-d.p0)
+
 ## EM: M-Step
 function EM_M_expert(d::ZIBinomialExpert,
                     tl, yl, yu, tu,

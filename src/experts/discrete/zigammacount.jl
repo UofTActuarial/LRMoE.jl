@@ -54,6 +54,11 @@ penalty_init(d::ZIGammaCountExpert) = [2.0 10.0 2.0 10.0]
 no_penalty_init(d::ZIGammaCountExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::ZIGammaCountExpert, p) = (p[1]-1)*log(d.m) - d.m/p[2] + (p[3]-1)*log(d.s) - d.s/p[4]
 
+## statistics
+mean(d::ZIGammaCountExpert) = (1-d.p)*mean(LRMoE.GammaCount(d.m, d.s))
+var(d::ZIGammaCountExpert) = (1-d.p)*var(LRMoE.GammaCount(d.m, d.s)) + d.p*(1-d.p)*(mean(LRMoE.GammaCount(d.m, d.s)))^2
+quantile(d::ZIGammaCountExpert, p) = p <= d.p ? 0.0 : quantile(LRMoE.GammaCount(d.m, d.s), p-d.p)
+
 ## EM: M-Step
 function EM_M_expert(d::ZIGammaCountExpert,
                     tl, yl, yu, tu,

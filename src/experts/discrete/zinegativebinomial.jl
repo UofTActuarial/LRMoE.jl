@@ -53,6 +53,11 @@ penalty_init(d::ZINegativeBinomialExpert) = [2.0 10.0]
 no_penalty_init(d::ZINegativeBinomialExpert) = [1.0 Inf]
 penalize(d::ZINegativeBinomialExpert, p) = (p[1]-1)*log(d.n) - d.n/p[2]
 
+## statistics
+mean(d::ZINegativeBinomialExpert) = (1-d.p0)*mean(Distributions.NegativeBinomial(d.n, d.p))
+var(d::ZINegativeBinomialExpert) = (1-d.p0)*var(Distributions.NegativeBinomial(d.n, d.p)) + + d.p0*(1-d.p0)*(mean(Distributions.NegativeBinomial(d.n, d.p)))^2
+quantile(d::ZINegativeBinomialExpert, p) = p <= d.p0 ? 0.0 :  quantile(Distributions.NegativeBinomial(d.n, d.p), p-d.p0)
+
 ## EM: M-Step
 function EM_M_expert(d::ZINegativeBinomialExpert,
                     tl, yl, yu, tu,

@@ -59,6 +59,11 @@ penalty_init(d::PoissonExpert) = [2.0 1.0]
 no_penalty_init(d::PoissonExpert) = [1.0 Inf]
 penalize(d::PoissonExpert, p) = (p[1]-1)*log(d.λ) - d.λ/p[2]
 
+## statistics
+mean(d::PoissonExpert) = mean(Distributions.Poisson(d.λ))
+var(d::PoissonExpert) = var(Distributions.Poisson(d.λ))
+quantile(d::PoissonExpert, p) = quantile(Distributions.Poisson(d.λ), p)
+
 ## Misc functions for E-Step
 
 function _sum_densy_series(d::PoissonExpert, yl, yu)

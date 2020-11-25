@@ -61,6 +61,11 @@ penalty_init(d::BinomialExpert) = []
 no_penalty_init(d::BinomialExpert) = []
 penalize(d::BinomialExpert, p) = 0.0
 
+## statistics
+mean(d::BinomialExpert) = mean(Distributions.Binomial(d.n, d.p))
+var(d::BinomialExpert) = var(Distributions.Binomial(d.n, d.p))
+quantile(d::BinomialExpert, p) = quantile(Distributions.Binomial(d.n, d.p), p)
+
 ## Misc functions for E-Step
 
 function _sum_densy_series(d::BinomialExpert, yl, yu)

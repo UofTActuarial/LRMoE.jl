@@ -67,6 +67,11 @@ penalty_init(d::GammaCountExpert) = [2.0 10.0 2.0 10.0]
 no_penalty_init(d::GammaCountExpert) = [1.0 Inf 1.0 Inf]
 penalize(d::GammaCountExpert, p) = (p[1]-1)*log(d.m) - d.m/p[2] + (p[3]-1)*log(d.s) - d.s/p[4]
 
+## statistics
+mean(d::GammaCountExpert) = mean(LRMoE.GammaCount(d.m, d.s))
+var(d::GammaCountExpert) = var(LRMoE.GammaCount(d.m, d.s))
+quantile(d::GammaCountExpert, p) = quantile(LRMoE.GammaCount(d.m, d.s), p)
+
 ## Misc functions for E-Step
 
 function _sum_dens_series(m_new, s_new, d::GammaCountExpert, yl, yu)
