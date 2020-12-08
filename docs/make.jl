@@ -9,7 +9,8 @@ makedocs(
 		"Modelling Framework" => "framework.md",
 		"Expert Functions" => "experts.md",
 		"Examples & Tutorials" => Any[
-			"Simulated Data" => "examples/sim_data/simulate_data.md"
+			"Data Simulation" => "examples/sim_data/simulate_data.md",
+			"Fitting Function" => "examples/sim_fit/simulate_fit.md"
 		],
 		
 		# "Tutorials" => Any[
