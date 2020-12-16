@@ -46,6 +46,9 @@ import HypothesisTests: ExactOneSampleKSTest, pvalue, ksstats
 
 using Logging
 
+using Roots
+import Roots: find_zero
+
 export
     # generic types
     convert,
