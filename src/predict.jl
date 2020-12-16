@@ -1,8 +1,38 @@
+"""
+    predict_class_prior(X, α)
+
+Predicts the latent class probabilities, given covariates `X` and logit regression coefficients `α`.
+
+# Arguments
+- `X`: A matrix of covariates.
+- `α`: A matrix of logit regression coefficients.
+
+# Return Values
+- `prob`: A matrix of latent class probabilities.
+- `max_prob_idx`: A matrix of the most likely latent class for each observation.
+"""
 function predict_class_prior(X, α)
     tmp = exp.(LogitGating(α, X))
     return (prob = tmp, max_prob_idx = [findmax(tmp[i,:])[2] for i in 1:size(tmp)[1]])
 end
 
+
+"""
+    predict_class_posterior(Y, X, α, model)
+
+Predicts the latent class probabilities, given observations `Y`, covariates `X`, 
+logit regression coefficients `α` and a specified `model` of expert functions. 
+
+# Arguments
+- `Y`: A matrix of responses.
+- `X`: A matrix of covariates.
+- `α`: A matrix of logit regression coefficients.
+- `model`: A matrix specifying the expert functions.
+
+# Return Values
+- `prob`: A matrix of latent class probabilities.
+- `max_prob_idx`: A matrix of the most likely latent class for each observation.
+"""
 function predict_class_posterior(Y, X, α, model)
     gate = LogitGating(α, X)
     ll_np_list = loglik_np(Y, gate, model)
