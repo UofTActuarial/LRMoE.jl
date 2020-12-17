@@ -11,7 +11,7 @@ import StatsFuns: log1mexp, log1pexp, logsumexp
 import StatsFuns: sqrt2, invsqrt2π
 
 using Statistics
-import Statistics: quantile, mean, var
+import Statistics: quantile, mean, var, median
 
 using Distributions
 import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf, quantile
@@ -47,7 +47,7 @@ import HypothesisTests: ExactOneSampleKSTest, pvalue, ksstats
 using Logging
 
 using Roots
-import Roots: find_zero
+import Roots: find_zero, Order2
 
 export
     # generic types
@@ -157,7 +157,9 @@ export
     predict_mean_prior,
     predict_mean_posterior,
     predict_var_prior,
-    predict_var_posterior
+    predict_var_posterior,
+    predict_VaR_prior,
+    predict_VaR_posterior
 
 
 ### source files
