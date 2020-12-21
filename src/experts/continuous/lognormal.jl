@@ -71,6 +71,8 @@ penalize(d::LogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 mean(d::LogNormalExpert) = mean(Distributions.LogNormal(d.μ, d.σ))
 var(d::LogNormalExpert) = var(Distributions.LogNormal(d.μ, d.σ))
 quantile(d::LogNormalExpert, p) = quantile(Distributions.LogNormal(d.μ, d.σ), p)
+lev(d::LogNormalExpert, u) = exp(d.μ+0.5*d.σ^2) * cdf.(Normal(d.μ+d.σ^2, d.σ), log(u)) + u*(1-cdf.(Normal(d.μ, d.σ), log(u)))
+excess(d::LogNormalExpert, u) = mean(d) - lev(d, u)
 
 ## Misc functions for E-Step
 function _diff_dens_series(d::LogNormalExpert, yl, yu)

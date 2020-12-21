@@ -61,6 +61,8 @@ penalize(d::ZILogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[
 mean(d::ZILogNormalExpert) = (1-d.p)*mean(Distributions.LogNormal(d.μ, d.σ))
 var(d::ZILogNormalExpert) = (1-d.p)*var(Distributions.LogNormal(d.μ, d.σ)) + d.p*(1-d.p)*(mean(Distributions.LogNormal(d.μ, d.σ)))^2
 quantile(d::ZILogNormalExpert, p) = p <= d.p ? 0.0 : quantile(Distributions.LogNormal(d.μ, d.σ), p-d.p)
+lev(d::ZILogNormalExpert, u) = (1-d.p) * lev(LogNormalExpert(d.μ, d.σ), u)
+excess(d::ZILogNormalExpert, u) = mean(d) - lev(d, u)
 
 ## EM: M-Step
 function EM_M_expert(d::ZILogNormalExpert,
