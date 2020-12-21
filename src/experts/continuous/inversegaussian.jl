@@ -75,6 +75,12 @@ penalize(d::InverseGaussianExpert, p) = (p[1]-1)*log(d.μ) - d.μ/p[2] + (p[3]-1
 mean(d::InverseGaussianExpert) = mean(Distributions.InverseGaussian(d.μ, d.λ))
 var(d::InverseGaussianExpert) = var(Distributions.InverseGaussian(d.μ, d.λ))
 quantile(d::InverseGaussianExpert, p) = quantile(Distributions.InverseGaussian(d.μ, d.λ), p)
+function lev(d::InverseGaussianExpert, u)
+    z = (u-d.μ)/d.μ
+    y = (u+d.μ)/d.μ
+    return u - d.μ*z*cdf.(Normal(0, 1), z*(d.λ/u)^0.5) - d.μ*y*exp(2*d.λ/d.μ)*cdf.(Normal(0, 1), -y*(d.λ/u)^0.5)
+end
+excess(d::InverseGaussianExpert, u) = mean(d) - lev(d, u)
 
 ## Misc functions for E-Step
 function _int_y_func(d::InverseGaussianExpert, x)

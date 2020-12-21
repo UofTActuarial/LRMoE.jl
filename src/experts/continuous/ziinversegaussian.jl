@@ -65,6 +65,8 @@ penalize(d::ZIInverseGaussianExpert, p) = (p[1]-1)*log(d.μ) - d.μ/p[2] + (p[3]
 mean(d::ZIInverseGaussianExpert) = (1-d.p)*mean(Distributions.InverseGaussian(d.μ, d.λ))
 var(d::ZIInverseGaussianExpert) = (1-d.p)*var(Distributions.InverseGaussian(d.μ, d.λ)) + d.p*(1-d.p)*(mean(Distributions.InverseGaussian(d.μ, d.λ)))^2
 quantile(d::ZIInverseGaussianExpert, p) = p <= d.p ? 0.0 : quantile(Distributions.InverseGaussian(d.μ, d.λ), p-d.p)
+lev(d::ZIInverseGaussianExpert, u) = (1-d.p)*lev(InverseGaussianExpert(d.μ, d.λ), u)
+excess(d::ZIInverseGaussianExpert, u) = mean(d) - lev(d, u)
 
 ## EM: M-Step
 function EM_M_expert(d::ZIInverseGaussianExpert,
