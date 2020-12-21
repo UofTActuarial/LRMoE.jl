@@ -74,6 +74,8 @@ penalize(d::GammaExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.θ) 
 mean(d::GammaExpert) = mean(Distributions.Gamma(d.k, d.θ))
 var(d::GammaExpert) = var(Distributions.Gamma(d.k, d.θ))
 quantile(d::GammaExpert, p) = quantile(Distributions.Gamma(d.k, d.θ), p)
+lev(d::GammaExpert, u) = d.θ*d.k*gamma_inc(float(d.k+1), u/d.θ, 0)[1] + u*(1-gamma_inc(float(d.k), u/d.θ,0)[1])
+excess(d::GammaExpert, u) = mean(d) - lev(d, u)
 
 ## Misc functions for E-Step
 function _diff_dist_series(d::GammaExpert, yl, yu)
