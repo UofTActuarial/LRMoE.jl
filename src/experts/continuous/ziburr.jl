@@ -65,6 +65,8 @@ penalize(d::ZIBurrExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.c) 
 mean(d::ZIBurrExpert) = (1-d.p)*mean(LRMoE.Burr(d.k, d.c, d.λ))
 var(d::ZIBurrExpert) = (1-d.p)*var(LRMoE.Burr(d.k, d.c, d.λ)) + d.p*(1-d.p)*(mean(LRMoE.Burr(d.k, d.c, d.λ)))^2
 quantile(d::ZIBurrExpert, p) = p <= d.p ? 0.0 : quantile(LRMoE.Burr(d.k, d.c, d.λ), p-d.p)
+lev(d::ZIBurrExpert, u) = (1-d.p)*lev(BurrExpert(d.k, d.c, d.λ), u)
+excess(d::ZIBurrExpert, u) = mean(d) - lev(d, u)
 
 ## EM: M-Step
 function EM_M_expert(d::ZIBurrExpert,

@@ -30,7 +30,7 @@ using LinearAlgebra
 import LinearAlgebra: I, Cholesky
 
 using SpecialFunctions
-import SpecialFunctions: erf, loggamma, gamma_inc, gamma
+import SpecialFunctions: erf, loggamma, gamma_inc, gamma, beta_inc
 
 using QuadGK
 import QuadGK: quadgk
