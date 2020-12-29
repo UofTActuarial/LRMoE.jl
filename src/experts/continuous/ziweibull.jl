@@ -64,6 +64,8 @@ penalize(d::ZIWeibullExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.
 mean(d::ZIWeibullExpert) = (1-d.p)*mean(Distributions.Weibull(d.k, d.θ))
 var(d::ZIWeibullExpert) = (1-d.p)*var(Distributions.Weibull(d.k, d.θ)) + d.p*(1-d.p)*(mean(Distributions.Weibull(d.k, d.θ)))^2
 quantile(d::ZIWeibullExpert, p) = p <= d.p ? 0.0 : quantile(Distributions.Weibull(d.k, d.θ), p-d.p)
+lev(d::ZIWeibullExpert, u) = (1-d.p)*lev(WeibullExpert(d.k, d.θ), u)
+excess(d::ZIWeibullExpert, u) = mean(d) - lev(d, u)
 
 ## EM: M-Step
 function EM_M_expert(d::ZIWeibullExpert,

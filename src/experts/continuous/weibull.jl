@@ -85,6 +85,8 @@ penalize(d::WeibullExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.θ
 mean(d::WeibullExpert) = mean(Distributions.Weibull(d.k, d.θ))
 var(d::WeibullExpert) = var(Distributions.Weibull(d.k, d.θ))
 quantile(d::WeibullExpert, p) = quantile(Distributions.Weibull(d.k, d.θ), p)
+lev(d::WeibullExpert, u) = d.θ*gamma_inc(float(1/d.k+1), (u/d.θ)^d.k, 0)[1]*gamma(float(1/d.k+1)) + u*exp(-(u/d.θ)^d.k)
+excess(d::WeibullExpert, u) = mean(d) - lev(d, u)
 
 ## Misc functions for E-Step
 
