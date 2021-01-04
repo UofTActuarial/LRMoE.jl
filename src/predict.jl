@@ -130,7 +130,95 @@ function predict_var_posterior(Y, X, α, model)
     return [var_c_mean[j]+mean_c_var[j] for j in 1:length(var_c_mean)]
 end
 
+"""
+    predict_limit_prior(X, α, model, limit)
 
+Predicts the limit expected value (LEV) of response, 
+given covariates `X`, 
+logit regression coefficients `α` and a specified `model` of expert functions.
+
+# Arguments
+- `X`: A matrix of covariates.
+- `α`: A matrix of logit regression coefficients.
+- `model`: A matrix specifying the expert functions.
+- `limit`: A vector specifying the cutoff point.
+
+# Return Values
+- A matrix of predicted limit expected value of response, based on prior probabilities.
+"""
+function predict_limit_prior(X, α, model, limit)
+    weights = predict_class_prior(X, α).prob
+    means = vcat([hcat([lev(model[d,j], limit[d]) for j in 1:size(model)[2]]...) for d in 1:size(model)[1]]...)
+    return [weights * means[j,:] for j in 1:size(means)[1]]
+end
+
+"""
+    predict_limit_posterior(Y, X, α, model, limit)
+
+Predicts the limit expected value (LEV) of response, 
+given observations `Y`, covariates `X`, 
+logit regression coefficients `α` and a specified `model` of expert functions.
+
+# Arguments
+- `Y`: A matrix of responses.
+- `X`: A matrix of covariates.
+- `α`: A matrix of logit regression coefficients.
+- `model`: A matrix specifying the expert functions.
+- `limit`: A vector specifying the cutoff point.
+
+# Return Values
+- A matrix of predicted limit expected value of response, based on posterior probabilities.
+"""
+function predict_limit_posterior(Y, X, α, model, limit)
+    weights = predict_class_posterior(Y, X, α, model).prob
+    means = vcat([hcat([lev(model[d,j], limit[d]) for j in 1:size(model)[2]]...) for d in 1:size(model)[1]]...)
+    return [weights * means[j,:] for j in 1:size(means)[1]]
+end
+
+"""
+    predict_excess_prior(X, α, model, limit)
+
+Predicts the excess expectation of response, 
+given covariates `X`, 
+logit regression coefficients `α` and a specified `model` of expert functions.
+
+# Arguments
+- `X`: A matrix of covariates.
+- `α`: A matrix of logit regression coefficients.
+- `model`: A matrix specifying the expert functions.
+- `limit`: A vector specifying the cutoff point.
+
+# Return Values
+- A matrix of predicted excess expectation of response, based on prior probabilities.
+"""
+function predict_excess_prior(X, α, model, limit)
+    weights = predict_class_prior(X, α).prob
+    means = vcat([hcat([excess(model[d,j], limit[d]) for j in 1:size(model)[2]]...) for d in 1:size(model)[1]]...)
+    return [weights * means[j,:] for j in 1:size(means)[1]]
+end
+
+"""
+    predict_excess_posterior(Y, X, α, model, limit)
+
+Predicts the excess expectation of response, 
+given observations `Y`, covariates `X`, 
+logit regression coefficients `α` and a specified `model` of expert functions.
+
+# Arguments
+- `Y`: A matrix of responses.
+- `X`: A matrix of covariates.
+- `α`: A matrix of logit regression coefficients.
+- `model`: A matrix specifying the expert functions.
+- `limit`: A vector specifying the cutoff point.
+
+# Return Values
+- A matrix of predicted excess expectation of response, based on posterior probabilities.
+"""
+function predict_excess_posterior(Y, X, α, model, limit)
+    weights = predict_class_posterior(Y, X, α, model).prob
+    means = vcat([hcat([exccess(model[d,j], limit[d]) for j in 1:size(model)[2]]...) for d in 1:size(model)[1]]...)
+    return [weights * means[j,:] for j in 1:size(means)[1]]
+end
 
 # solve a quantile of a mixture model
 # Bisection method seems to give the most stable results
