@@ -99,10 +99,10 @@ function predict_var_prior(X, α, model)
     weights = predict_class_prior(X, α).prob
     c_mean = mean.(model)
     g_mean = predict_mean_prior(X, α, model)
-    var_c_mean = [vec(sum(hcat([(c_mean[d,j] .- g_mean[d]).^2 for j in 1:length(c_mean[d,:])]...) .* weights, dims = 2)) for d in 1:length(g_mean)]
+    var_c_mean = hcat([vec(sum(hcat([(c_mean[d,j] .- g_mean[d]).^2 for j in 1:length(c_mean[d,:])]...) .* weights, dims = 2)) for d in 1:size(g_mean)[2]]...)
     c_var = var.(model)
-    mean_c_var = [weights * c_var[j,:] for j in 1:size(c_var)[1]]
-    return hcat([var_c_mean[j]+mean_c_var[j] for j in 1:length(var_c_mean)]...)
+    mean_c_var = hcat([weights * c_var[j,:] for j in 1:size(c_var)[1]]...)
+    return var_c_mean + mean_c_var
 end
 
 """
@@ -124,10 +124,10 @@ function predict_var_posterior(Y, X, α, model)
     weights = predict_class_posterior(Y, X, α, model).prob
     c_mean = mean.(model)
     g_mean = predict_mean_prior(X, α, model)
-    var_c_mean = [vec(sum(hcat([(c_mean[d,j] .- g_mean[d]).^2 for j in 1:length(c_mean[d,:])]...) .* weights, dims = 2)) for d in 1:length(g_mean)]
+    var_c_mean = hcat([vec(sum(hcat([(c_mean[d,j] .- g_mean[d]).^2 for j in 1:length(c_mean[d,:])]...) .* weights, dims = 2)) for d in 1:size(g_mean)[2]]...)
     c_var = var.(model)
-    mean_c_var = [weights * c_var[j,:] for j in 1:size(c_var)[1]]
-    return hcat([var_c_mean[j]+mean_c_var[j] for j in 1:length(var_c_mean)]...)
+    mean_c_var = hcat([weights * c_var[j,:] for j in 1:size(c_var)[1]]...)
+    return var_c_mean + mean_c_var
 end
 
 """
@@ -216,7 +216,7 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 """
 function predict_excess_posterior(Y, X, α, model, limit)
     weights = predict_class_posterior(Y, X, α, model).prob
-    means = vcat([hcat([exccess(model[d,j], limit[d]) for j in 1:size(model)[2]]...) for d in 1:size(model)[1]]...)
+    means = vcat([hcat([excess(model[d,j], limit[d]) for j in 1:size(model)[2]]...) for d in 1:size(model)[1]]...)
     return hcat([weights * means[j,:] for j in 1:size(means)[1]]...)
 end
 
