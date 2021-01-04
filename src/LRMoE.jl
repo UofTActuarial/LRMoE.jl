@@ -158,6 +158,10 @@ export
     predict_mean_posterior,
     predict_var_prior,
     predict_var_posterior,
+    predict_limit_prior,
+    predict_limit_posterior,
+    predict_excess_prior,
+    predict_excess_posterior,
     predict_VaR_prior,
     predict_VaR_posterior
 
