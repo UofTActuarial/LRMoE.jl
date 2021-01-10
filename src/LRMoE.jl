@@ -162,8 +162,8 @@ export
     predict_limit_posterior,
     predict_excess_prior,
     predict_excess_posterior,
-    predict_VaR_prior,
-    predict_VaR_posterior
+    predict_VaRCTE_prior,
+    predict_VaRCTE_posterior
 
 
 ### source files

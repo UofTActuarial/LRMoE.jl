@@ -1,7 +1,9 @@
 """
     predict_class_prior(X, α)
 
-Predicts the latent class probabilities, given covariates `X` and logit regression coefficients `α`.
+Predicts the latent class probabilities, 
+given covariates `X` 
+and logit regression coefficients `α`.
 
 # Arguments
 - `X`: A matrix of covariates.
@@ -20,7 +22,8 @@ end
 """
     predict_class_posterior(Y, X, α, model)
 
-Predicts the latent class probabilities, given observations `Y`, covariates `X`, 
+Predicts the latent class probabilities, 
+given observations `Y`, covariates `X`, 
 logit regression coefficients `α` and a specified `model` of expert functions. 
 
 # Arguments
@@ -43,7 +46,8 @@ end
 """
     predict_mean_prior(X, α, model)
 
-Predicts the mean values of response, given covariates `X`, 
+Predicts the mean values of response, 
+given covariates `X`, 
 logit regression coefficients `α` and a specified `model` of expert functions.
 
 # Arguments
@@ -63,7 +67,8 @@ end
 """
     predict_mean_posterior(Y, X, α, model)
 
-Predicts the mean values of response, observations `Y`, covariates `X`, 
+Predicts the mean values of response,
+given observations `Y`, covariates `X`, 
 logit regression coefficients `α` and a specified `model` of expert functions.
 
 # Arguments
@@ -84,7 +89,8 @@ end
 """
     predict_var_prior(X, α, model)
 
-Predicts the variance of response, given covariates `X`, 
+Predicts the variance of response, 
+given covariates `X`, 
 logit regression coefficients `α` and a specified `model` of expert functions.
 
 # Arguments
@@ -108,7 +114,8 @@ end
 """
     predict_var_posterior(Y, X, α, model)
 
-Predicts the variance of response, observations `Y`, covariates `X`, 
+Predicts the variance of response, 
+given observations `Y`, covariates `X`, 
 logit regression coefficients `α` and a specified `model` of expert functions.
 
 # Arguments
@@ -240,15 +247,22 @@ function _solve_continuous_mix_quantile(weights, experts, p)
     end
 end
 
+function _calc_continuous_CTE(weights, experts, p, VaR)
+    m = sum(vec(weights) .* vec(mean.(experts)))
+    lim_ev = sum(vec(weights) .* vec(lev.(experts, VaR))) # [lev(model[k], VaR) for k in 1:length(model)]
+    return VaR + (m-lim_ev)/(1-p)
+end
+
 # calculate CTE based on VaR and p
 # function _calc_continuous_mix_CTE(weights, experts, p, means, VaR)
 #     return 
 # end
 
 """
-    predict_VaR_prior(X, α, model, p)
+    predict_VaRCTE_prior(X, α, model, p)
 
-Predicts the `p`-th value-at-risk (VaR) of response, given covariates `X`, 
+Predicts the `p`-th value-at-risk (VaR) and conditional tail expectation (CTE) of response, 
+given covariates `X`, 
 logit regression coefficients `α` and a specified `model` of expert functions.
 
 # Arguments
@@ -258,9 +272,10 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `p`: A vector of probabilities.
 
 # Return Values
-- A matrix of predicted variance of response, based on prior probabilities.
+- `VaR`: A matrix of predicted VaR of response, based on prior probabilities.
+- `CTE`: A matrix of predicted CTE of response, based on prior probabilities.
 """
-function predict_VaR_prior(X, α, model, p)
+function predict_VaRCTE_prior(X, α, model, p)
     weights = predict_class_prior(X, α).prob
     # VaR = fill(NaN, size(X)[1], size(model)[1])
     # for i in 1:size(X)[1]
@@ -273,8 +288,45 @@ function predict_VaR_prior(X, α, model, p)
     #     end
     # end
     # return VaR
-    return vcat([hcat([_solve_continuous_mix_quantile(weights[i,:], model[k,:], p) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
+
+    VaR = vcat([hcat([_solve_continuous_mix_quantile(weights[i,:], model[k,:], p) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
+    CTE = vcat([hcat([_calc_continuous_CTE(weights[i,:], model[k,:], p, VaR[i,k]) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
+    return (VaR = VaR, CTE = CTE)
 end
 
+"""
+    predict_VaRCTE_posterior(X, α, model, p)
 
+Predicts the `p`-th value-at-risk (VaR) and conditional tail expectation (CTE) of response, 
+given observations `Y`, covariates `X`,
+logit regression coefficients `α` and a specified `model` of expert functions.
+
+# Arguments
+- `X`: A matrix of covariates.
+- `α`: A matrix of logit regression coefficients.
+- `model`: A matrix specifying the expert functions.
+- `p`: A vector of probabilities.
+
+# Return Values
+- `VaR`: A matrix of predicted VaR of response, based on posterior probabilities.
+- `CTE`: A matrix of predicted CTE of response, based on posterior probabilities.
+"""
+function predict_VaRCTE_posterior(Y, X, α, model, p)
+    weights = predict_class_posterior(Y, X, α, model).prob
+    # VaR = fill(NaN, size(X)[1], size(model)[1])
+    # for i in 1:size(X)[1]
+    #     for k in 1:size(model)[1]
+    #         VaR[i,k] = try 
+    #             find_zero(y -> sum(weights[i,:] .* exp.(expert_ll.(model[k,:], 0.0, 0.0, y, Inf))) - p, 100)
+    #         catch;
+    #             NaN
+    #         end
+    #     end
+    # end
+    # return VaR
+
+    VaR = vcat([hcat([_solve_continuous_mix_quantile(weights[i,:], model[k,:], p) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
+    CTE = vcat([hcat([_calc_continuous_CTE(weights[i,:], model[k,:], p, VaR[i,k]) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
+    return (VaR = VaR, CTE = CTE)
+end
 
