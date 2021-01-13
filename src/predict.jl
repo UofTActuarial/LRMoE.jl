@@ -295,7 +295,7 @@ function predict_VaRCTE_prior(X, α, model, p)
 end
 
 """
-    predict_VaRCTE_posterior(X, α, model, p)
+    predict_VaRCTE_posterior(Y, X, α, model, p)
 
 Predicts the `p`-th value-at-risk (VaR) and conditional tail expectation (CTE) of response, 
 given observations `Y`, covariates `X`,
