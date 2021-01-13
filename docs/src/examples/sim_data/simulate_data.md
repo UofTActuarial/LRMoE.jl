@@ -3,8 +3,9 @@
 
 # Introduction
 
-This document contains the data generation process for the dataset `LRMoEDemoData` included 
-in the `LRMoE.jl` package. This also serves as an example of using the `sim_dataset` function 
+This document contains the data generation process for the dataset accompanying 
+the `LRMoE.jl` package (see [here](https://github.com/sparktseung/LRMoE-jl-demo)).
+This also serves as an example of using the `sim_dataset` function 
 included in the package.
 
 # Data Simulation
@@ -36,16 +37,15 @@ X = DataFrame(intercept = intercept, sex= sex,
 The first few rows of `X` are shown below.
 
 ```
-6×5 DataFrame
-│ Row │ intercept │ sex   │ aged    │ agec      │ region │
-│     │ Float64   │ Int64 │ Float64 │ Float64   │ Int64  │
-├─────┼───────────┼───────┼─────────┼───────────┼────────┤
-│ 1   │ 1.0       │ 1     │ 56.4367 │ 3.3857    │ 1      │
-│ 2   │ 1.0       │ 1     │ 29.7025 │ 2.31892   │ 1      │
-│ 3   │ 1.0       │ 1     │ 33.4796 │ 8.61125   │ 0      │
-│ 4   │ 1.0       │ 0     │ 38.7478 │ 2.88865   │ 1      │
-│ 5   │ 1.0       │ 1     │ 47.348  │ 9.01135   │ 0      │
-│ 6   │ 1.0       │ 1     │ 54.7017 │ 0.0306372 │ 0      │
+5×5 DataFrame
+ Row │ intercept  sex    aged     agec     region
+     │ Float64    Int64  Float64  Float64  Int64
+─────┼────────────────────────────────────────────
+   1 │       1.0      1  56.4367  3.3857        1
+   2 │       1.0      1  29.7025  2.31892       1
+   3 │       1.0      1  33.4796  8.61125       0
+   4 │       1.0      0  38.7478  2.88865       1
+   5 │       1.0      1  47.348   9.01135       0
 ```
 
 
@@ -180,24 +180,24 @@ leaving 9837 observations available for model fitting. Sample data points are sh
 
 ```
 3×4 DataFrame
-│ Row │ tl_1    │ yl_1    │ yu_1    │ tu_1    │
-│     │ Float64 │ Float64 │ Float64 │ Float64 │
-├─────┼─────────┼─────────┼─────────┼─────────┤
-│ 1   │ 0.0     │ 6.0     │ 6.0     │ Inf     │
-│ 2   │ 0.0     │ 8.0     │ 8.0     │ Inf     │
-│ 3   │ 0.0     │ 7.0     │ 7.0     │ Inf     │
+ Row │ tl_1     yl_1     yu_1     tu_1
+     │ Float64  Float64  Float64  Float64
+─────┼────────────────────────────────────
+   1 │     0.0      6.0      6.0     Inf
+   2 │     0.0      8.0      8.0     Inf
+   3 │     0.0      7.0      7.0     Inf
 ```
 
 
 
 ```
 3×4 DataFrame
-│ Row │ tl_2    │ yl_2    │ yu_2    │ tu_2    │
-│     │ Float64 │ Float64 │ Float64 │ Float64 │
-├─────┼─────────┼─────────┼─────────┼─────────┤
-│ 1   │ 0.0     │ 89.0332 │ 89.0332 │ Inf     │
-│ 2   │ 5.0     │ 37.4133 │ 37.4133 │ Inf     │
-│ 3   │ 0.0     │ 100.0   │ Inf     │ Inf     │
+ Row │ tl_2     yl_2      yu_2      tu_2
+     │ Float64  Float64   Float64   Float64
+─────┼──────────────────────────────────────
+   1 │     0.0   89.0332   89.0332     Inf
+   2 │     5.0   37.4133   37.4133     Inf
+   3 │     0.0  100.0     Inf          Inf
 ```
 
 
