@@ -1,6 +1,6 @@
 # Expert Functions
 
-The **LRMoE** package supports a collection of distributions commonly used for modelling insurance claim frequency and severity.
+The **LRMoE.jl** package supports a collection of distributions commonly used for modelling insurance claim frequency and severity.
 
 ## Discrete Distributions (Frequency Modelling)
 

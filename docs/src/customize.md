@@ -8,8 +8,6 @@ expert functions specific to a particular modelling problem (not confined within
 Expert functions are implemented as subtypes of the `AnyExpert` type in this package.
 A good number of expert functions are simply wrappers around the `UnivariateDistribution` type in `Distributions.jl` (details [here](https://juliastats.org/Distributions.jl/stable/types/)), and functions such as `pdf` and `cdf` are also directly using those in `Distributions.jl`.
 
-Specific to actuarial application, a collection of commonly used distributions are also included in this package, e.g. Burr, GammaCount, etc. See below for details.
-
 Expert functions can be defined either on the real line, or only on nonnegative values (as is usually the case for actuarial loss modelling).
 
 ```julia
