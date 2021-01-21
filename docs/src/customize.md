@@ -105,11 +105,11 @@ the gamma expert function is accessible outside of the package.
 
 ### Basic and additional functions
 
-For all expert functions, there are a number of basic functions absolutely needed for using the package (highlighted in **bold**).
+For all expert functions, there are a number of basic functions absolutely needed for using the package.
 In addition, some functions may be omitted (e.g. calculating limited expected value) if they are not
 relevant to the modeling problem at hand.
 
-* **Basic probability functions**: `pdf`, `logpdf`, `cdf` and `logcdf`. These are used for calculating the loglikelihood
+**Basic probability functions**: `pdf`, `logpdf`, `cdf` and `logcdf`. These are used for calculating the loglikelihood
 of the model. Notice that for `logpdf` etc., we have directly used the corresponding functions in `Distributions.jl`
 since the Gamma distribution is already implemented there. If this is not the case, the user can also
 add a new distribution type following the guide in `Distributions.jl`, and add the source code to the folder `src/experts/add_dist`.
@@ -121,6 +121,82 @@ pdf(d::GammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? 0.0 : Distributions.pdf.(
 logcdf(d::GammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? -Inf : Distributions.logcdf.(Distributions.Gamma(d.k, d.θ), x...)
 cdf(d::GammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? 0.0 : Distributions.cdf.(Distributions.Gamma(d.k, d.θ), x...)
 ```
+
+**Parameters and initialization**: The following functions are necessary for calling the functions to initialize parameters (e.g. `cmm_init_params`).
+
+In the following `params_init` function, we assume a vector of observations `y`,
+and match the first two moments to solve for the parameters of a gamma distribution. Notice that the function should return an expert function, not the
+parameter values. Also, an empty expert should also be added to the corresponding list in `src/paramsinit.jl`. In this case, `GammaExpert()` is added to `_default_expert_continuous`.
+
+The function `ks_distance` is used to select an initialization of expert which has
+the lowest test statistics for the Kolmogorov-Smirnov test, in other words, the
+K-S distance is minimized. The `ks_distance` simply calculates the test statistics
+given a vector of observations `y` and an expert function `GammaExpert`
+(i.e. to see if the observations `y` come from a Gamma distribution).
+
+```julia
+## Parameters
+params(d::GammaExpert) = (d.k, d.θ)
+function params_init(y, d::GammaExpert)
+    pos_idx = (y .> 0.0)
+    μ, σ2 = mean(y[pos_idx]), var(y[pos_idx])
+    θ_init = σ2/μ
+    k_init = μ/θ_init
+    if isnan(θ_init) || isnan(k_init)
+        return GammaExpert()
+    else
+        return GammaExpert(k_init, θ_init)
+    end
+end
+
+## KS stats for parameter initialization
+function ks_distance(y, d::GammaExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-0.0), (1-0.0)*HypothesisTests.ksstats(y[y .> 0.0], Distributions.Gamma(d.k, d.θ))[2])
+end
+```
+
+**Simulation**: A simulator is also needed, which simulates a vector of length `sample_size` from the expert function.
+
+```julia
+## Simululation
+sim_expert(d::GammaExpert, sample_size) = Distributions.rand(Distributions.Gamma(d.k, d.θ), sample_size)
+```
+
+**Penalty on parameters**: This is also required. When fitting mixture models, the EM algorithm
+may converge to a spurious model with extremely large or small parameter values,
+which is undesirable for a number of reasons (e.g. giving infinite likelihood, or
+straight up a NaN error). Hence, a penalty is imposed for these extreme cases.
+In implementation, we essentially assume the parameters have a prior distribution
+described by some hyperparameters. Consequently, the EM step is essentially
+maximizing a posterior loglikelihood.
+
+As a rule of thumb, we assume a Gamma prior for positive parameters and a Normal prior
+for real parameters. For example, the penalty terms for Gamma experts are coded as follows. 
+
+```julia
+## penalty
+penalty_init(d::GammaExpert) = [2.0 10.0 2.0 10.0]
+no_penalty_init(d::GammaExpert) = [1.0 Inf 1.0 Inf]
+penalize(d::GammaExpert, p) = (p[1]-1)*log(d.k) - d.k/p[2] + (p[3]-1)*log(d.θ) - d.θ/p[4]
+```
+
+In the function `penalize`, the hyperparameters are given as a vector `p`.
+We assume the shape parameter `k` of the Gamma expert follows a Gamma prior distribution with shape `p[1]` and scale `p[2]`. Analogously, the scale parameter
+`θ` of the Gamma expert follows a Gamma prior distribution with shape `p[1]` and scale `p[2]` of the Gamma expert follows a Gamma prior distribution with shape `p[3]` and scale `p[3]`. The `penalize` function calculates the prior logpdf of the
+parameters, excluding the constant terms since they are irrelevant to the EM algorithm.
+
+The functions `penalty_init` initializes some default hyperparameters, if they
+are not given by the user. Similarly, `no_penalty_init` speficies hyperparameters
+which poses no penalty, as plugging ion `p = [1.0 Inf 1.0 Inf]` into the
+`penalize` function yields zero. Still, it is recommended to always use some penalty
+in application to avoid the issue of spurious models mentioned above.
+
+
+
+
+
+
 
 
 
