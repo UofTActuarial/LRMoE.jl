@@ -91,16 +91,16 @@ function cmm_init_exact(Y, X, n_comp, type)
     ll_best = vcat([hcat([params_init[j][lb][findmax.(ll_init[j])[lb][2]] for lb in unique(label)]...) for j in 1:size(Y)[2]]...)
 
     # evaluate ks stat
-    ks_init = [[[ks_distance(Y[:,j], params_init[j][lb][e])
-                for e in 1:length(params_init[j][lb])]
-                for lb in unique(label)] 
-                for j in 1:size(Y)[2]]
+    # ks_init = [[[ks_distance(Y[:,j], params_init[j][lb][e])
+    #             for e in 1:length(params_init[j][lb])]
+    #             for lb in unique(label)] 
+    #             for j in 1:size(Y)[2]]
 
     # highest ks_init model
-    ks_best = vcat([hcat([params_init[j][lb][findmin.(ks_init[j])[lb][2]] for lb in unique(label)]...) for j in 1:size(Y)[2]]...)
+    # ks_best = vcat([hcat([params_init[j][lb][findmin.(ks_init[j])[lb][2]] for lb in unique(label)]...) for j in 1:size(Y)[2]]...)
 
-    return (α_init = α_init, params_init = params_init, ll_init = ll_init, ks_init = ks_init,
-            ll_best = ll_best, ks_best = ks_best,
+    return (α_init = α_init, params_init = params_init, ll_init = ll_init, # ks_init = ks_init,
+            ll_best = ll_best, # ks_best = ks_best,
             zero_y = zero_y,
             mean_y_pos = mean_y_pos, var_y_pos = var_y_pos, skewness_y_pos = skewness_y_pos, kurtosis_y_pos = kurtosis_y_pos)
 end
@@ -119,8 +119,8 @@ function cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
             mean_y_pos = tmp.mean_y_pos, var_y_pos = tmp.var_y_pos, 
             skewness_y_pos = tmp.skewness_y_pos, kurtosis_y_pos = tmp.kurtosis_y_pos,
             α_init = tmp.α_init, params_init = tmp.params_init, 
-            ll_init = tmp.ll_init, ks_init = tmp.ks_init,
-            ll_best = tmp.ll_best, ks_best = tmp.ks_best,
+            ll_init = tmp.ll_init, # ks_init = tmp.ks_init,
+            ll_best = tmp.ll_best, # ks_best = tmp.ks_best,
             random_init = random_init)
 end
 
