@@ -190,6 +190,11 @@ function EM_M_expert(d::NegativeBinomialExpert,
 
     p_new = _negativebinomial_n_to_p(n_new, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
+    # Deal with zero mass 
+    if (p_new^n_new > 0.999999) || (isnan(p_new^n_new))
+        p_new, n_new = d.p, d.n
+    end
+
     return NegativeBinomialExpert(n_new, p_new)
 
 end
@@ -271,6 +276,11 @@ function EM_M_expert_exact(d::NegativeBinomialExpert,
     sum_term_zkzy = sum(term_zkz_Y)[1]
 
     p_new = _negativebinomial_n_to_p(n_new, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+
+    # Deal with zero mass 
+    if (p_new^n_new > 0.999999) || (isnan(p_new^n_new))
+        p_new, n_new = d.p, d.n
+    end
 
     return NegativeBinomialExpert(n_new, p_new)
 
