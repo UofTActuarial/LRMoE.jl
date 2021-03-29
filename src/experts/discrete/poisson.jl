@@ -51,6 +51,12 @@ function params_init(y, d::PoissonExpert)
     end
 end
 
+## KS stats for parameter initialization
+function ks_distance(y, d::PoissonExpert)
+    p_zero = sum(y .== 0.0) / sum(y .>= 0.0)
+    return max(abs(p_zero-0.0), (1-0.0)*HypothesisTests.ksstats(y[y .> 0.0], Distributions.Poisson(d.λ))[2])
+end
+
 ## Simululation
 sim_expert(d::PoissonExpert, sample_size) = Distributions.rand(Distributions.Poisson(d.λ), sample_size)
 
@@ -118,6 +124,11 @@ function EM_M_expert(d::PoissonExpert,
 
     λ_new = penalty ? ((sum(term_zkz_Y)[1] - (pen_pararms_jk[1]-1)) / (sum(term_zkz)[1] + 1/pen_pararms_jk[2])) : (sum(term_zkz_Y)[1] / sum(term_zkz)[1])
 
+    # Need to deal with zero mass: λ is very small
+    if λ_new < 0.00001
+        λ_new = λ_old
+    end
+
     return PoissonExpert(λ_new)
 end
 
@@ -147,6 +158,11 @@ function EM_M_expert_exact(d::PoissonExpert,
     term_zkz_Y = (z_e_obs .* ye) # (z_e_obs .* Y_e_obs) .+ (z_e_lat .* k_e .* Y_e_lat)
 
     λ_new = penalty ? ((sum(term_zkz_Y)[1] - (pen_pararms_jk[1]-1)) / (sum(term_zkz)[1] + 1/pen_pararms_jk[2])) : (sum(term_zkz_Y)[1] / sum(term_zkz)[1])
+
+    # Need to deal with zero mass: λ is very small
+    if λ_new < 0.00001
+        λ_new = λ_old
+    end
 
     return PoissonExpert(λ_new)
 end
