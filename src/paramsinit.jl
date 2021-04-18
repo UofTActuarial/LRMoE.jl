@@ -19,12 +19,12 @@ _default_expert_discrete = [
     PoissonExpert()
     NegativeBinomialExpert()
     BinomialExpert()
-    # GammaCountExpert()
+    GammaCountExpert()
 
     ZIPoissonExpert()
     NegativeBinomialExpert()
     ZIBinomialExpert()
-    # ZIGammaCountExpert()
+    ZIGammaCountExpert()
 ]
 
 _default_expert_real = [
