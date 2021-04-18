@@ -147,6 +147,11 @@ function EM_M_expert(d::GammaCountExpert,
 
     # println("$m_new, $s_new")
 
+    # Deal with zero mass
+    if ccdf.(Gamma((0+1)*s_new, 1), m_new*s_new) > 0.999999 || isnan(ccdf.(Gamma((0+1)*s_new, 1), m_new*s_new))
+        m_new, s_new = d.m, d.s
+    end
+
     return GammaCountExpert(m_new, s_new)
 
 end
@@ -205,6 +210,11 @@ function EM_M_expert_exact(d::GammaCountExpert,
     m_new = exp(logparams_new[1])
     s_new = exp(logparams_new[2])
 
+    # Deal with zero mass
+    if ccdf.(Gamma((0+1)*s_new, 1), m_new*s_new) > 0.999999 || isnan(ccdf.(Gamma((0+1)*s_new, 1), m_new*s_new))
+        m_new, s_new = d.m, d.s
+    end
+    
     # println("$m_new, $s_new")
     return GammaCountExpert(m_new, s_new)
 
