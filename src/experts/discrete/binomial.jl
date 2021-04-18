@@ -112,6 +112,11 @@ function EM_M_expert(d::BinomialExpert,
 
     p_new = sum(term_zkz_Y)[1] / (sum(term_zkz_Y)[1] + sum(term_zkz_n_Y)[1])
 
+    # Deal with zero mass
+    if (1-p_new)^d.n > 0.999999 || (isnan((1-p_new)^d.n))
+        p_new = d.p
+    end
+
     return BinomialExpert(d.n, p_new)
 
 end
@@ -139,6 +144,11 @@ function EM_M_expert_exact(d::BinomialExpert,
     term_zkz_n_Y = (z_e_obs .* (d.n .- Y_e_obs)) # .+ (z_e_lat .* k_e .* (d.n .- Y_e_lat))
 
     p_new = sum(term_zkz_Y)[1] / (sum(term_zkz_Y)[1] + sum(term_zkz_n_Y)[1])
+
+    # Deal with zero mass
+    if (1-p_new)^d.n > 0.999999 || (isnan((1-p_new)^d.n))
+        p_new = d.p
+    end
 
     return BinomialExpert(d.n, p_new)
 
