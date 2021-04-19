@@ -12,7 +12,7 @@ end
 
 ## Outer constructors
 ZINegativeBinomialExpert(p0::Real, n::Real, p::Real) = ZINegativeBinomialExpert(promote(p0, n, p)...)
-ZINegativeBinomialExpert(p0::Integer, n::Integer, p::Integer) = ZINegativeBinomialExpert(float(p0), n, float(p))
+ZINegativeBinomialExpert(p0::Integer, n::Integer, p::Integer) = ZINegativeBinomialExpert(float(p0), float(n), float(p))
 ZINegativeBinomialExpert() = ZINegativeBinomialExpert(0.50, 1, 0.50)
 
 ## Conversion
