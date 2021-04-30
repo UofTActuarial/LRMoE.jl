@@ -34,7 +34,7 @@ partype(::GammaCount{T}) where {T} = T
 
 # @_delegate_statsfuns Poisson pois λ
 
-function pdf(d::GammaCount, x::T) where {T <: Integer}
+function pdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
     if x < 0 || x != floor(x) || isinf(x)
         return 0.0
     elseif x == 0
@@ -44,7 +44,7 @@ function pdf(d::GammaCount, x::T) where {T <: Integer}
     end
 end
 
-function logpdf(d::GammaCount, x::T) where {T <: Integer}
+function logpdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
     if x < 0 || x != floor(x) || isinf(x)
         return -Inf
     elseif x == 0
@@ -54,7 +54,7 @@ function logpdf(d::GammaCount, x::T) where {T <: Integer}
     end
 end
 
-function cdf(d::GammaCount, x::T) where {T <: Integer}
+function cdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
     if isinf(x)
         return 1.0
     elseif x < 0
@@ -64,7 +64,7 @@ function cdf(d::GammaCount, x::T) where {T <: Integer}
     end
 end
 
-function logcdf(d::GammaCount, x::T) where {T <: Integer}
+function logcdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
     if isinf(x)
         return 0.0
     elseif x < 0
