@@ -224,7 +224,7 @@ The M-step with exact observation is carried out by the function
 should not be altered, since it is referenced in the main fitting function of the
 package.
 
-In short, the goal is to maximize the objective function  `z_e_obs` * LL, where LL is
+In short, the goal is to maximize the objective function  `z_e_obs` * ``LL``, where ``LL`` is
 the loglikelihood of the expert `d` when observing a vector `ye`. If the function argument
 `penalty` is true, then a penalty term given by hyperparameters `pen_params_jk` (see also above) is subtracted from the objective function. The function argument
 `expert_ll_pos` is a legacy and irrelevant to the M-step when observations `ye` are exact.
