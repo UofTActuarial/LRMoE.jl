@@ -1,3 +1,26 @@
+"""
+    fit_LRMoE(Y, X, α_init, model; ...)
+
+Fit an LRMoE model.
+
+# Arguments
+- `Y`: A matrix of response.
+- `X`: A matrix of covariates.
+- `α`: A matrix of logit regression coefficients.
+- `model`: A matrix specifying the expert functions.
+
+# Optional Arguments
+- `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
+- `penalty`: `true` (default) or `false`, indicating whether penalty is imposed on the magnitude of parameters.
+- `pen_α`: a numeric penalty on the magnitude of logit regression coefficients. Default is 1.0.
+- `pen_params`: an array of penalty term on the magnitude of parameters of component distributions/expert functions.
+- `ϵ`: Stopping criterion on loglikelihood (stop when the increment is less than `ϵ`). Default is 0.001.
+- `α_iter_max`: Maximum number of iterations when updating `α`. Default is 5.
+- `ecm_iter_max`: Maximum number of iterations of the ECM algorithm. Default is 200.
+- `grad_jump`: **IN DEVELOPMENT**
+- `grad_seq`: **IN DEVELOPMENT**
+- `print_steps`: `true` (default) or `false`, indicating whether intermediate updates of parameters should be logged.
+"""
 function fit_LRMoE(Y, X, α_init, model;
                     exact_Y = false,
                     penalty = true, pen_α = 1.0, pen_params = nothing,
