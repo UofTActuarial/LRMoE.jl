@@ -120,6 +120,22 @@ Initialize an LRMoE model using the Clustered Method of Moments (CMM).
 # Optional Arguments
 - `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
 - `n_random`: Integer. Number of randomized initializations. 
+
+# Return Values
+- `zero_y`: Proportion of zeros in observed `Y`.
+- `mean_y_pos`: Mean of positive observations in `Y`.
+- `var_y_pos`: Variance of positive observations in `Y`.
+- `skewness_y_pos`: Skewness of positive observations in `Y`.
+- `kurtosis_y_pos`: Kurtosis of positive observations in `Y`.
+- `α_init`: Initialization of logit regression coefficients `α`.
+- `params_init`: Initializations of expert functions. It is a three-dimensional vector. 
+    For example, `params_init[1][2]` initializes the 1st dimension of `Y` using the 2nd latent class,
+    which is a vector of potential expert functions to choose from.
+- `ll_init`: Calculates the loglikelihood of each expert function on the clustered groups of `Y`.
+    For example, `ll_init[1][2][3]` is the loglikelihood of the 1st dimension of `Y`, calculated based
+    on the 2nd latent classes and the 3rd initialized expert function in `params_init`.
+- `ll_best`: An initialization chosen from `params_init` which yields the highest likelihood upon initialization.
+- `random_init`: A list of `n_random` randomized initializations chosen from `params_init`.
 """
 function cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
     Y_transform = exact_Y ? Y : _cmm_transform_inexact_Y(Y)
