@@ -8,6 +8,8 @@ makedocs(
 		"Overview" => "index.md",
 		"Modelling Framework" => "framework.md",
 		"Expert Functions" => "experts.md",
+		"Model Initialization" => "init.md",
+		"Fitting Function" => "fit.md",
 		"Predictive Functions" => "predictive.md",
 		"Examples & Tutorials" => Any[
 			"Data Simulation" => "examples/sim_data/simulate_data.md",
