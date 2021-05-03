@@ -8,6 +8,7 @@ The **LRMoE.jl** package supports a collection of distributions commonly used fo
 BinomialExpert
 NegativeBinomialExpert
 PoissonExpert
+GammaCountExpert
 ```
 
 ## Continuous Distributions (Severity Modelling)
@@ -31,6 +32,7 @@ zero-inflated expert functions is given below.
 ZIBinomialExpert(p0, n, p)
 ZINegativeBinomialExpert(p0, n, p)
 ZIPoissonExpert(p, λ)
+ZIGammaCountExpert(p, m, s)
 ```
 
 ```julia

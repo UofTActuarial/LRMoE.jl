@@ -1,7 +1,19 @@
 """
     GammaCountExpert(m, s)
 
-Expert function: `GammaCountExpert(m, s)`.
+PMF:
+
+```math
+P(X = k) = G(m k, s T) - G(m (k+1), s T), \\quad \\text{ for } k = 0,1,2, \\ldots, n.
+```
+
+with
+
+```math
+G(m k, s T) = \\frac{1}{\\Gamma(mk)}  \\int^{sT}_{0} u^{mk - 1} e^{-u} du
+```
+
+See also: [Gamma Count Distribution](https://arxiv.org/abs/1312.2423) (Arxiv) 
 
 """
 struct GammaCountExpert{T<:Real} <: NonZIDiscreteExpert
