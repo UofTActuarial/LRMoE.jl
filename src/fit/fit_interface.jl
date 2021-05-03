@@ -20,6 +20,16 @@ Fit an LRMoE model.
 - `grad_jump`: **IN DEVELOPMENT**
 - `grad_seq`: **IN DEVELOPMENT**
 - `print_steps`: `true` (default) or `false`, indicating whether intermediate updates of parameters should be logged.
+
+# Return Values
+- `model_result.α_fit`: Fitted values of logit regression coefficients `α`.
+- `model_result.comp_dist`: Fitted parameters of expert functions.
+- `converge`: `true` or `false`, indicating whether the fitting procedure has converged.
+- `iter`: Number of iterations passed in the fitting function.
+- `ll`: Loglikelihood of the fitted model (with penalty on the magnitude of parameters).
+- `ll_np`: Loglikelihood of the fitted model (without penalty on the magnitude of parameters).
+- `AIC`: Akaike Information Criterion (AIC) of the fitted model.
+- `BIC`: Bayesian Information Criterion (BIC) of the fitted model.
 """
 function fit_LRMoE(Y, X, α_init, model;
                     exact_Y = false,
