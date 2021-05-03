@@ -13,6 +13,7 @@ makedocs(
 		"Predictive Functions" => "predictive.md",
 		"Examples & Tutorials" => Any[
 			"Data Simulation" => "examples/sim_data/simulate_data.md",
+			"Data Formatting" => "data_format.md",
 			"Fitting Function" => "examples/sim_fit/simulate_fit.md",
 			"Adding Customized Expert Functions" => "customize.md"
 		],

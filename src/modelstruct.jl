@@ -31,6 +31,18 @@ struct LRMoESTDFit <: LRMoEFittingResult
     LRMoESTDFit(model_fit, converge, iter, loglik, loglik_np, AIC, BIC) = new(model_fit, converge, iter, loglik, loglik_np, AIC, BIC)
 end
 
+
+"""
+    summary(obj)
+
+Summarizes a fitted LRMoE model.
+
+# Arguments
+- `obj`: An object returned by `fit_LRMoE` function.
+
+# Return Values
+Prints out a summary of the fitted LRMoE model on screen.
+"""
 function summary(m::LRMoESTDFit)
     println("Model: LRMoE")
     if m.converge

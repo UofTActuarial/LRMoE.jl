@@ -2,4 +2,5 @@
 
 ```@docs
 fit_LRMoE
+summary
 ```
