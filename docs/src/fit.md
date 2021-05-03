@@ -1,4 +1,4 @@
-# Fitting functions
+# Fitting Functions
 
 ```@docs
 fit_LRMoE

@@ -105,6 +105,22 @@ function cmm_init_exact(Y, X, n_comp, type)
             mean_y_pos = mean_y_pos, var_y_pos = var_y_pos, skewness_y_pos = skewness_y_pos, kurtosis_y_pos = kurtosis_y_pos)
 end
 
+
+"""
+    cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
+
+Initialize an LRMoE model using the Clustered Method of Moments (CMM).
+
+# Arguments
+- `Y`: A matrix of response.
+- `X`: A matrix of covariates.
+- `n_comp`: Integer. Number of latent classes/components.
+- `type`: A vector of either `continuous`, `discrete` or `real`, indicating the type of response by dimension.
+
+# Optional Arguments
+- `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
+- `n_random`: Integer. Number of randomized initializations. 
+"""
 function cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
     Y_transform = exact_Y ? Y : _cmm_transform_inexact_Y(Y)
     tmp = cmm_init_exact(Y_transform, X, n_comp, type)
