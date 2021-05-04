@@ -1,7 +1,8 @@
 ## Working tests
 
-using Random, LRMoE, Statistics, Clustering, Distributions, HypothesisTests
-Random.seed!(1234)
+# using Random, LRMoE, Statistics, Clustering, Distributions, HypothesisTests
+using LRMoE, Statistics, Clustering, Distributions, HypothesisTests
+# Random.seed!(1234)
 
 
 X = [1 2 3; 1 5 6; 1 99 3; 1 3 9; 2 5 7; 2 3 5]

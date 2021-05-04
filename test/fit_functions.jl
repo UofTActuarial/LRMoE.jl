@@ -1,13 +1,13 @@
 using Test
 using Distributions
 using StatsFuns
-using Random
+# using Random
 
 μ = 1
 σ = 2
-using LRMoE
+# using LRMoE
 
-Random.seed!(1234)
+# Random.seed!(1234)
 
 # tmp = LRMoESTD([1 2 ; 3 4], ["a" "b"])
 # tmp1 = LRMoESTDFit(tmp, true, 20, 1.1, 1.2, 1.3)

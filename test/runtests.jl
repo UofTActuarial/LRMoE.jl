@@ -10,7 +10,7 @@
 
 using LRMoE
 using Distributions
-using Random
+# using Random
 using Test
 
 const tests = [
@@ -24,7 +24,7 @@ const tests = [
 
 printstyled("Running tests:\n", color=:blue)
 
-Random.seed!(345679)
+# Random.seed!(345679)
 
 # to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
 # include("testutils.jl")
