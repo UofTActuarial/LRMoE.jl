@@ -27,7 +27,6 @@ Optim = ">= 0.15"
 QuadGK = ">= 2.4"
 Roots = ">= 1.0"
 SpecialFunctions = ">= 0.8"
-Statistics = ">= 1.0"
 StatsFuns = ">= 0.9"
 julia = "^1.0.0"
 
