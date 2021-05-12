@@ -56,5 +56,5 @@ deploydocs(
 	repo = "github.com/sparktseung/LRMoE.jl.git",
 	branch = "gh-pages",
 	devbranch = "dev",
-	versions = ["stable" => "v^", "v#.#.#", devurl => devurl],
+	versions = ["stable" => "v^", "v#.#.#", devurl => "dev"],
 )
