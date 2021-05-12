@@ -44,6 +44,8 @@ function pdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
     end
 end
 
+pdf(d::GammaCount, x::T) where {T <: Integer} = pdf(d, convert(Float64, x))
+
 function logpdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
     if x < 0 || x != floor(x) || isinf(x)
         return -Inf
@@ -53,6 +55,8 @@ function logpdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
         return logcdf.(Gamma((floor(x))*d.s, 1), d.m*d.s) + log1mexp.(logcdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s) - logcdf.(Gamma((floor(x))*d.s, 1), d.m*d.s)) 
     end
 end
+
+logpdf(d::GammaCount, x::T) where {T <: Integer} = logpdf(d, convert(Float64, x))
 
 function cdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
     if isinf(x)
@@ -64,6 +68,8 @@ function cdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
     end
 end
 
+cdf(d::GammaCount, x::T) where {T <: Integer} = cdf(d, convert(Float64, x))
+
 function logcdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
     if isinf(x)
         return 0.0
@@ -73,6 +79,8 @@ function logcdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
         return log1mexp.(logcdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s)) 
     end
 end
+
+logcdf(d::GammaCount, x::T) where {T <: Integer} = logcdf(d, convert(Float64, x))
 
 function quantile(d::GammaCount, q::Real)
     if q <= 0 || Distributions.cdf.(d, 0.0) >= q

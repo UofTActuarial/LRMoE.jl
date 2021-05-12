@@ -42,10 +42,10 @@ end
 copy(d::GammaCountExpert) = GammaCountExpert(d.m, d.s, check_args=false)
 
 ## Loglikelihood of Expoert
-logpdf(d::GammaCountExpert, x...) = isinf(x...) ? -Inf : Distributions.logpdf.(LRMoE.GammaCount(d.m, d.s), x...)
-pdf(d::GammaCountExpert, x...) = isinf(x...) ? 0.0 : Distributions.pdf.(LRMoE.GammaCount(d.m, d.s), x...)
-logcdf(d::GammaCountExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(LRMoE.GammaCount(d.m, d.s), x...)
-cdf(d::GammaCountExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(LRMoE.GammaCount(d.m, d.s), x...)
+logpdf(d::GammaCountExpert, x...) = isinf(x...) ? -Inf : LRMoE.logpdf.(LRMoE.GammaCount(d.m, d.s), x...)
+pdf(d::GammaCountExpert, x...) = isinf(x...) ? 0.0 : LRMoE.pdf.(LRMoE.GammaCount(d.m, d.s), x...)
+logcdf(d::GammaCountExpert, x...) = isinf(x...) ? 0.0 : LRMoE.logcdf.(LRMoE.GammaCount(d.m, d.s), x...)
+cdf(d::GammaCountExpert, x...) = isinf(x...) ? 1.0 : LRMoE.cdf.(LRMoE.GammaCount(d.m, d.s), x...)
 
 ## Parameters
 params(d::GammaCountExpert) = (d.m, d.s)
