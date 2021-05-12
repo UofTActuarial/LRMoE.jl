@@ -19,6 +19,7 @@ branches:
   only:
     - main
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+    - dev
 
 jobs:
   allow_failures:
