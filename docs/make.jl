@@ -55,6 +55,6 @@ makedocs(
 deploydocs(
 	repo = "github.com/sparktseung/LRMoE.jl.git",
 	branch = "gh-pages",
-	devbranch = "dev",
-	versions = ["stable" => "v^", "v#.#.#"],
+	devbranch = "main",
+	versions = ["stable" => "v^", "v#.#.#", "dev" => "dev"],
 )
