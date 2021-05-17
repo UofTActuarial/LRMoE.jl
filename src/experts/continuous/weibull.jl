@@ -42,6 +42,23 @@ pdf(d::WeibullExpert, x...) = Distributions.pdf.(Distributions.Weibull(d.k, d.θ
 logcdf(d::WeibullExpert, x...) = Distributions.logcdf.(Distributions.Weibull(d.k, d.θ), x...)
 cdf(d::WeibullExpert, x...) = Distributions.cdf.(Distributions.Weibull(d.k, d.θ), x...)
 
+## expert_ll, etc
+expert_ll_exact(d::WeibullExpert, x::Real; exposure = 1) = LRMoE.logpdf(d, x) 
+function expert_ll(d::WeibullExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_ll = (yl == yu) ? logpdf.(d, yl) : logcdf.(d, yu) + log1mexp.(logcdf.(d, yl) - logcdf.(d, yu))
+    expert_ll = (tu == 0.) ? -Inf : expert_ll
+    return expert_ll
+end
+function expert_tn(d::WeibullExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn = (tl == tu) ? logpdf.(d, tl) : logcdf.(d, tu) + log1mexp.(logcdf.(d, tl) - logcdf.(d, tu))
+    expert_tn = (tu == 0.) ? -Inf : expert_tn
+    return expert_tn
+end
+function expert_tn_bar(d::WeibullExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_bar = (tl == tu) ? 0.0 : log1mexp.(logcdf.(d, tu) + log1mexp.(logcdf.(d, tl) - logcdf.(d, tu)))
+    return expert_tn_bar
+end
+
 ## Parameters
 params(d::WeibullExpert) = (d.k, d.θ)
 function params_init(y, d::WeibullExpert)

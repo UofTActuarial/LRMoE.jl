@@ -43,6 +43,23 @@ pdf(d::InverseGaussianExpert, x...) = isinf(x...) ? 0.0 : Distributions.pdf.(Dis
 logcdf(d::InverseGaussianExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.InverseGaussian(d.μ, d.λ), x...)
 cdf(d::InverseGaussianExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.InverseGaussian(d.μ, d.λ), x...)
 
+## expert_ll, etc
+expert_ll_exact(d::InverseGaussianExpert, x::Real; exposure = 1) = LRMoE.logpdf(d, x) 
+function expert_ll(d::InverseGaussianExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_ll = (yl == yu) ? logpdf.(d, yl) : logcdf.(d, yu) + log1mexp.(logcdf.(d, yl) - logcdf.(d, yu))
+    expert_ll = (tu == 0.) ? -Inf : expert_ll
+    return expert_ll
+end
+function expert_tn(d::InverseGaussianExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn = (tl == tu) ? logpdf.(d, tl) : logcdf.(d, tu) + log1mexp.(logcdf.(d, tl) - logcdf.(d, tu))
+    expert_tn = (tu == 0.) ? -Inf : expert_tn
+    return expert_tn
+end
+function expert_tn_bar(d::InverseGaussianExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_bar = (tl == tu) ? 0.0 : log1mexp.(logcdf.(d, tu) + log1mexp.(logcdf.(d, tl) - logcdf.(d, tu)))
+    return expert_tn_bar
+end
+
 ## Parameters
 params(d::InverseGaussianExpert) = (d.μ, d.λ)
 function params_init(y, d::InverseGaussianExpert)
