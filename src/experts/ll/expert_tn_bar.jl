@@ -13,7 +13,8 @@ end
 ## Zero inflated, continuous. e.g. ZILogNormal
 function expert_tn_bar(d::e, tl::Real, yl::Real, yu::Real, tu::Real) where {e<:ZIContinuousExpert}
     # Possibly coming from the zero probability mass
-    expert_tn_bar = (tl > 0.) ? log.(d.p + (1-d.p)*exp.(expert_tn_bar_pos(d, tl, yl, yu, tu))) : log.(0.0 + (1-d.p)*exp.(expert_tn_bar_pos(d, tl, yl, yu, tu)))
+    p0 = params(d)[1]
+    expert_tn_bar = (tl > 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_bar_pos(d, tl, yl, yu, tu))) : log.(0.0 + (1-p0)*exp.(expert_tn_bar_pos(d, tl, yl, yu, tu)))
 
     return expert_tn_bar
 end
@@ -27,7 +28,8 @@ end
 ## Zero inflated, discrete. e.g. ZIPoisson
 function expert_tn_bar(d::e, tl::Real, yl::Real, yu::Real, tu::Real) where {e<:ZIDiscreteExpert}
     # Possibly coming from the zero probability mass
-    expert_tn_bar = (tl > 0.) ? log.(d.p + (1-d.p)*exp.(expert_tn_bar_pos(d, tl, yl, yu, tu))) : log.(0.0 + (1-d.p)*exp.(expert_tn_bar_pos(d, tl, yl, yu, tu)))
+    p0 = params(d)[1]
+    expert_tn_bar = (tl > 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_bar_pos(d, tl, yl, yu, tu))) : log.(0.0 + (1-p0)*exp.(expert_tn_bar_pos(d, tl, yl, yu, tu)))
 
     return expert_tn_bar
 end
