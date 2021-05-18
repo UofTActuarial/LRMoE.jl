@@ -767,4 +767,14 @@ end
     @test cube_tmp[2,2,idx] == LRMoE.expert_ll_exact(model_expod[2,2,idx], Y_tmp[idx,2])
     @test cube_tmp[2,3,idx] == LRMoE.expert_ll_exact(model_expod[2,3,idx], Y_tmp[idx,2])
     @test cube_tmp[2,4,idx] == LRMoE.expert_ll_exact(model_expod[2,4,idx], Y_tmp[idx,2])
+
+
+    # ll related
+    gate_tmp = rand(Distributions.Uniform(-1, 1), 15, 4)
+
+    dim_agg = LRMoE.loglik_aggre_dim(cube_tmp)
+    @test size(dim_agg) == (15, 4)
+    @test size(LRMoE.loglik_aggre_gate_dim(gate_tmp, dim_agg)) == (15, 4)
+    
+
 end

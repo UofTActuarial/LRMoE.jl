@@ -30,17 +30,7 @@ end
 #     return gate + sum(expert_ll_pos_list(Y, model), dims = 1)[1]
 # end
 
-function loglik_aggre_dim(ls)
-    return sum(ls, dims = 1)[1]
-end
 
-function loglik_aggre_gate_dim(gate, ll_mat)
-    return gate + ll_mat
-end
-
-function loglik_aggre_gate_dim_comp(ll_mat)
-    return rowlogsumexp(ll_mat)
-end
 
 # function loglik_aggre_all(ll_mat)
 #     return sum(ll_mat)
