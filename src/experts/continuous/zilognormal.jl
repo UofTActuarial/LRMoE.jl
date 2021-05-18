@@ -57,6 +57,8 @@ function expert_tn_bar(d::ZILogNormalExpert, tl::Real, yl::Real, yu::Real, tu::R
     return expert_tn_bar
 end
 
+exposurize_expert(d::ZILogNormalExpert; exposure = 1) = d
+
 ## Parameters
 params(d::ZILogNormalExpert) = (d.p, d.μ, d.σ)
 p_zero(d::ZILogNormalExpert) = d.p

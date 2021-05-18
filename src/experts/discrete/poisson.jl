@@ -58,6 +58,8 @@ function expert_tn_bar(d::PoissonExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     return expert_tn_bar
 end
 
+exposurize_expert(d::PoissonExpert; exposure = 1) = PoissonExpert(d.λ*exposure)
+
 ## Parameters
 params(d::PoissonExpert) = (d.λ)
 function params_init(y, d::PoissonExpert)

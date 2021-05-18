@@ -56,6 +56,8 @@ function expert_tn_bar(d::BinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real
     return expert_tn_bar
 end
 
+exposurize_expert(d::BinomialExpert; exposure = 1) = d
+
 ## Parameters
 params(d::BinomialExpert) = (d.n, d.p)
 function params_init(y, d::BinomialExpert)

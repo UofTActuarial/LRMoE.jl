@@ -57,6 +57,8 @@ function expert_tn_bar(d::ZIInverseGaussianExpert, tl::Real, yl::Real, yu::Real,
     return expert_tn_bar
 end
 
+exposurize_expert(d::ZIInverseGaussianExpert; exposure = 1) = d
+
 ## Parameters
 params(d::ZIInverseGaussianExpert) = (d.p, d.μ, d.λ)
 p_zero(d::ZIInverseGaussianExpert) = d.p

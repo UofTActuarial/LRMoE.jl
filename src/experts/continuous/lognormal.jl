@@ -60,6 +60,8 @@ function expert_tn_bar(d::LogNormalExpert, tl::Real, yl::Real, yu::Real, tu::Rea
     return expert_tn_bar
 end
 
+exposurize_expert(d::LogNormalExpert; exposure = 1) = d
+
 ## Parameters
 params(d::LogNormalExpert) = (d.μ, d.σ)
 function params_init(y, d::LogNormalExpert)

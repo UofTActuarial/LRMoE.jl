@@ -57,6 +57,8 @@ function expert_tn_bar(d::ZIWeibullExpert, tl::Real, yl::Real, yu::Real, tu::Rea
     return expert_tn_bar
 end
 
+exposurize_expert(d::ZIWeibullExpert; exposure = 1) = d
+
 ## Parameters
 params(d::ZIWeibullExpert) = (d.p, d.k, d.θ)
 p_zero(d::ZIWeibullExpert) = d.p

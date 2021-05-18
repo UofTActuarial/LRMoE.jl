@@ -59,6 +59,8 @@ function expert_tn_bar(d::WeibullExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     return expert_tn_bar
 end
 
+exposurize_expert(d::WeibullExpert; exposure = 1) = d
+
 ## Parameters
 params(d::WeibullExpert) = (d.k, d.θ)
 function params_init(y, d::WeibullExpert)

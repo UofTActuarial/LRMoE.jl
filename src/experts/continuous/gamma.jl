@@ -59,6 +59,8 @@ function expert_tn_bar(d::GammaExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     return expert_tn_bar
 end
 
+exposurize_expert(d::GammaExpert; exposure = 1) = d
+
 ## Parameters
 params(d::GammaExpert) = (d.k, d.θ)
 function params_init(y, d::GammaExpert)

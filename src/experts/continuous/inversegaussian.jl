@@ -60,6 +60,8 @@ function expert_tn_bar(d::InverseGaussianExpert, tl::Real, yl::Real, yu::Real, t
     return expert_tn_bar
 end
 
+exposurize_expert(d::InverseGaussianExpert; exposure = 1) = d
+
 ## Parameters
 params(d::InverseGaussianExpert) = (d.μ, d.λ)
 function params_init(y, d::InverseGaussianExpert)

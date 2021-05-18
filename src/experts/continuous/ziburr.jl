@@ -59,6 +59,8 @@ function expert_tn_bar(d::ZIBurrExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     return expert_tn_bar
 end
 
+exposurize_expert(d::ZIBurrExpert; exposure = 1) = d
+
 ## Parameters
 params(d::ZIBurrExpert) = (d.p, d.k, d.c, d.λ)
 p_zero(d::ZIBurrExpert) = d.p

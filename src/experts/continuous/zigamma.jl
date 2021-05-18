@@ -58,6 +58,8 @@ function expert_tn_bar(d::ZIGammaExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     return expert_tn_bar
 end
 
+exposurize_expert(d::ZIGammaExpert; exposure = 1) = d
+
 ## Parameters
 params(d::ZIGammaExpert) = (d.p, d.k, d.θ)
 p_zero(d::ZIGammaExpert) = d.p

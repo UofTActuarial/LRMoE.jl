@@ -59,6 +59,8 @@ function expert_tn_bar(d::NegativeBinomialExpert, tl::Real, yl::Real, yu::Real, 
     return expert_tn_bar
 end
 
+exposurize_expert(d::NegativeBinomialExpert; exposure = 1) = NegativeBinomialExpert(d.n*exposure, d.p)
+
 ## Parameters
 params(d::NegativeBinomialExpert) = (d.n, d.p)
 function params_init(y, d::NegativeBinomialExpert)

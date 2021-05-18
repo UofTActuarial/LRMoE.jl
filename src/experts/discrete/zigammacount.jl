@@ -54,6 +54,8 @@ function expert_tn_bar(d::ZIGammaCountExpert, tl::Real, yl::Real, yu::Real, tu::
     return expert_tn_bar
 end
 
+exposurize_expert(d::ZIGammaCountExpert; exposure = 1) = ZIGammaCountExpert(d.p, d.m, d.s/exposure)
+
 ## Parameters
 params(d::ZIGammaCountExpert) = (d.p, d.m, d.s)
 p_zero(d::ZIGammaCountExpert) = d.p

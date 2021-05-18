@@ -61,6 +61,8 @@ function expert_tn_bar(d::BurrExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     return expert_tn_bar
 end
 
+exposurize_expert(d::BurrExpert; exposure = 1) = d
+
 ## Parameters
 params(d::BurrExpert) = (d.k, d.c, d.λ)
 function params_init(y, d::BurrExpert)

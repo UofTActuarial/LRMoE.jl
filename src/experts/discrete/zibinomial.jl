@@ -54,6 +54,8 @@ function expert_tn_bar(d::ZIBinomialExpert, tl::Real, yl::Real, yu::Real, tu::Re
     return expert_tn_bar
 end
 
+exposurize_expert(d::ZIBinomialExpert; exposure = 1) = d
+
 ## Parameters
 params(d::ZIBinomialExpert) = (d.p0, d.n, d.p)
 p_zero(d::ZIBinomialExpert) = d.p0

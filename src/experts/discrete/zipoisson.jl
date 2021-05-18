@@ -53,6 +53,8 @@ function expert_tn_bar(d::ZIPoissonExpert, tl::Real, yl::Real, yu::Real, tu::Rea
     return expert_tn_bar
 end
 
+exposurize_expert(d::ZIPoissonExpert; exposure = 1) = ZIPoissonExpert(d.p, d.λ*exposure)
+
 ## Parameters
 params(d::ZIPoissonExpert) = (d.p, d.λ)
 p_zero(d::ZIPoissonExpert) = d.p

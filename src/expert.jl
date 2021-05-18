@@ -62,7 +62,8 @@ const calcs = [
     # "expert_tn_bar_pos",
     # "expert_ll",
     # "expert_tn",
-    # "expert_tn_bar"
+    # "expert_tn_bar",
+    "exposurize"
 ]
 
 for dname in add_experts

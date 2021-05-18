@@ -65,6 +65,8 @@ function expert_tn_bar(d::GammaCountExpert, tl::Real, yl::Real, yu::Real, tu::Re
     return expert_tn_bar
 end
 
+exposurize_expert(d::GammaCountExpert; exposure = 1) = GammaCountExpert(d.m, d.s/exposure)
+
 ## Parameters
 params(d::GammaCountExpert) = (d.m, d.s)
 function params_init(y, d::GammaCountExpert)
