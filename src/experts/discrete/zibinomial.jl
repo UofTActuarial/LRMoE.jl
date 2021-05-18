@@ -30,8 +30,33 @@ pdf(d::ZIBinomialExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distrib
 logcdf(d::ZIBinomialExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.Binomial(d.n, d.p), x...)
 cdf(d::ZIBinomialExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.Binomial(d.n, d.p), x...)
 
+## expert_ll, etc
+expert_ll_exact(d::ZIBinomialExpert, x::Real; exposure = 1) = (x == 0.) ? log.(p_zero(d) + (1-p_zero(d))*exp.(LRMoE.logpdf(d, x))) : log.(1-p_zero(d)) + LRMoE.logpdf(d, x)
+function expert_ll(d::ZIBinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_ll_pos = LRMoE.expert_ll(LRMoE.BinomialExpert(d.n, d.p), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = p_zero(d)
+    expert_ll = (yl == 0.) ? log.(p0 + (1-p0)*exp.(expert_ll_pos)) : log.(0.0 + (1-p0)*exp.(expert_ll_pos))
+    return expert_ll
+end
+function expert_tn(d::ZIBinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_pos = LRMoE.expert_tn(LRMoE.BinomialExpert(d.n, d.p), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = params(d)[1]
+    expert_tn = (tl == 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_pos))
+    return expert_tn
+end
+function expert_tn_bar(d::ZIBinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_bar_pos = LRMoE.expert_tn_bar(LRMoE.BinomialExpert(d.n, d.p), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = params(d)[1]
+    expert_tn_bar = (tl > 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_bar_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_bar_pos))
+    return expert_tn_bar
+end
+
 ## Parameters
 params(d::ZIBinomialExpert) = (d.p0, d.n, d.p)
+p_zero(d::ZIBinomialExpert) = d.p0
 function params_init(y, d::ZIBinomialExpert)
     n_init = Int(maximum(vec(y))) + 2
     μ, σ2 = mean(y), var(y)

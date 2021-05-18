@@ -29,8 +29,33 @@ pdf(d::ZIPoissonExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distribu
 logcdf(d::ZIPoissonExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.Poisson(d.λ), x...)
 cdf(d::ZIPoissonExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.Poisson(d.λ), x...)
 
+## expert_ll, etc
+expert_ll_exact(d::ZIPoissonExpert, x::Real; exposure = 1) = (x == 0.) ? log.(p_zero(d) + (1-p_zero(d))*exp.(LRMoE.logpdf(LRMoE.PoissonExpert(d.λ*exposure), x))) : log.(1-p_zero(d)) + LRMoE.logpdf(LRMoE.PoissonExpert(d.λ*exposure), x)
+function expert_ll(d::ZIPoissonExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_ll_pos = LRMoE.expert_ll(LRMoE.PoissonExpert(d.λ), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = p_zero(d)
+    expert_ll = (yl == 0.) ? log.(p0 + (1-p0)*exp.(expert_ll_pos)) : log.(0.0 + (1-p0)*exp.(expert_ll_pos))
+    return expert_ll
+end
+function expert_tn(d::ZIPoissonExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_pos = LRMoE.expert_tn(LRMoE.PoissonExpert(d.λ), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = params(d)[1]
+    expert_tn = (tl == 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_pos))
+    return expert_tn
+end
+function expert_tn_bar(d::ZIPoissonExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_bar_pos = LRMoE.expert_tn_bar(LRMoE.PoissonExpert(d.λ), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = params(d)[1]
+    expert_tn_bar = (tl > 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_bar_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_bar_pos))
+    return expert_tn_bar
+end
+
 ## Parameters
 params(d::ZIPoissonExpert) = (d.p, d.λ)
+p_zero(d::ZIPoissonExpert) = d.p
 function params_init(y, d::ZIPoissonExpert)
     μ, σ2 = mean(y), var(y)
     λp = (σ2-μ) / μ
