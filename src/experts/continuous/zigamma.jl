@@ -32,8 +32,35 @@ pdf(d::ZIGammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? 0.0 : Distributions.pdf
 logcdf(d::ZIGammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? -Inf : Distributions.logcdf.(Distributions.Gamma(d.k, d.θ), x...)
 cdf(d::ZIGammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? 0.0 : Distributions.cdf.(Distributions.Gamma(d.k, d.θ), x...)
 
+## expert_ll, etc
+expert_ll_exact(d::ZIGammaExpert, x::Real; exposure = 1) = (x == 0.) ? log(p_zero(d)) :  log(1-p_zero(d)) + LRMoE.logpdf(d, x)
+function expert_ll(d::ZIGammaExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_ll_pos = LRMoE.expert_ll(LRMoE.GammaExpert(d.k, d.θ), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = p_zero(d)
+    expert_ll = (yl == 0.) ? log.(p0 + (1-p0)*exp.(expert_ll_pos)) : log.(0.0 + (1-p0)*exp.(expert_ll_pos))
+    expert_ll = (tu == 0.) ? log.(p0) : expert_ll
+    return expert_ll
+end
+function expert_tn(d::ZIGammaExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_pos = LRMoE.expert_tn(LRMoE.GammaExpert(d.k, d.θ), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = p_zero(d)
+    expert_tn = (tl == 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_pos))
+    expert_tn = (tu == 0.) ? log.(p0) : expert_tn
+    return expert_tn
+end
+function expert_tn_bar(d::ZIGammaExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_bar_pos = LRMoE.expert_tn_bar(LRMoE.GammaExpert(d.k, d.θ), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = p_zero(d)
+    expert_tn_bar = (tl > 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_bar_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_bar_pos))
+    return expert_tn_bar
+end
+
 ## Parameters
 params(d::ZIGammaExpert) = (d.p, d.k, d.θ)
+p_zero(d::ZIGammaExpert) = d.p
 function params_init(y, d::ZIGammaExpert)
     p_init = sum(y .== 0.0) / sum(y .>= 0.0)
     pos_idx = (y .> 0.0)

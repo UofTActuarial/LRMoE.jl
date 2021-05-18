@@ -127,6 +127,7 @@ export
     GammaCount,
 
     params,
+    p_zero,
     params_init,
 
     BurrExpert, ZIBurrExpert,

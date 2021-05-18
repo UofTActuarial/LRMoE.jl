@@ -32,8 +32,34 @@ pdf(d::ZILogNormalExpert, x...) = Distributions.pdf.(Distributions.LogNormal(d.�
 logcdf(d::ZILogNormalExpert, x...) = Distributions.logcdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 cdf(d::ZILogNormalExpert, x...) = Distributions.cdf.(Distributions.LogNormal(d.μ, d.σ), x...)
 
+expert_ll_exact(d::ZILogNormalExpert, x::Real; exposure = 1) = (x == 0.) ? log(p_zero(d)) :  log(1-p_zero(d)) + LRMoE.logpdf(d, x)
+function expert_ll(d::ZILogNormalExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_ll_pos = LRMoE.expert_ll(LRMoE.LogNormalExpert(d.μ, d.σ), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = p_zero(d)
+    expert_ll = (yl == 0.) ? log.(p0 + (1-p0)*exp.(expert_ll_pos)) : log.(0.0 + (1-p0)*exp.(expert_ll_pos))
+    expert_ll = (tu == 0.) ? log.(p0) : expert_ll
+    return expert_ll
+end
+function expert_tn(d::ZILogNormalExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_pos = LRMoE.expert_tn(LRMoE.LogNormalExpert(d.μ, d.σ), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = p_zero(d)
+    expert_tn = (tl == 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_pos))
+    expert_tn = (tu == 0.) ? log.(p0) : expert_tn
+    return expert_tn
+end
+function expert_tn_bar(d::ZILogNormalExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_bar_pos = LRMoE.expert_tn_bar(LRMoE.LogNormalExpert(d.μ, d.σ), tl, yl, yu, tu, exposure = exposure)
+    # Deal with zero inflation
+    p0 = p_zero(d)
+    expert_tn_bar = (tl > 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_bar_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_bar_pos))
+    return expert_tn_bar
+end
+
 ## Parameters
 params(d::ZILogNormalExpert) = (d.p, d.μ, d.σ)
+p_zero(d::ZILogNormalExpert) = d.p
 function params_init(y, d::ZILogNormalExpert)
     p_init = sum(y .== 0.0) / sum(y .>= 0.0)
     pos_idx = (y .> 0.0)
