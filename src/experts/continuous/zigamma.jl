@@ -34,7 +34,7 @@ cdf(d::ZIGammaExpert, x...) = (d.k < 1 && x... <= 0.0) ? 0.0 : Distributions.cdf
 
 ## expert_ll, etc
 expert_ll_exact(d::ZIGammaExpert, x::Real) = (x == 0.) ? log(p_zero(d)) :  log(1-p_zero(d)) + LRMoE.logpdf(d, x)
-function expert_ll(d::ZIGammaExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+function expert_ll(d::ZIGammaExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     expert_ll_pos = LRMoE.expert_ll(LRMoE.GammaExpert(d.k, d.θ), tl, yl, yu, tu)
     # Deal with zero inflation
     p0 = p_zero(d)
