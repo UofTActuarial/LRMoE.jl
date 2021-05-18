@@ -130,6 +130,7 @@ export
     p_zero,
     params_init,
     exposurize_expert,
+    exposurize_model,
 
     BurrExpert, ZIBurrExpert,
     GammaExpert, ZIGammaExpert,
