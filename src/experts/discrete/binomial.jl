@@ -41,6 +41,21 @@ pdf(d::BinomialExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distribut
 logcdf(d::BinomialExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.Binomial(d.n, d.p), x...)
 cdf(d::BinomialExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.Binomial(d.n, d.p), x...)
 
+## expert_ll, etc
+expert_ll_exact(d::BinomialExpert, x::Real; exposure = 1) = LRMoE.logpdf(d, x) 
+function expert_ll(d::BinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_ll = (yl == yu) ? logpdf.(d, yl) : logcdf.(d, yu) + log1mexp.(logcdf.(d, ceil.(yl) .- 1) - logcdf.(d, yu))
+    return expert_ll
+end
+function expert_tn(d::BinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn = (tl == tu) ? logpdf.(d, tl) : logcdf.(d, tu) + log1mexp.(logcdf.(d, ceil.(tl) .- 1) - logcdf.(d, tu))
+    return expert_tn
+end
+function expert_tn_bar(d::BinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    expert_tn_bar = (tl == tu) ? log1mexp.(logpdf.(d, tl)) : log1mexp.(logcdf.(d, tu) + log1mexp.(logcdf.(d, ceil.(tl) .- 1) - logcdf.(d, tu)))
+    return expert_tn_bar
+end
+
 ## Parameters
 params(d::BinomialExpert) = (d.n, d.p)
 function params_init(y, d::BinomialExpert)

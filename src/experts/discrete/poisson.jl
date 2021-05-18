@@ -40,6 +40,24 @@ pdf(d::PoissonExpert, x...) = isinf(x...) ? -Inf : Distributions.pdf.(Distributi
 logcdf(d::PoissonExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.Poisson(d.λ), x...)
 cdf(d::PoissonExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.Poisson(d.λ), x...)
 
+## expert_ll, etc
+expert_ll_exact(d::PoissonExpert, x::Real; exposure = 1) = LRMoE.logpdf(LRMoE.PoissonExpert(d.λ*exposure), x) 
+function expert_ll(d::PoissonExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    d_exp = LRMoE.PoissonExpert(d.λ*exposure)
+    expert_ll = (yl == yu) ? logpdf.(d_exp, yl) : logcdf.(d_exp, yu) + log1mexp.(logcdf.(d_exp, ceil.(yl) .- 1) - logcdf.(d_exp, yu))
+    return expert_ll
+end
+function expert_tn(d::PoissonExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    d_exp = LRMoE.PoissonExpert(d.λ*exposure)
+    expert_tn = (tl == tu) ? logpdf.(d_exp, tl) : logcdf.(d_exp, tu) + log1mexp.(logcdf.(d_exp, ceil.(tl) .- 1) - logcdf.(d_exp, tu))
+    return expert_tn
+end
+function expert_tn_bar(d::PoissonExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+    d_exp = LRMoE.PoissonExpert(d.λ*exposure)
+    expert_tn_bar = (tl == tu) ? log1mexp.(logpdf.(d_exp, tl)) : log1mexp.(logcdf.(d_exp, tu) + log1mexp.(logcdf.(d_exp, ceil.(tl) .- 1) - logcdf.(d_exp, tu)))
+    return expert_tn_bar
+end
+
 ## Parameters
 params(d::PoissonExpert) = (d.λ)
 function params_init(y, d::PoissonExpert)
