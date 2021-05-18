@@ -16,7 +16,7 @@ using Test
 const tests = [
     # "dummytest",
     # "pdfcdf",
-    # "expert_loglik",
+    "expert_loglik",
     # "gating",
     # "loglik",
     # "fit_functions"
