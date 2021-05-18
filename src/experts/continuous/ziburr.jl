@@ -34,25 +34,25 @@ logcdf(d::ZIBurrExpert, x...) = Distributions.logcdf.(LRMoE.Burr(d.k, d.c, d.λ)
 cdf(d::ZIBurrExpert, x...) = Distributions.cdf.(LRMoE.Burr(d.k, d.c, d.λ), x...)
 
 ## expert_ll, etc
-expert_ll_exact(d::ZIBurrExpert, x::Real; exposure = 1) = (x == 0.) ? log(p_zero(d)) :  log(1-p_zero(d)) + LRMoE.logpdf(d, x)
-function expert_ll(d::ZIBurrExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
-    expert_ll_pos = LRMoE.expert_ll(LRMoE.BurrExpert(d.k, d.c, d.λ), tl, yl, yu, tu, exposure = exposure)
+expert_ll_exact(d::ZIBurrExpert, x::Real) = (x == 0.) ? log(p_zero(d)) :  log(1-p_zero(d)) + LRMoE.logpdf(d, x)
+function expert_ll(d::ZIBurrExpert, tl::Real, yl::Real, yu::Real, tu::Real)
+    expert_ll_pos = LRMoE.expert_ll(LRMoE.BurrExpert(d.k, d.c, d.λ), tl, yl, yu, tu)
     # Deal with zero inflation
     p0 = p_zero(d)
     expert_ll = (yl == 0.) ? log.(p0 + (1-p0)*exp.(expert_ll_pos)) : log.(0.0 + (1-p0)*exp.(expert_ll_pos))
     expert_ll = (tu == 0.) ? log.(p0) : expert_ll
     return expert_ll
 end
-function expert_tn(d::ZIBurrExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
-    expert_tn_pos = LRMoE.expert_tn(LRMoE.BurrExpert(d.k, d.c, d.λ), tl, yl, yu, tu, exposure = exposure)
+function expert_tn(d::ZIBurrExpert, tl::Real, yl::Real, yu::Real, tu::Real)
+    expert_tn_pos = LRMoE.expert_tn(LRMoE.BurrExpert(d.k, d.c, d.λ), tl, yl, yu, tu)
     # Deal with zero inflation
     p0 = p_zero(d)
     expert_tn = (tl == 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_pos))
     expert_tn = (tu == 0.) ? log.(p0) : expert_tn
     return expert_tn
 end
-function expert_tn_bar(d::ZIBurrExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
-    expert_tn_bar_pos = LRMoE.expert_tn_bar(LRMoE.BurrExpert(d.k, d.c, d.λ), tl, yl, yu, tu, exposure = exposure)
+function expert_tn_bar(d::ZIBurrExpert, tl::Real, yl::Real, yu::Real, tu::Real)
+    expert_tn_bar_pos = LRMoE.expert_tn_bar(LRMoE.BurrExpert(d.k, d.c, d.λ), tl, yl, yu, tu)
     # Deal with zero inflation
     p0 = p_zero(d)
     expert_tn_bar = (tl > 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_bar_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_bar_pos))

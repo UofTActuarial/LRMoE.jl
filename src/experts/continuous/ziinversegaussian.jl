@@ -32,25 +32,25 @@ pdf(d::ZIInverseGaussianExpert, x...) = isinf(x...) ? 0.0 : Distributions.pdf.(D
 logcdf(d::ZIInverseGaussianExpert, x...) = isinf(x...) ? 0.0 : Distributions.logcdf.(Distributions.InverseGaussian(d.μ, d.λ), x...)
 cdf(d::ZIInverseGaussianExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.InverseGaussian(d.μ, d.λ), x...)
 
-expert_ll_exact(d::ZIInverseGaussianExpert, x::Real; exposure = 1) = (x == 0.) ? log(p_zero(d)) :  log(1-p_zero(d)) + LRMoE.logpdf(d, x)
-function expert_ll(d::ZIInverseGaussianExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
-    expert_ll_pos = LRMoE.expert_ll(LRMoE.InverseGaussianExpert(d.μ, d.λ), tl, yl, yu, tu, exposure = exposure)
+expert_ll_exact(d::ZIInverseGaussianExpert, x::Real) = (x == 0.) ? log(p_zero(d)) :  log(1-p_zero(d)) + LRMoE.logpdf(d, x)
+function expert_ll(d::ZIInverseGaussianExpert, tl::Real, yl::Real, yu::Real, tu::Real)
+    expert_ll_pos = LRMoE.expert_ll(LRMoE.InverseGaussianExpert(d.μ, d.λ), tl, yl, yu, tu)
     # Deal with zero inflation
     p0 = p_zero(d)
     expert_ll = (yl == 0.) ? log.(p0 + (1-p0)*exp.(expert_ll_pos)) : log.(0.0 + (1-p0)*exp.(expert_ll_pos))
     expert_ll = (tu == 0.) ? log.(p0) : expert_ll
     return expert_ll
 end
-function expert_tn(d::ZIInverseGaussianExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
-    expert_tn_pos = LRMoE.expert_tn(LRMoE.InverseGaussianExpert(d.μ, d.λ), tl, yl, yu, tu, exposure = exposure)
+function expert_tn(d::ZIInverseGaussianExpert, tl::Real, yl::Real, yu::Real, tu::Real)
+    expert_tn_pos = LRMoE.expert_tn(LRMoE.InverseGaussianExpert(d.μ, d.λ), tl, yl, yu, tu)
     # Deal with zero inflation
     p0 = p_zero(d)
     expert_tn = (tl == 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_pos))
     expert_tn = (tu == 0.) ? log.(p0) : expert_tn
     return expert_tn
 end
-function expert_tn_bar(d::ZIInverseGaussianExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
-    expert_tn_bar_pos = LRMoE.expert_tn_bar(LRMoE.InverseGaussianExpert(d.μ, d.λ), tl, yl, yu, tu, exposure = exposure)
+function expert_tn_bar(d::ZIInverseGaussianExpert, tl::Real, yl::Real, yu::Real, tu::Real)
+    expert_tn_bar_pos = LRMoE.expert_tn_bar(LRMoE.InverseGaussianExpert(d.μ, d.λ), tl, yl, yu, tu)
     # Deal with zero inflation
     p0 = p_zero(d)
     expert_tn_bar = (tl > 0.) ? log.(p0 + (1-p0)*exp.(expert_tn_bar_pos)) : log.(0.0 + (1-p0)*exp.(expert_tn_bar_pos))

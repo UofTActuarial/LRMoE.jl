@@ -42,20 +42,20 @@ logcdf(d::NegativeBinomialExpert, x...) = isinf(x...) ? 0.0 : Distributions.logc
 cdf(d::NegativeBinomialExpert, x...) = isinf(x...) ? 1.0 : Distributions.cdf.(Distributions.NegativeBinomial(d.n, d.p), x...)
 
 ## expert_ll, etc
-expert_ll_exact(d::NegativeBinomialExpert, x::Real; exposure = 1) = LRMoE.logpdf(LRMoE.NegativeBinomialExpert(d.n*exposure, d.p), x) 
-function expert_ll(d::NegativeBinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
-    d_exp = NegativeBinomialExpert(d.n*exposure, d.p)
-    expert_ll = (yl == yu) ? logpdf.(d_exp, yl) : logcdf.(d_exp, yu) + log1mexp.(logcdf.(d_exp, ceil.(yl) .- 1) - logcdf.(d_exp, yu))
+expert_ll_exact(d::NegativeBinomialExpert, x::Real) = LRMoE.logpdf(LRMoE.NegativeBinomialExpert(d.n, d.p), x) 
+function expert_ll(d::NegativeBinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real)
+    # d_exp = NegativeBinomialExpert(d.n*exposure, d.p)
+    expert_ll = (yl == yu) ? logpdf.(d, yl) : logcdf.(d, yu) + log1mexp.(logcdf.(d, ceil.(yl) .- 1) - logcdf.(d, yu))
     return expert_ll
 end
-function expert_tn(d::NegativeBinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
-    d_exp = NegativeBinomialExpert(d.n*exposure, d.p)
-    expert_tn = (tl == tu) ? logpdf.(d_exp, tl) : logcdf.(d_exp, tu) + log1mexp.(logcdf.(d_exp, ceil.(tl) .- 1) - logcdf.(d_exp, tu))
+function expert_tn(d::NegativeBinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real)
+    # d_exp = NegativeBinomialExpert(d.n*exposure, d.p)
+    expert_tn = (tl == tu) ? logpdf.(d, tl) : logcdf.(d, tu) + log1mexp.(logcdf.(d, ceil.(tl) .- 1) - logcdf.(d, tu))
     return expert_tn
 end
-function expert_tn_bar(d::NegativeBinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
-    d_exp = NegativeBinomialExpert(d.n*exposure, d.p)
-    expert_tn_bar = (tl == tu) ? log1mexp.(logpdf.(d_exp, tl)) : log1mexp.(logcdf.(d_exp, tu) + log1mexp.(logcdf.(d_exp, ceil.(tl) .- 1) - logcdf.(d_exp, tu)))
+function expert_tn_bar(d::NegativeBinomialExpert, tl::Real, yl::Real, yu::Real, tu::Real)
+    # d_exp = NegativeBinomialExpert(d.n*exposure, d.p)
+    expert_tn_bar = (tl == tu) ? log1mexp.(logpdf.(d, tl)) : log1mexp.(logcdf.(d, tu) + log1mexp.(logcdf.(d, ceil.(tl) .- 1) - logcdf.(d, tu)))
     return expert_tn_bar
 end
 

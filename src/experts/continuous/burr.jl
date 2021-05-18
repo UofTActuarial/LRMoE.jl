@@ -45,18 +45,18 @@ logcdf(d::BurrExpert, x...) = Distributions.logcdf.(LRMoE.Burr(d.k, d.c, d.λ), 
 cdf(d::BurrExpert, x...) = Distributions.cdf.(LRMoE.Burr(d.k, d.c, d.λ), x...)
 
 ## expert_ll, etc
-expert_ll_exact(d::BurrExpert, x::Real; exposure = 1) = LRMoE.logpdf(d, x) 
-function expert_ll(d::BurrExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+expert_ll_exact(d::BurrExpert, x::Real) = LRMoE.logpdf(d, x) 
+function expert_ll(d::BurrExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     expert_ll = (yl == yu) ? logpdf.(d, yl) : logcdf.(d, yu) + log1mexp.(logcdf.(d, yl) - logcdf.(d, yu))
     expert_ll = (tu == 0.) ? -Inf : expert_ll
     return expert_ll
 end
-function expert_tn(d::BurrExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+function expert_tn(d::BurrExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     expert_tn = (tl == tu) ? logpdf.(d, tl) : logcdf.(d, tu) + log1mexp.(logcdf.(d, tl) - logcdf.(d, tu))
     expert_tn = (tu == 0.) ? -Inf : expert_tn
     return expert_tn
 end
-function expert_tn_bar(d::BurrExpert, tl::Real, yl::Real, yu::Real, tu::Real; exposure = 1)
+function expert_tn_bar(d::BurrExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     expert_tn_bar = (tl == tu) ? 0.0 : log1mexp.(logcdf.(d, tu) + log1mexp.(logcdf.(d, tl) - logcdf.(d, tu)))
     return expert_tn_bar
 end
