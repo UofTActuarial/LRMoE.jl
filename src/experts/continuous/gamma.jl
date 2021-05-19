@@ -134,41 +134,26 @@ function _int_lat_logY_raw(d::GammaExpert, tl, tu)
 end
 
 function _gamma_k_to_θ(k, sum_term_zkz, sum_term_zkzy;
-                        # term_zkz, term_zkzy;
-                        # z_e_obs, z_e_lat, k_e, Y_e_obs, Y_e_lat;
                         penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
 
-    # term_zkz = z_e_obs .+ (z_e_lat .* k_e)
-    # term_zkzy = (z_e_obs .* Y_e_obs) .+ (z_e_lat .* k_e .* Y_e_lat)
     if penalty
         hyper1, hyper2 = pen_pararms_jk[3], pen_pararms_jk[4]
         if hyper1 == 1.0 && hyper2 == Inf
             # return sum(term_zkzy)[1] / (sum(term_zkz)[1] * k)   
             return sum_term_zkzy / (sum_term_zkz * k)   
         end
-        # quad1, quad2 = ( k * sum(term_zkz)[1] - (hyper1 - 1) )^2, (4/hyper2) * sum(term_zkzy)[1]
         quad1, quad2 = ( k * sum_term_zkz - (hyper1 - 1) )^2, (4/hyper2) * sum_term_zkzy
         return (hyper2/2) * ( (hyper1-1) - k*sum_term_zkz + sqrt(quad1 + quad2) )
     else
-        # return sum(term_zkzy)[1] / (sum(term_zkz)[1] * k)
         return sum_term_zkzy / (sum_term_zkz * k)
     end  
 end
 
 function _gamma_optim_k(logk,
                         sum_term_zkz, sum_term_zkzy, sum_term_zkzlogy;
-                        # z_e_obs, z_e_lat, k_e, Y_e_obs, Y_e_lat, logY_e_obs, logY_e_lat;
                         penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
     # Optimization in log scale for unconstrained computation    
     k_tmp = exp(logk)
-
-    # term_zkz = z_e_obs .+ (z_e_lat .* k_e)
-    # term_zkzy = (z_e_obs .* Y_e_obs) .+ (z_e_lat .* k_e .* Y_e_lat)
-    # term_zkzlogy = (z_e_obs .* logY_e_obs) .+ (z_e_lat .* k_e .* logY_e_lat)
-
-    # sum_term_zkz = sum(term_zkz)[1]
-    # sum_term_zkzy = sum(term_zkzy)[1]
-    # sum_term_zkzlogy = sum(term_zkzlogy)[1]
 
     θ_tmp = _gamma_k_to_θ(k_tmp, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
@@ -223,39 +208,25 @@ end
 
 ## EM: M-Step, exact observations
 function EM_M_expert_exact(d::GammaExpert,
-                            ye,
-                            expert_ll_pos,
+                            ye, exposure,
                             z_e_obs; 
                             penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
 
     # Further E-Step
-    Y_e_obs = ye # vec(_int_obs_Y.(d, yl, yu, expert_ll_pos))
-    Y_e_lat = 0.0 # vec(_int_lat_Y.(d, tl, tu, expert_tn_bar_pos))
-    # nan2num(Y_e_obs, 0.0) # get rid of NaN
-    # nan2num(Y_e_lat, 0.0) # get rid of NaN
-
-    # yl_yu_unique = unique_bounds(yl, yu)
-    # int_obs_logY_tmp = _int_obs_logY_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    logY_e_obs = log.(ye) # exp.(-expert_ll_pos) .* int_obs_logY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
+    Y_e_obs = ye 
+    logY_e_obs = log.(ye)
     # nan2num(logY_e_obs, 0.0) # get rid of NaN
 
-    # tl_tu_unique = unique_bounds(tl, tu)
-    # int_lat_logY_tmp = _int_lat_logY_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    logY_e_lat = 0.0 # exp.(-expert_tn_bar_pos) .* int_lat_logY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
-    # nan2num(logY_e_lat, 0.0) # get rid of NaN
-    
     # Update parameters
     pos_idx = (ye .!= 0.0)
-    term_zkz = z_e_obs[pos_idx] # .+ (z_e_lat[pos_idx] .* k_e[pos_idx])
-    term_zkz_Y = (z_e_obs[pos_idx] .* Y_e_obs[pos_idx]) # .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* Y_e_lat[pos_idx])
-    term_zkz_logY = (z_e_obs[pos_idx] .* logY_e_obs[pos_idx]) # .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_e_lat[pos_idx])
+    term_zkz = z_e_obs[pos_idx]
+    term_zkz_Y = z_e_obs[pos_idx] .* Y_e_obs[pos_idx]
+    term_zkz_logY = z_e_obs[pos_idx] .* logY_e_obs[pos_idx]
     
     logk_new = Optim.minimizer( Optim.optimize(x -> _gamma_optim_k(x, sum(term_zkz)[1], sum(term_zkz_Y)[1], sum(term_zkz_logY)[1],
                                                penalty = penalty, pen_pararms_jk = pen_pararms_jk),
                                                max(log(d.k)-2.0, 0.0), log(d.k)+2.0 ))
-                                               # log(d.k)-2.0, log(d.k)+2.0 )) # ,
-                                               # GoldenSection() )) 
-                                               # , rel_tol = 1e-8) )
+
     k_new = exp(logk_new)
     θ_new = _gamma_k_to_θ(k_new, sum(term_zkz)[1], sum(term_zkz_Y)[1], penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
