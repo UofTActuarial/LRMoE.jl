@@ -71,7 +71,7 @@ function params_init(y, d::BinomialExpert)
 end
 
 ## Simululation
-sim_expert(d::BinomialExpert, sample_size) = Distributions.rand(Distributions.Binomial(d.n, d.p), sample_size)
+sim_expert(d::BinomialExpert) = Distributions.rand(Distributions.Binomial(d.n, d.p), 1)[1]
 
 ## penalty
 penalty_init(d::BinomialExpert) = []

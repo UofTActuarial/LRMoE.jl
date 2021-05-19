@@ -81,7 +81,7 @@ function ks_distance(y, d::ZIWeibullExpert)
 end
 
 ## Simululation
-sim_expert(d::ZIWeibullExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.Weibull(d.k, d.θ), sample_size)
+sim_expert(d::ZIWeibullExpert) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), 1)[1]) .* Distributions.rand(Distributions.Weibull(d.k, d.θ), 1)[1]
 
 ## penalty
 penalty_init(d::ZIWeibullExpert) = [2.0 10.0 2.0 10.0]

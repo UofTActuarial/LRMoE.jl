@@ -73,7 +73,7 @@ function params_init(y, d::ZINegativeBinomialExpert)
 end
 
 ## Simululation
-sim_expert(d::ZINegativeBinomialExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p0), sample_size)) .* Distributions.rand(Distributions.NegativeBinomial(d.n, d.p), sample_size)
+sim_expert(d::ZINegativeBinomialExpert) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p0), 1)[1]) .* Distributions.rand(Distributions.NegativeBinomial(d.n, d.p), 1)[1]
 
 ## penalty
 penalty_init(d::ZINegativeBinomialExpert) = [2.0 10.0]

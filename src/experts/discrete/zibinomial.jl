@@ -72,7 +72,7 @@ function params_init(y, d::ZIBinomialExpert)
 end
 
 ## Simululation
-sim_expert(d::ZIBinomialExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p0), sample_size)) .* Distributions.rand(Distributions.Binomial(d.n, d.p), sample_size)
+sim_expert(d::ZIBinomialExpert) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p0), 1)[1]) .* Distributions.rand(Distributions.Binomial(d.n, d.p), 1)[1]
 
 ## penalty
 penalty_init(d::ZIBinomialExpert) = []

@@ -93,7 +93,7 @@ end
 
 
 ## Simululation
-sim_expert(d::WeibullExpert, sample_size) = Distributions.rand(Distributions.Weibull(d.k, d.θ), sample_size)
+sim_expert(d::WeibullExpert) = Distributions.rand(Distributions.Weibull(d.k, d.θ), 1)[1]
 
 ## penalty
 penalty_init(d::WeibullExpert) = [2.0 10.0 1.0 Inf]

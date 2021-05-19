@@ -74,7 +74,7 @@ function params_init(y, d::ZIGammaCountExpert)
 end
 
 ## Simululation
-sim_expert(d::ZIGammaCountExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(LRMoE.GammaCount(d.m, d.s), sample_size)
+sim_expert(d::ZIGammaCountExpert) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), 1)[1]) .* Distributions.rand(LRMoE.GammaCount(d.m, d.s), 1)[1]
 
 ## penalty
 penalty_init(d::ZIGammaCountExpert) = [2.0 10.0 2.0 10.0]

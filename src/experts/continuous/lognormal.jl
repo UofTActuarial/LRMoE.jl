@@ -79,7 +79,7 @@ function ks_distance(y, d::LogNormalExpert)
 end
 
 ## Simululation
-sim_expert(d::LogNormalExpert, sample_size) = Distributions.rand(Distributions.LogNormal(d.μ, d.σ), sample_size)
+sim_expert(d::LogNormalExpert) = Distributions.rand(Distributions.LogNormal(d.μ, d.σ), 1)[1]
 
 ## penalty
 penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]

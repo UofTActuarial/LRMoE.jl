@@ -83,7 +83,7 @@ function ks_distance(y, d::ZIBurrExpert)
 end
 
 ## Simululation
-sim_expert(d::ZIBurrExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(LRMoE.Burr(d.k, d.c, d.λ), sample_size)
+sim_expert(d::ZIBurrExpert) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), 1)[1]) .* Distributions.rand(LRMoE.Burr(d.k, d.c, d.λ), 1)[1]
 
 ## penalty
 penalty_init(d::ZIBurrExpert) = [2.0 10.0 2.0 10.0 2.0 10.0]

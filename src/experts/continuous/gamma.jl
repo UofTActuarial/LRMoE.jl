@@ -82,7 +82,7 @@ function ks_distance(y, d::GammaExpert)
 end
 
 ## Simululation
-sim_expert(d::GammaExpert, sample_size) = Distributions.rand(Distributions.Gamma(d.k, d.θ), sample_size)
+sim_expert(d::GammaExpert) = Distributions.rand(Distributions.Gamma(d.k, d.θ), 1)[1]
 
 ## penalty
 penalty_init(d::GammaExpert) = [2.0 10.0 2.0 10.0]

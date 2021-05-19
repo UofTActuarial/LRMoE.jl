@@ -75,7 +75,7 @@ function params_init(y, d::NegativeBinomialExpert)
 end
 
 ## Simululation
-sim_expert(d::NegativeBinomialExpert, sample_size) = Distributions.rand(Distributions.NegativeBinomial(d.n, d.p), sample_size)
+sim_expert(d::NegativeBinomialExpert) = Distributions.rand(Distributions.NegativeBinomial(d.n, d.p), 1)[1]
 
 ## penalty
 penalty_init(d::NegativeBinomialExpert) = [2.0 10.0]

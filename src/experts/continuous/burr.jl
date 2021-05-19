@@ -98,7 +98,7 @@ function ks_distance(y, d::BurrExpert)
 end
 
 ## Simululation
-sim_expert(d::BurrExpert, sample_size) = Distributions.rand(LRMoE.Burr(d.k, d.c, d.λ), sample_size)
+sim_expert(d::BurrExpert) = Distributions.rand(LRMoE.Burr(d.k, d.c, d.λ), 1)[1]
 
 
 ## penalty

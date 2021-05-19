@@ -78,7 +78,7 @@ function ks_distance(y, d::PoissonExpert)
 end
 
 ## Simululation
-sim_expert(d::PoissonExpert, sample_size) = Distributions.rand(Distributions.Poisson(d.λ), sample_size)
+sim_expert(d::PoissonExpert) = Distributions.rand(Distributions.Poisson(d.λ), 1)[1]
 
 ## penalty
 penalty_init(d::PoissonExpert) = [2.0 1.0]
@@ -154,7 +154,7 @@ end
 
 ## EM: M-Step, exact observations
 function EM_M_expert_exact(d::PoissonExpert,
-                    ye,
+                    ye, exposure,
                     expert_ll_pos,
                     z_e_obs; 
                     penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
@@ -162,20 +162,9 @@ function EM_M_expert_exact(d::PoissonExpert,
     # Old parameters
     λ_old = d.λ
 
-    # Further E-Step
-    # yl_yu_unique = unique_bounds(yl, yu)
-    # int_obs_Y_tmp = _int_obs_Y_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    # Y_e_obs = exp.(-expert_ll_pos) .* int_obs_Y_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
-    # nan2num(Y_e_obs, 0.0) # get rid of NaN
-
-    # tl_tu_unique = unique_bounds(tl, tu)
-    # int_lat_Y_tmp = _int_lat_Y_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    # Y_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_Y_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
-    # nan2num(Y_e_lat, 0.0) # get rid of NaN
-
     # Update parameters
-    term_zkz = z_e_obs # .+ (z_e_lat .* k_e)
-    term_zkz_Y = (z_e_obs .* ye) # (z_e_obs .* Y_e_obs) .+ (z_e_lat .* k_e .* Y_e_lat)
+    term_zkz = z_e_obs .* exposure
+    term_zkz_Y = (z_e_obs .* ye)
 
     λ_new = penalty ? ((sum(term_zkz_Y)[1] - (pen_pararms_jk[1]-1)) / (sum(term_zkz)[1] + 1/pen_pararms_jk[2])) : (sum(term_zkz_Y)[1] / sum(term_zkz)[1])
 

@@ -96,7 +96,7 @@ function params_init(y, d::GammaCountExpert)
 end
 
 ## Simululation
-sim_expert(d::GammaCountExpert, sample_size) = Distributions.rand(LRMoE.GammaCount(d.m, d.s), sample_size)
+sim_expert(d::GammaCountExpert) = Distributions.rand(LRMoE.GammaCount(d.m, d.s), 1)[1]
 
 ## penalty
 penalty_init(d::GammaCountExpert) = [2.0 10.0 2.0 10.0]

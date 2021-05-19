@@ -82,7 +82,7 @@ function ks_distance(y, d::ZIInverseGaussianExpert)
 end
 
 ## Simululation
-sim_expert(d::ZIInverseGaussianExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.InverseGaussian(d.μ, d.λ), sample_size)
+sim_expert(d::ZIInverseGaussianExpert) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), 1)[1]) .* Distributions.rand(Distributions.InverseGaussian(d.μ, d.λ), 1)[1]
 
 ## penalty
 penalty_init(d::ZIInverseGaussianExpert) = [1.0 Inf 1.0 Inf]

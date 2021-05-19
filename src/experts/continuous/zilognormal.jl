@@ -78,7 +78,7 @@ function ks_distance(y, d::ZILogNormalExpert)
 end
 
 ## Simululation
-sim_expert(d::ZILogNormalExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.LogNormal(d.μ, d.σ), sample_size)
+sim_expert(d::ZILogNormalExpert) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), 1)[1]) .* Distributions.rand(Distributions.LogNormal(d.μ, d.σ), 1)[1]
 
 ## penalty
 penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]

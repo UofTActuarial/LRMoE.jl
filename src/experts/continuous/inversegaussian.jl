@@ -83,7 +83,7 @@ function ks_distance(y, d::InverseGaussianExpert)
 end
 
 ## Simululation
-sim_expert(d::InverseGaussianExpert, sample_size) = Distributions.rand(Distributions.InverseGaussian(d.μ, d.λ), sample_size)
+sim_expert(d::InverseGaussianExpert) = Distributions.rand(Distributions.InverseGaussian(d.μ, d.λ), 1)[1]
 
 ## penalty
 penalty_init(d::InverseGaussianExpert) = [1.0 Inf 1.0 Inf]

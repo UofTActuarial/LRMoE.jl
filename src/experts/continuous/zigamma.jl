@@ -83,7 +83,7 @@ function ks_distance(y, d::ZIGammaExpert)
 end
 
 ## Simululation
-sim_expert(d::ZIGammaExpert, sample_size) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), sample_size)) .* Distributions.rand(Distributions.Gamma(d.k, d.θ), sample_size)
+sim_expert(d::ZIGammaExpert) = (1 .- Distributions.rand(Distributions.Bernoulli(d.p), 1)[1]) .* Distributions.rand(Distributions.Gamma(d.k, d.θ), 1)[1]
 
 ## penalty
 penalty_init(d::ZIGammaExpert) = [2.0 10.0 2.0 10.0]
