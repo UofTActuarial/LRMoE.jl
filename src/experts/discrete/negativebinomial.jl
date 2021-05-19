@@ -220,12 +220,9 @@ function EM_M_expert(d::NegativeBinomialExpert,
 end
 
 ## EM: M-Step, exact observations
-function _negativebinomial_optim_n_exact(logn,
-                        d_old,
-                        ye, # tl, yl, yu, tu,
-                        expert_ll_pos, # expert_tn_pos, expert_tn_bar_pos,
-                        z_e_obs; # , # z_e_lat, k_e,
-                        # Y_e_obs, Y_e_lat;
+function _negativebinomial_optim_n_exact(logn, d_old,
+                        ye, exposure,
+                        z_e_obs;
                         penalty = true, pen_pararms_jk = [])
     # Optimization in log scale for unconstrained computation    
     n_tmp = exp(logn)
@@ -233,69 +230,45 @@ function _negativebinomial_optim_n_exact(logn,
     Y_e_obs = ye
 
     # Further E-Step
-    # yl_yu_unique = unique_bounds(yl, yu)
-    # int_obs_logY_tmp = _int_obs_logY_raw.(d_old, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    # logY_e_obs = loggamma.(ye .+ d_old.n) # exp.(-expert_ll_pos) .* int_obs_logY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
-    logY_e_obs = loggamma.(ye .+ n_tmp)
+    logY_e_obs = loggamma.(ye .+ n_tmp .* exposure)
     nan2num(logY_e_obs, 0.0) # get rid of NaN
 
-    # tl_tu_unique = unique_bounds(tl, tu)
-    # int_lat_logY_tmp = _int_lat_logY_raw.(d_old, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    # logY_e_lat = 0.0 # exp.(-expert_tn_bar_pos) .* int_lat_logY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
-    # nan2num(logY_e_lat, 0.0) # get rid of NaN
-
-    term_zkz = z_e_obs # .+ (z_e_lat .* k_e)
-    term_zkz_Y = (z_e_obs .* Y_e_obs) # .+ (z_e_lat .* k_e .* Y_e_lat)
-    term_zkz_logY = (z_e_obs .* logY_e_obs) # .+ (z_e_lat .* k_e .* logY_e_lat)
+    term_zkz = z_e_obs .* n_tmp .* exposure
+    term_zkz_Y = z_e_obs .* Y_e_obs
+    term_zkz_logY = z_e_obs .* logY_e_obs
 
     sum_term_zkz = sum(term_zkz)[1]
     sum_term_zkzy = sum(term_zkz_Y)[1]
     sum_term_zkzlogy = sum(term_zkz_logY)[1]
 
-    p_tmp = _negativebinomial_n_to_p(n_tmp, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+    p_tmp = _negativebinomial_n_to_p(1, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
-    obj = sum_term_zkzlogy - sum_term_zkz*loggamma(n_tmp) + sum_term_zkz*n_tmp*log(p_tmp) + sum_term_zkzy*log(1-p_tmp)
+    obj = sum_term_zkzlogy - sum(z_e_obs .* loggamma.(n_tmp .* exposure))[1] + sum_term_zkz*log(p_tmp) + sum_term_zkzy*log(1-p_tmp)
     p = penalty ? (pen_pararms_jk[1]-1)*log(n_tmp) - n_tmp/pen_pararms_jk[2] : 0.0
     return (obj + p) * (-1.0)
 end
+
 function EM_M_expert_exact(d::NegativeBinomialExpert,
-                    ye,
-                    expert_ll_pos,
+                    ye, exposure,
+                    # expert_ll_pos,
                     z_e_obs; 
                     penalty = true, pen_pararms_jk = [1.0 Inf])
 
-    # Further E-Step
-    # yl_yu_unique = unique_bounds(yl, yu)
-    # int_obs_Y_tmp = _int_obs_Y_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    Y_e_obs = ye # exp.(-expert_ll_pos) .* int_obs_Y_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
-    # nan2num(Y_e_obs, 0.0) # get rid of NaN
-
-    # tl_tu_unique = unique_bounds(tl, tu)
-    # int_lat_Y_tmp = _int_lat_Y_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    # Y_e_lat = 0.0 # exp.(-expert_tn_bar_pos) .* int_lat_Y_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
-    # nan2num(Y_e_lat, 0.0) # get rid of NaN
-
     # Update parameters
     logn_new = Optim.minimizer( Optim.optimize(x -> _negativebinomial_optim_n_exact(x, d,
-                                                ye, # tl, yl, yu, tu,
-                                                expert_ll_pos, # expert_tn_pos, expert_tn_bar_pos,
-                                                z_e_obs, # z_e_lat, k_e,
-                                                # Y_e_obs, Y_e_lat,
+                                                ye, exposure,
+                                                z_e_obs,
                                                 penalty = penalty, pen_pararms_jk = pen_pararms_jk),
-                                                log(d.n)-0.5, log(d.n)+0.5 )) # ,
-                                                # max(log(d.n)-2.0, 0.0), log(d.n)+2.0 )) # ,
-                                                # log(d.k)-2.0, log(d.k)+2.0 )) # ,
-                                                # GoldenSection() )) 
-                                                # , rel_tol = 1e-8) )
+                                                log(d.n)-0.5, log(d.n)+0.5 ))
     n_new = exp(logn_new)
 
-    term_zkz = z_e_obs # .+ (z_e_lat .* k_e)
-    term_zkz_Y = (z_e_obs .* Y_e_obs) # .+ (z_e_lat .* k_e .* Y_e_lat)
+    term_zkz = z_e_obs .* n_new .* exposure
+    term_zkz_Y = z_e_obs .* ye
 
     sum_term_zkz = sum(term_zkz)[1]
     sum_term_zkzy = sum(term_zkz_Y)[1]
 
-    p_new = _negativebinomial_n_to_p(n_new, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+    p_new = _negativebinomial_n_to_p(1, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     # Deal with zero mass 
     if (p_new^n_new > 0.999999) || (isnan(p_new^n_new))
