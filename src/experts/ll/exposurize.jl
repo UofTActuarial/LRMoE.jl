@@ -20,11 +20,21 @@ end
 
 # Exact case
 function expert_ll_ind_mat_exact(Y, model)
-    return cat([[LRMoE.expert_ll_exact.(model[j, k], Y[j]) for j in 1:size(model)[1]] for k in 1:size(model)[2]]..., dims = 2)
+    result = fill(NaN, size(model)[1], size(model)[2])
+    for j in 1:size(model)[1]
+        for k in 1:size(model)[2]
+            result[j, k] = LRMoE.expert_ll_exact.(model[j, k], Y[j])
+        end
+    end
+    return result # cat([[LRMoE.expert_ll_exact.(model[j, k], Y[j]) for j in 1:size(model)[1]] for k in 1:size(model)[2]]..., dims = 2)
 end
 
 function expert_ll_list_exact(Y, model)
-    return cat([expert_ll_ind_mat_exact(Y[i,:], model[:,:,i]) for i in 1:size(Y)[1]]..., dims = 3)
+    result = fill(NaN, size(model)[1], size(model)[2], size(Y)[1])
+    for i in 1:size(Y)[1]
+        result[:,:,i] = expert_ll_ind_mat_exact(Y[i,:], model[:,:,i])
+    end
+    return result # cat([expert_ll_ind_mat_exact(Y[i,:], model[:,:,i]) for i in 1:size(Y)[1]]..., dims = 3)
 end
 
 function loglik_exact(Y, gate, model)
@@ -65,7 +75,7 @@ function fit_exact(Y, X, α_init, model;
                     grad_jump = true, grad_seq = nothing,
                     print_steps = true)
     # Make variables accessible within the scope of `let`
-    let α_em, gate_em, model_em, exposure, model_em_expo, ll_em_list, ll_em, ll_em_np, ll_em_old, ll_em_np_old, iter, z_e_obs, z_e_lat, k_e, params_old        
+    let α_em, gate_em, model_em, model_em_expo, ll_em_list, ll_em, ll_em_np, ll_em_old, ll_em_np_old, iter, z_e_obs, z_e_lat, k_e, params_old        
         # Initial loglik
         gate_init = LogitGating(α_init, X)
         model_expo = exposurize_model(model, exposure = exposure) # exposurize
@@ -129,7 +139,7 @@ function fit_exact(Y, X, α_init, model;
                     model_em[j,k] = EM_M_expert_exact(model_em[j,k], 
                                                 Y[:, j], exposure,
                                                 # ll_em_list.expert_ll_pos_dim_comp[j][:,k],
-                                                ll_em_list.expert_ll_dim_comp[j, k, :],
+                                                # ll_em_list.expert_ll_dim_comp[j, k, :],
                                                 vec(z_e_obs[:,k]),
                                                 penalty = penalty, pen_pararms_jk = pen_params[j][k])
 

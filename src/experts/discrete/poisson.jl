@@ -155,7 +155,7 @@ end
 ## EM: M-Step, exact observations
 function EM_M_expert_exact(d::PoissonExpert,
                     ye, exposure,
-                    expert_ll_pos,
+                    # expert_ll_pos,
                     z_e_obs; 
                     penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
 
