@@ -121,15 +121,20 @@ end
 ## EM: M-Step, exact observations
 function EM_M_expert_exact(d::ZIPoissonExpert,
                      ye, exposure,
-                     expert_ll_pos,
+                     # expert_ll_pos,
                      z_e_obs;
                      penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
     
     # Old parameters
     λ_old = d.λ
-    p_old = d.p
+    p_old = p_zero(d)
 
     # Update zero probability
+    expert_ll_pos = fill(NaN, length(exposure))
+    for i in 1:length(exposure)
+        expert_ll_pos[i] = expert_ll_exact(exposurize_expert(LRMoE.PoissonExpert(λ_old), exposure = exposure[i]), ye[i])
+    end
+
     z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(ye, p_old, expert_ll_pos)
     z_pos_e_obs = z_e_obs .- z_zero_e_obs
     p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, 0.0, 0.0, 0.0)
@@ -139,7 +144,7 @@ function EM_M_expert_exact(d::ZIPoissonExpert,
     tmp_exp = PoissonExpert(d.λ)
     tmp_update = EM_M_expert_exact(tmp_exp,
                             ye, exposure,
-                            expert_ll_pos,
+                            # expert_ll_pos,
                             z_pos_e_obs;
                             penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
