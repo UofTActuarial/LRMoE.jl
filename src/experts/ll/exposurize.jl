@@ -1,5 +1,9 @@
 function exposurize_model(model; exposure = 1)
-    return cat([LRMoE.exposurize_expert.(model, exposure = exposure[i]) for i in 1:length(exposure)]..., dims = 3)
+    result = Array{Union{Nothing, LRMoE.AnyExpert}}(nothing, size(model)[1], size(model)[1], length(exposure))
+    for i in 1:length(exposure)
+        result[:,:,i] = LRMoE.exposurize_expert.(model, exposure = exposure[i])
+    end
+    return result
 end
 
 function loglik_aggre_dim(ls)
