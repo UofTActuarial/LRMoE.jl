@@ -15,7 +15,7 @@ function sim_dataset(α, X, model; exposure = nothing)
     end
     model_expo = exposurize_model(model, exposure = exposure)
     gating_sim = sim_logit_gating(α, X)
-    return vcat([sim_components(model_expo[:,:,i]) * gating_sim[i,:] for i in 1:size(X)[2]]'...)
+    return vcat([sim_components(model_expo[:,:,i]) * gating_sim[i,:] for i in 1:size(X)[1]]'...)
 end
 
 
