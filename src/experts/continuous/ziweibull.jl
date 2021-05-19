@@ -130,27 +130,24 @@ end
 
 ## EM: M-Step, exact observations
 function EM_M_expert_exact(d::ZIWeibullExpert,
-                     ye,
-                     expert_ll_pos,
+                     ye, exposure,
                      z_e_obs;
                      penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
     
     # Old parameters
-    p_old = d.p
+    p_old = p_zero(d)
 
     # Update zero probability
+    expert_ll_pos = expert_ll_exact.(LRMoE.WeibullExpert(d.k, d.θ), ye)
+
     z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(ye, p_old, expert_ll_pos)
     z_pos_e_obs = z_e_obs .- z_zero_e_obs
-    z_zero_e_lat = 0.0
-    z_pos_e_lat = 0.0
     p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, 0.0, 0.0, 0.0)
-        # EM_M_zero(z_zero_e_obs, z_pos_e_obs, z_zero_e_lat, z_pos_e_lat, k_e)
 
     # Update parameters: call its positive part
     tmp_exp = WeibullExpert(d.k, d.θ)
     tmp_update = EM_M_expert_exact(tmp_exp,
-                            ye,
-                            expert_ll_pos,
+                            ye, exposure,
                             z_pos_e_obs;
                             penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 

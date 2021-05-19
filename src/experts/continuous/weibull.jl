@@ -239,24 +239,20 @@ end
 
 ## EM: M-Step, exact observations
 function _weibull_optim_k_exact(logk,
-                        # d_old,
                         ye,
-                        # expert_ll_pos, expert_tn_pos, expert_tn_bar_pos,
-                        z_e_obs, # z_e_lat, k_e,
-                        logY_e_obs; #, logY_e_lat;
+                        z_e_obs,
+                        logY_e_obs;
                         penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
     # Optimization in log scale for unconstrained computation    
     k_tmp = exp(logk)
 
     # Further E-step
-    powY_e_obs = ye.^(k_tmp) # _int_obs_powY(d_old, k_tmp, yl, yu, expert_ll_pos)
-    # powY_e_lat = 0.0 # _int_lat_powY(d_old, k_tmp, tl, tu, expert_tn_bar_pos)
-    nan2num(powY_e_obs, 0.0) # get rid of NaN
-    # nan2num(powY_e_lat, 0.0) # get rid of NaN
+    powY_e_obs = ye.^(k_tmp)
+    nan2num(powY_e_obs, 0.0)
 
-    term_zkz = z_e_obs # .+ (z_e_lat .* k_e)
-    term_zkz_logY = (z_e_obs .* logY_e_obs) # .+ (z_e_lat .* k_e .* logY_e_lat)
-    term_zkz_powY = (z_e_obs .* powY_e_obs) # .+ (z_e_lat .* k_e .* powY_e_lat)
+    term_zkz = z_e_obs
+    term_zkz_logY = z_e_obs .* logY_e_obs
+    term_zkz_powY = z_e_obs .* powY_e_obs
 
     sum_term_zkz = sum(term_zkz)[1]
     sum_term_zkz_logY = sum(term_zkz_logY)[1]
@@ -270,53 +266,37 @@ function _weibull_optim_k_exact(logk,
 
 end
 function EM_M_expert_exact(d::WeibullExpert,
-                            ye,
-                            expert_ll_pos,
+                            ye, exposure,
                             z_e_obs; 
                             penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
 
     # Further E-Step
-    # yl_yu_unique = unique_bounds(yl, yu)
-    # int_obs_logY_tmp = _int_obs_logY_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    logY_e_obs = log.(ye) # exp.(-expert_ll_pos) .* int_obs_logY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
+    logY_e_obs = log.(ye)
     nan2num(logY_e_obs, 0.0) # get rid of NaN
-
-    # tl_tu_unique = unique_bounds(tl, tu)
-    # int_lat_logY_tmp = _int_lat_logY_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    logY_e_lat = 0.0 # exp.(-expert_tn_bar_pos) .* int_lat_logY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
-    # nan2num(logY_e_lat, 0.0) # get rid of NaN
     
     # Update parameters
     pos_idx = (ye .!= 0.0)
-    logk_new = Optim.minimizer( Optim.optimize(x -> _weibull_optim_k_exact(x, # d,
+    logk_new = Optim.minimizer( Optim.optimize(x -> _weibull_optim_k_exact(x,
                                                             ye[pos_idx],
-                                                            # expert_ll_pos[pos_idx], expert_tn_pos[pos_idx], expert_tn_bar_pos[pos_idx],
-                                                            z_e_obs[pos_idx], # z_e_lat[pos_idx], k_e[pos_idx],
-                                                            logY_e_obs[pos_idx], # logY_e_lat[pos_idx],
+                                                            z_e_obs[pos_idx],
+                                                            logY_e_obs[pos_idx],
                                                             penalty = penalty, pen_pararms_jk = pen_pararms_jk),
-                                               max(log(d.k)-2.0, 0.0), log(d.k)+2.0 )) # ,
-                                               # log(d.k)-2.0, log(d.k)+2.0 )) # ,
-                                               # GoldenSection() )) 
-                                               # , rel_tol = 1e-8) )
+                                               max(log(d.k)-2.0, 0.0), log(d.k)+2.0 ))
+
     k_new = exp(logk_new)
 
     # Further E-step
-    powY_e_obs = ye.^(k_new) # _int_obs_powY(d_old, k_tmp, yl, yu, expert_ll_pos)
-    # powY_e_lat = 0.0 # _int_lat_powY(d_old, k_tmp, tl, tu, expert_tn_bar_pos)
-    nan2num(powY_e_obs, 0.0) # get rid of NaN
-    # nan2num(powY_e_lat, 0.0) # get rid of NaN
+    powY_e_obs = ye.^(k_new)
+    nan2num(powY_e_obs, 0.0)
 
-    term_zkz = z_e_obs # .+ (z_e_lat .* k_e)
-    # term_zkz_logY = (z_e_obs .* logY_e_obs) # .+ (z_e_lat .* k_e .* logY_e_lat)
-    term_zkz_powY = (z_e_obs .* powY_e_obs) # .+ (z_e_lat .* k_e .* powY_e_lat)
+    term_zkz = z_e_obs
+    term_zkz_powY = z_e_obs .* powY_e_obs
 
     sum_term_zkz = sum(term_zkz)[1]
-    # sum_term_zkz_logY = sum(term_zkz_logY)[1]
     sum_term_zkz_powY = sum(term_zkz_powY)[1]
 
-    θ_new = _weibull_k_to_λ(k_new, sum(term_zkz)[1], sum(sum_term_zkz_powY)[1], penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+    θ_new = _weibull_k_to_λ(k_new, sum_term_zkz, sum(sum_term_zkz_powY)[1], penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
-    # println("$k_new, $θ_new")
     return WeibullExpert(k_new, θ_new)
 
 end
