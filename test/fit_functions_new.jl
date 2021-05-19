@@ -178,3 +178,93 @@ end
 
 
 end
+
+
+@testset "Binomial, exact" begin
+
+    # Fit 50,000 observations as an example
+
+    # param0 = rand(Distributions.Uniform(0, 1), 1)[1]
+    # param1 = rand(5:35, 4)
+    # param2 = rand(Distributions.Uniform(0, 1), 4)
+
+    # X = rand(Distributions.Uniform(-5, 5), 50000, 7)
+    # α = rand(Distributions.Uniform(-1, 1), 2, 7)
+    # α[2,:] .= 0
+
+    # model = [BinomialExpert(param1[1], param2[1]) BinomialExpert(param1[2], param2[2]);
+    #          BinomialExpert(param1[3], param2[3]) BinomialExpert(param1[4], param2[4])]
+
+    # expos = rand(Distributions.Uniform(0.1, 5), 50000)
+    # Y_sim = LRMoE.sim_dataset(α, X, model, exposure = expos)
+
+    # α_guess = fill(0.0, 2, 7)
+    # model_guess = [BinomialExpert(param1[1], 0.4) BinomialExpert(param1[2], 0.5);
+    #                BinomialExpert(param1[3], 0.6) BinomialExpert(param1[4], 0.5)]
+
+    # pen_α = 5
+    # pen_params = [[[1.0 Inf], [1.0 Inf]],
+    #               [[1.0 Inf], [1.0 Inf]]]
+
+    # result = LRMoE.fit_exact(Y_sim, X, α_guess, model_guess,
+    #                     exposure = expos,
+    #                     penalty = true, 
+    #                     pen_α = pen_α, pen_params = pen_params,
+    #                     # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
+    #                     # grad_jump = true, grad_seq = nothing,
+    #                     print_steps = true)
+    
+    # α
+    # result.α_fit 
+   
+    # model
+    # result.model_fit
+
+
+
+end
+
+
+@testset "ZIBinomial, exact" begin
+
+    # Fit 50,000 observations as an example
+
+    # param0 = rand(Distributions.Uniform(0, 1), 4)
+    # param1 = rand(5:35, 4)
+    # param2 = rand(Distributions.Uniform(0, 1), 4)
+
+    # X = rand(Distributions.Uniform(-5, 5), 50000, 7)
+    # α = rand(Distributions.Uniform(-1, 1), 2, 7)
+    # α[2,:] .= 0
+
+    # model = [ZIBinomialExpert(param0[1], param1[1], param2[1]) ZIBinomialExpert(param0[2], param1[2], param2[2]);
+    #          ZIBinomialExpert(param0[3], param1[3], param2[3]) ZIBinomialExpert(param0[4], param1[4], param2[4])]
+
+    # expos = rand(Distributions.Uniform(0.1, 5), 50000)
+    # Y_sim = LRMoE.sim_dataset(α, X, model, exposure = expos)
+
+    # α_guess = fill(0.0, 2, 7)
+    # model_guess = [ZIBinomialExpert(0.5, param1[1], 0.4) ZIBinomialExpert(0.5, param1[2], 0.5);
+    #                ZIBinomialExpert(0.5, param1[3], 0.6) ZIBinomialExpert(0.5, param1[4], 0.5)]
+
+    # pen_α = 5
+    # pen_params = [[[1.0 Inf], [1.0 Inf]],
+    #               [[1.0 Inf], [1.0 Inf]]]
+
+    # result = LRMoE.fit_exact(Y_sim, X, α_guess, model_guess,
+    #                     exposure = expos,
+    #                     penalty = true, 
+    #                     pen_α = pen_α, pen_params = pen_params,
+    #                     # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
+    #                     # grad_jump = true, grad_seq = nothing,
+    #                     print_steps = true)
+    
+    # α
+    # result.α_fit 
+   
+    # model
+    # result.model_fit
+
+
+
+end
