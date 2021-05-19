@@ -174,8 +174,7 @@ end
 
 ## EM: M-Step, exact observations
 function EM_M_expert_exact(d::LogNormalExpert,
-                            ye,
-                            expert_ll_pos,
+                            ye, exposure,
                             z_e_obs; 
                             penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
 
@@ -187,18 +186,14 @@ function EM_M_expert_exact(d::LogNormalExpert,
 
     # Further E-Step
     logY_e_obs = log.(ye)
-    logY_e_lat = 0.0
-    # nan2num(logY_e_lat, 0.0) # get rid of NaN
     
     logY_sq_e_obs = (log.(ye)).^2
-    logY_sq_e_lat = 0.0
-    # nan2num(logY_sq_e_lat, 0.0) # get rid of NaN
     
     # Update parameters
     pos_idx = (ye .!= 0.0)
-    term_zkz = z_e_obs[pos_idx] # .+ (z_e_lat[pos_idx] .* k_e[pos_idx])
-    term_zkz_logY = (z_e_obs[pos_idx] .* logY_e_obs[pos_idx]) # .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_e_lat[pos_idx])
-    term_zkz_logY_sq = (z_e_obs[pos_idx] .* logY_sq_e_obs[pos_idx]) # .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_sq_e_lat[pos_idx])
+    term_zkz = z_e_obs[pos_idx]
+    term_zkz_logY = (z_e_obs[pos_idx] .* logY_e_obs[pos_idx])
+    term_zkz_logY_sq = (z_e_obs[pos_idx] .* logY_sq_e_obs[pos_idx])
 
     μ_new = sum(term_zkz_logY)[1] / sum(term_zkz)[1]
     σ_new = sqrt( 1/sum(term_zkz)[1] * (sum(term_zkz_logY_sq)[1] - 2.0*μ_new*sum(term_zkz_logY)[1] + (μ_new)^2*sum(term_zkz)[1] ) )

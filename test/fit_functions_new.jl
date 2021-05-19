@@ -358,3 +358,92 @@ end
 
 
 end
+
+
+@testset "LogNormal, exact" begin
+
+    # Fit 50,000 observations as an example
+
+    # param0 = rand(Distributions.Uniform(0, 1), 1)[1]
+    # param1 = rand(Distributions.Uniform(0.5, 5), 4)
+    # param2 = rand(Distributions.Uniform(0.5, 3), 4)
+
+    # X = rand(Distributions.Uniform(-5, 5), 50000, 7)
+    # α = rand(Distributions.Uniform(-1, 1), 2, 7)
+    # α[2,:] .= 0
+
+    # model = [LogNormalExpert(param1[1], param2[1]) LogNormalExpert(param1[2], param2[2]);
+    #          LogNormalExpert(param1[3], param2[3]) LogNormalExpert(param1[4], param2[4])]
+
+    # expos = rand(Distributions.Uniform(0.1, 5), 50000)
+    # Y_sim = LRMoE.sim_dataset(α, X, model, exposure = expos)
+
+    # α_guess = fill(0.0, 2, 7)
+    # model_guess = [LogNormalExpert(0.5*param1[1], 1.2*param2[1]) LogNormalExpert(0.75*param1[2], 0.8*param2[2]);
+    #                LogNormalExpert(2*param1[3], 1.25*param2[3]) LogNormalExpert(0.1*param1[4], param2[4])]
+
+    # pen_α = 5
+    # pen_params = [[[Inf 1.0 Inf], [Inf 1.0 Inf]],
+    #               [[Inf 1.0 Inf], [Inf 1.0 Inf]]]
+
+    # result = LRMoE.fit_exact(Y_sim, X, α_guess, model_guess,
+    #                     exposure = expos,
+    #                     penalty = true, 
+    #                     pen_α = pen_α, pen_params = pen_params,
+    #                     # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
+    #                     # grad_jump = true, grad_seq = nothing,
+    #                     print_steps = true)
+    
+    # α
+    # result.α_fit 
+   
+    # model
+    # result.model_fit
+
+
+
+end
+
+@testset "ZILogNormal, exact" begin
+
+    # Fit 50,000 observations as an example
+
+    # param0 = rand(Distributions.Uniform(0, 1), 4)
+    # param1 = rand(Distributions.Uniform(0.5, 5), 4)
+    # param2 = rand(Distributions.Uniform(0.5, 3), 4)
+
+    # X = rand(Distributions.Uniform(-5, 5), 50000, 7)
+    # α = rand(Distributions.Uniform(-1, 1), 2, 7)
+    # α[2,:] .= 0
+
+    # model = [ZILogNormalExpert(param0[1], param1[1], param2[1]) ZILogNormalExpert(param0[2], param1[2], param2[2]);
+    #          ZILogNormalExpert(param0[3], param1[3], param2[3]) ZILogNormalExpert(param0[4], param1[4], param2[4])]
+
+    # expos = rand(Distributions.Uniform(0.1, 5), 50000)
+    # Y_sim = LRMoE.sim_dataset(α, X, model, exposure = expos)
+
+    # α_guess = fill(0.0, 2, 7)
+    # model_guess = [ZILogNormalExpert(0.5, 0.5*param1[1], 1.2*param2[1]) ZILogNormalExpert(0.5, 0.75*param1[2], 0.8*param2[2]);
+    #                ZILogNormalExpert(0.5, 2*param1[3], 1.25*param2[3]) ZILogNormalExpert(0.5, 0.1*param1[4], param2[4])]
+
+    # pen_α = 5
+    # pen_params = [[[Inf 1.0 Inf], [Inf 1.0 Inf]],
+    #               [[Inf 1.0 Inf], [Inf 1.0 Inf]]]
+
+    # result = LRMoE.fit_exact(Y_sim, X, α_guess, model_guess,
+    #                     exposure = expos,
+    #                     penalty = true, 
+    #                     pen_α = pen_α, pen_params = pen_params,
+    #                     # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
+    #                     # grad_jump = true, grad_seq = nothing,
+    #                     print_steps = true)
+    
+    # α
+    # result.α_fit 
+   
+    # model
+    # result.model_fit
+
+
+
+end
