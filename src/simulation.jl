@@ -1,5 +1,5 @@
 function sim_components(model)
-    return vcat([[hcat([sim_expert(model[j, k], 1) for k in 1:size(model)[2]]...) for j in 1:size(model)[1]]...]...)
+    return LRMoE.sim_expert.(model)
 end
 
 function sim_logit_gating(α, X)
