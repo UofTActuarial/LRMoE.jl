@@ -194,52 +194,40 @@ end
 
 ## EM: M-Step, exact observations
 function _gammacount_optim_params(lognew,
-                        d_old,
-                        ye, # tl, yl, yu, tu,
-                        expert_ll_pos, # expert_tn_pos, expert_tn_bar_pos,
-                        z_e_obs; # , # z_e_lat, k_e,
-                        # Y_e_obs, Y_e_lat;
+                        ye, exposure,
+                        z_e_obs;
                         penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
     # Optimization in log scale for unconstrained computation    
     m_tmp = exp(lognew[1])
     s_tmp = exp(lognew[2])
 
     # Further E-Step
-    # yl_yu_unique = unique_bounds(yl, yu)
-    # int_obs_dens_tmp = _int_obs_dens_raw.(m_tmp, s_tmp, d_old, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    densY_e_obs = logpdf.(GammaCountExpert(m_tmp, s_tmp), ye) # exp.(-expert_ll_pos) .* int_obs_dens_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
+    densY_e_obs = fill(NaN, length(exposure))
+    for i in 1:length(exposure)
+        densY_e_obs[i] = expert_ll_exact(exposurize_expert(LRMoE.GammaCountExpert(m_tmp, s_tmp), exposure = exposure[i]), ye[i])
+    end
+    # densY_e_obs = logpdf.(GammaCountExpert(m_tmp, s_tmp), ye)
     nan2num(densY_e_obs, 0.0) # get rid of NaN
 
-    # tl_tu_unique = unique_bounds(tl, tu)
-    # int_lat_dens_tmp = _int_lat_dens_raw.(m_tmp, s_tmp, d_old, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    densY_e_lat = 0.0 # exp.(-expert_tn_bar_pos) .* int_lat_dens_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
-    # nan2num(densY_e_lat, 0.0) # get rid of NaN
+    term_zkz_Y = z_e_obs .* densY_e_obs
 
-    # term_zkz = z_e_obs .+ (z_e_lat .* k_e)
-    term_zkz_Y = (z_e_obs .* densY_e_obs) # .+ (z_e_lat .* k_e .* densY_e_lat)
-
-    # sum_term_zkz = sum(term_zkz)[1]
     sum_term_zkzy = sum(term_zkz_Y)[1]
 
     obj = sum_term_zkzy
     p = penalty ? (pen_pararms_jk[1]-1)*log(m_tmp) - m_tmp/pen_pararms_jk[2] + (pen_pararms_jk[3]-1)*log(s_tmp) - s_tmp/pen_pararms_jk[4] : 0.0
     return (obj + p) * (-1.0)
 end
+
 function EM_M_expert_exact(d::GammaCountExpert,
-                    ye,
-                    expert_ll_pos,
+                    ye, exposure,
                     z_e_obs; 
                     penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
 
     # Update parameters
-    logparams_new = Optim.minimizer( Optim.optimize(x -> _gammacount_optim_params(x, d,
-                                                ye, # tl, yl, yu, tu,
-                                                expert_ll_pos, # expert_tn_pos, expert_tn_bar_pos,
-                                                z_e_obs, # z_e_lat, k_e,
-                                                # Y_e_obs, Y_e_lat,
+    logparams_new = Optim.minimizer( Optim.optimize(x -> _gammacount_optim_params(x,
+                                                ye, exposure,
+                                                z_e_obs, 
                                                 penalty = penalty, pen_pararms_jk = pen_pararms_jk),
-                                                # [log(d.m)-2.0, log(d.s)-2.0],
-                                                # [log(d.m)+2.0, log(d.s)+2.0],
                                                 [log(d.m), log(d.s)] ))
 
     # println("$logparams_new")

@@ -122,27 +122,28 @@ end
 
 ## EM: M-Step, exact observations
 function EM_M_expert_exact(d::ZIGammaCountExpert,
-                    ye,
-                    expert_ll_pos,
+                    ye, exposure,
                     z_e_obs; 
                     penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
 
     # Old parameters
-    p_old = d.p
+    p_old = p_zero(d)
 
     # Update zero probability
+    expert_ll_pos = fill(NaN, length(exposure))
+    for i in 1:length(exposure)
+        expert_ll_pos[i] = expert_ll_exact(exposurize_expert(LRMoE.GammaCountExpert(d.m, d.s), exposure = exposure[i]), ye[i])
+    end
+
     z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(ye, p_old, expert_ll_pos)
     z_pos_e_obs = z_e_obs .- z_zero_e_obs
-    z_zero_e_lat = 0.0
-    z_pos_e_lat = 0.0
     p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, 0.0, 0.0, 0.0)
 
     # Update parameters: call its positive part
     tmp_exp = GammaCountExpert(d.m, d.s)
     tmp_update = EM_M_expert_exact(tmp_exp,
-                            ye,
-                            expert_ll_pos,
-                            z_pos_e_obs;
+                            ye, exposure,
+                            z_pos_e_obs,
                             penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     return ZIGammaCountExpert(p_new, tmp_update.m, tmp_update.s)
