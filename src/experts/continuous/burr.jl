@@ -255,7 +255,7 @@ end
 
 ## EM: M-Step, exact observations
 function _burr_lpow_to_k_exact(sum_term_zkz, sum_term_zkzlpow;
-    penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf 1.0 Inf])
+                                penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf 1.0 Inf])
     if penalty
         return (sum_term_zkz + (pen_pararms_jk[1]-1))/(sum_term_zkzlpow + 1/pen_pararms_jk[2]) 
     else
@@ -264,28 +264,19 @@ function _burr_lpow_to_k_exact(sum_term_zkz, sum_term_zkzlpow;
 end
 
 function _burr_optim_params_exact(lognew,
-                        d_old,
                         ye,
-                        expert_ll_pos, # expert_tn_pos, expert_tn_bar_pos,
-                        z_e_obs, # z_e_lat, k_e,
+                        z_e_obs,
                         sum_term_zkzlogy;
                         penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf 1.0 Inf])
     # Optimization in log scale for unconstrained computation    
     c_tmp = exp(lognew[1])
     λ_tmp = exp(lognew[2])
 
-    # yl_yu_unique = unique_bounds(yl, yu)
-    # int_obs_lpow_tmp = _int_obs_lpow_raw.(c_tmp, λ_tmp, d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    lpow_e_obs = log1p.((ye./λ_tmp).^c_tmp) # log.(1.0 .+ (ye./λ_tmp).^c_tmp) # exp.(-expert_ll_pos) .* int_obs_lpow_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
+    lpow_e_obs = log1p.((ye./λ_tmp).^c_tmp) 
     # nan2num(lpow_e_obs, 0.0) # get rid of NaN
 
-    # tl_tu_unique = unique_bounds(tl, tu)
-    # int_lat_lpow_tmp = _int_lat_lpow_raw.(c_tmp, λ_tmp, d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    # lpow_e_lat = 0.0 # exp.(-expert_tn_bar_pos) .* int_lat_lpow_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
-    # nan2num(lpow_e_lat, 0.0) # get rid of NaN
-
-    term_zkz = z_e_obs # .+ (z_e_lat .* k_e)
-    term_zkzlpow = (z_e_obs .* lpow_e_obs) # .+ (z_e_lat .* k_e .* lpow_e_lat)
+    term_zkz = z_e_obs 
+    term_zkzlpow = z_e_obs .* lpow_e_obs
 
     sum_term_zkz = sum(term_zkz)[1]
     sum_term_zkzlpow = sum(term_zkzlpow)[1]
@@ -298,62 +289,41 @@ function _burr_optim_params_exact(lognew,
 end
 
 function EM_M_expert_exact(d::BurrExpert,
-                            ye,
-                            expert_ll_pos,
+                            ye, exposure,
                             z_e_obs; 
                             penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
 
     # Further E-Step
-    # yl_yu_unique = unique_bounds(yl, yu)
-    # int_obs_logY_tmp = _int_obs_logY_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    logY_e_obs = log.(ye) # exp.(-expert_ll_pos) .* int_obs_logY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
-    # nan2num(logY_e_obs, 0.0) # get rid of NaN
+    logY_e_obs = log.(ye)
 
-    # tl_tu_unique = unique_bounds(tl, tu)
-    # int_lat_logY_tmp = _int_lat_logY_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    # logY_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_logY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
-    # nan2num(logY_e_lat, 0.0) # get rid of NaN
-    
     # Update parameters
     pos_idx = (ye .!= 0.0)
-    term_zkz = z_e_obs[pos_idx] # .+ (z_e_lat[pos_idx] .* k_e[pos_idx])
-    term_zkz_logY = (z_e_obs[pos_idx] .* logY_e_obs[pos_idx]) # .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_e_lat[pos_idx])
+    term_zkz = z_e_obs[pos_idx]
+    term_zkz_logY = z_e_obs[pos_idx] .* logY_e_obs[pos_idx]
 
     sum_term_zkzlogy = sum(term_zkz_logY)[1]
     
-    logparams_new = Optim.minimizer( Optim.optimize(x -> _burr_optim_params_exact(x, d,
-                                                ye[pos_idx], # tl[pos_idx], yl[pos_idx], yu[pos_idx], tu[pos_idx],
-                                                expert_ll_pos[pos_idx], # expert_tn_pos[pos_idx], expert_tn_bar_pos[pos_idx],
-                                                z_e_obs[pos_idx], # z_e_lat[pos_idx], k_e[pos_idx],
+    logparams_new = Optim.minimizer( Optim.optimize(x -> _burr_optim_params_exact(x,
+                                                ye[pos_idx],
+                                                z_e_obs[pos_idx],
                                                 sum_term_zkzlogy,
                                                 penalty = penalty, pen_pararms_jk = pen_pararms_jk),
-                                                # [log(d.c)-2.0, log(d.λ)-2.0],
-                                                # [log(d.c)+2.0, log(d.λ)+2.0],
                                                 [log(d.c), log(d.λ)] ))
    
     c_new = exp(logparams_new[1])
     λ_new = exp(logparams_new[2])
 
     # Find k_new
-    # yl_yu_unique = unique_bounds(yl, yu)
-    # int_obs_lpow_tmp = _int_obs_lpow_raw.(c_new, λ_new, d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    lpow_e_obs = log1p.((ye ./ λ_new).^c_new) # log.(1.0 .+(ye ./ λ_new).^c_new) # exp.(-expert_ll_pos) .* int_obs_lpow_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
-    nan2num(lpow_e_obs, 0.0) # get rid of NaN
+    lpow_e_obs = log1p.((ye ./ λ_new).^c_new)
+    nan2num(lpow_e_obs, 0.0)
 
-    # tl_tu_unique = unique_bounds(tl, tu)
-    # int_lat_lpow_tmp = _int_lat_lpow_raw.(c_new, λ_new, d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    # lpow_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_lpow_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
-    # nan2num(lpow_e_lat, 0.0) # get rid of NaN
-
-    term_zkz = z_e_obs[pos_idx] # .+ (z_e_lat[pos_idx] .* k_e[pos_idx])
-    term_zkzlpow = (z_e_obs[pos_idx] .* lpow_e_obs[pos_idx]) # .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* lpow_e_lat[pos_idx])
+    term_zkz = z_e_obs[pos_idx]
+    term_zkzlpow = z_e_obs[pos_idx] .* lpow_e_obs[pos_idx]
 
     sum_term_zkz = sum(term_zkz)[1]
     sum_term_zkzlpow = sum(term_zkzlpow)[1]
 
     k_new = _burr_lpow_to_k_exact(sum_term_zkz, sum_term_zkzlpow, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
-
-    # println("$k_new, $c_new, $λ_new")
 
     return BurrExpert(k_new, c_new, λ_new)
 end
