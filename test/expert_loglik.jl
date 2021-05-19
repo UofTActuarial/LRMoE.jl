@@ -777,4 +777,22 @@ end
     @test size(LRMoE.loglik_aggre_gate_dim(gate_tmp, dim_agg)) == (15, 4)
     
 
+    # Simulation related
+    X_tmp = rand(Distributions.Uniform(-1, 1), 15, 7)
+    α_tmp = rand(Distributions.Uniform(-1, 1), 4, 7)
+
+    model = [LogNormalExpert(param1, param2) ZIGammaExpert(param0, param1, param2) WeibullExpert(param1, param2) BurrExpert(param1, param2, param3);
+            BinomialExpert(20, param0) PoissonExpert(param1) ZIGammaCountExpert(param0, param1, param2) ZINegativeBinomialExpert(param0, param1, param0)]
+    
+    expo = rand(Distributions.Uniform(0.5, 20), 15)
+            
+    model_expod = LRMoE.exposurize_model(model, exposure = expo)
+
+    sim_tmp = LRMoE.sim_dataset(α_tmp, X_tmp, model, exposure = expo)
+    mean(sim_tmp, dims = 1)
+
+    sim_tmp = LRMoE.sim_dataset(α_tmp, X_tmp, model)
+    mean(sim_tmp, dims = 1)
+
+
 end

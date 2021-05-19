@@ -1,5 +1,5 @@
-function sim_components(model, sample_size)
-    return [[hcat([sim_expert(model[j, k], sample_size) for k in 1:size(model)[2]]...) for j in 1:size(model)[1]]...]
+function sim_components(model)
+    return vcat([[hcat([sim_expert(model[j, k], 1) for k in 1:size(model)[2]]...) for j in 1:size(model)[1]]...]...)
 end
 
 function sim_logit_gating(α, X)
@@ -8,11 +8,14 @@ function sim_logit_gating(α, X)
     return hcat([rand(Distributions.Multinomial(1, probs[i,:])) for i in 1:size(X)[1]]...)'
 end
 
-function sim_dataset(α, X, model)
+function sim_dataset(α, X, model; exposure = nothing)
     X = Array(X)
-    dim_comp_sim = sim_components(model, size(X)[1])
+    if isnothing(exposure)
+        exposure = fill(1.0, size(X)[1])
+    end
+    model_expo = exposurize_model(model, exposure = exposure)
     gating_sim = sim_logit_gating(α, X)
-    return hcat([sum(gating_sim .* dim_comp_sim[j], dims = 2)  for j in 1:size(model)[1]]...)
+    return vcat([sim_components(model_expo[:,:,i]) * gating_sim[i,:] for i in 1:size(X)[2]]'...)
 end
 
 

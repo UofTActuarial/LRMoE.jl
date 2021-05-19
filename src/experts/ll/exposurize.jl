@@ -61,7 +61,7 @@ function fit_exact(Y, X, α_init, model;
                     grad_jump = true, grad_seq = nothing,
                     print_steps = true)
     # Make variables accessible within the scope of `let`
-    let α_em, gate_em, model_em, model_em_expo, ll_em_list, ll_em, ll_em_np, ll_em_old, ll_em_np_old, iter, z_e_obs, z_e_lat, k_e, params_old        
+    let α_em, gate_em, model_em, exposure, model_em_expo, ll_em_list, ll_em, ll_em_np, ll_em_old, ll_em_np_old, iter, z_e_obs, z_e_lat, k_e, params_old        
         # Initial loglik
         gate_init = LogitGating(α_init, X)
         model_expo = exposurize_model(model, exposure = exposure) # exposurize
@@ -123,8 +123,9 @@ function fit_exact(Y, X, α_init, model;
                     params_old = params(model_em[j,k])
                     
                     model_em[j,k] = EM_M_expert_exact(model_em[j,k], 
-                                                Y[:, j],
-                                                ll_em_list.expert_ll_pos_dim_comp[j][:,k],
+                                                Y[:, j], exposure,
+                                                # ll_em_list.expert_ll_pos_dim_comp[j][:,k],
+                                                ll_em_list.expert_ll_dim_comp[j, k, :],
                                                 vec(z_e_obs[:,k]),
                                                 penalty = penalty, pen_pararms_jk = pen_params[j][k])
 
