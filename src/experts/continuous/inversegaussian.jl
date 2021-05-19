@@ -203,46 +203,21 @@ end
 
 ## EM: M-Step, exact observations
 function EM_M_expert_exact(d::InverseGaussianExpert,
-                            ye,
-                            expert_ll_pos,
+                            ye, exposure,
                             z_e_obs; 
                             penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
 
     # Further E-Step
-    # yl_yu_unique = unique_bounds(yl, yu)
-
-    # int_obs_Y_tmp = _int_obs_Y_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    # int_obs_logY_tmp = _int_obs_logY_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    # int_obs_invY_tmp = _int_obs_invY_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-
     Y_e_obs = ye
-    logY_e_obs = log.(ye)
     invY_e_obs = 1.0 ./ ye
 
     nan2num(Y_e_obs, 0.0) # get rid of NaN
-    nan2num(logY_e_obs, 0.0) # get rid of NaN
-    nan2num(invY_e_obs, 0.0) # get rid of NaN
-
-    # tl_tu_unique = unique_bounds(tl, tu)
-    
-    # int_lat_Y_tmp = _int_lat_Y_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    # int_lat_logY_tmp = _int_lat_logY_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    # int_lat_invY_tmp = _int_lat_invY_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-
-    Y_e_lat = 0.0
-    logY_e_lat = 0.0
-    invY_e_lat = 0.0
-    
-    # nan2num(Y_e_lat, 0.0) # get rid of NaN
-    # nan2num(logY_e_lat, 0.0) # get rid of NaN
-    # nan2num(invY_e_lat, 0.0) # get rid of NaN
     
     # Update parameters
     pos_idx = (ye .!= 0.0)
-    term_zkz = z_e_obs[pos_idx] # .+ (z_e_lat[pos_idx] .* k_e[pos_idx])
-    term_zkz_Y = (z_e_obs[pos_idx] .* Y_e_obs[pos_idx]) # .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* Y_e_lat[pos_idx])
-    term_zkz_logY = (z_e_obs[pos_idx] .* logY_e_obs[pos_idx]) # .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_e_lat[pos_idx])
-    term_zkz_invY = (z_e_obs[pos_idx] .* invY_e_obs[pos_idx]) # .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* invY_e_lat[pos_idx])
+    term_zkz = z_e_obs[pos_idx]
+    term_zkz_Y = z_e_obs[pos_idx] .* Y_e_obs[pos_idx]
+    term_zkz_invY = z_e_obs[pos_idx] .* invY_e_obs[pos_idx]
 
     μ_new = sum(term_zkz_Y)[1] / sum(term_zkz)[1]
     λ_new = sum(term_zkz)[1] / ( sum(term_zkz_Y)[1]/(μ_new)^2 - 2*sum(term_zkz)[1]/μ_new + sum(term_zkz_invY)[1] )

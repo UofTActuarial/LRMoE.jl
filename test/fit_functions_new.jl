@@ -537,3 +537,47 @@ end
 
 
 end
+
+@testset "InverseGaussianm, exact" begin
+
+    # Fit 50,000 observations as an example
+
+    param0 = rand(Distributions.Uniform(0, 1), 1)[1]
+    param1 = rand(Distributions.Uniform(1, 10), 4)
+    param2 = rand(Distributions.Uniform(0.5, 30), 4)
+
+    X = rand(Distributions.Uniform(-5, 5), 50000, 7)
+    α = rand(Distributions.Uniform(-1, 1), 2, 7)
+    α[2,:] .= 0
+
+    model = [InverseGaussianExpert(param1[1], param2[1]) InverseGaussianExpert(param1[2], param2[2]);
+             InverseGaussianExpert(param1[3], param2[3]) InverseGaussianExpert(param1[4], param2[4])]
+
+    expos = rand(Distributions.Uniform(0.1, 5), 50000)
+    Y_sim = LRMoE.sim_dataset(α, X, model, exposure = expos)
+
+    α_guess = fill(0.0, 2, 7)
+    model_guess = [InverseGaussianExpert(0.5*param1[1], 1.2*param2[1]) InverseGaussianExpert(0.75*param1[2], 0.8*param2[2]);
+                   InverseGaussianExpert(2*param1[3], 1.25*param2[3]) InverseGaussianExpert(0.1*param1[4], param2[4])]
+
+    pen_α = 5
+    pen_params = [[[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]],
+                  [[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]]]
+
+    result = LRMoE.fit_exact(Y_sim, X, α_guess, model_guess,
+                        exposure = expos,
+                        penalty = true, 
+                        pen_α = pen_α, pen_params = pen_params,
+                        # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
+                        # grad_jump = true, grad_seq = nothing,
+                        print_steps = true)
+    
+    α
+    result.α_fit 
+   
+    model
+    result.model_fit
+
+
+
+end
