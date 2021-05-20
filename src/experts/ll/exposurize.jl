@@ -1,5 +1,5 @@
 function exposurize_model(model; exposure = 1)
-    result = Array{Union{Nothing, LRMoE.AnyExpert}}(nothing, size(model)[1], size(model)[1], length(exposure))
+    result = Array{Union{Nothing, LRMoE.AnyExpert}}(nothing, size(model)[1], size(model)[2], length(exposure))
     for i in 1:length(exposure)
         result[:,:,i] = LRMoE.exposurize_expert.(model, exposure = exposure[i])
     end
