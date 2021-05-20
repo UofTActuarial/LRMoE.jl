@@ -769,6 +769,35 @@ end
     @test cube_tmp[2,4,idx] == LRMoE.expert_ll_exact(model_expod[2,4,idx], Y_tmp[idx,2])
 
 
+    Y_tmp = hcat(0.2 .* Y_tmp[:,1], 0.8 .* Y_tmp[:,1], 1.2 .* Y_tmp[:,1], 5 .* Y_tmp[:,1], fill(0, length(Y_tmp[:,2])), Y_tmp[:,2], Y_tmp[:,2], fill(Inf, length(Y_tmp[:,2])))
+    
+    @test size(LRMoE.expert_ll_ind_mat(Y_tmp[1,:], model_expod[:,:,1])) == (2, 4)
+    @test size(LRMoE.expert_ll_ind_mat(Y_tmp[5,:], model_expod[:,:,5])) == (2, 4)
+    @test size(LRMoE.expert_ll_ind_mat(Y_tmp[12,:], model_expod[:,:,12])) == (2, 4)
+    @test size(LRMoE.expert_ll_list(Y_tmp, model_expod)) == (2, 4, 15)
+
+    idx = rand(1:15, 1)[1]
+    mat_tmp = LRMoE.expert_ll_ind_mat(Y_tmp[idx,:], model_expod[:,:,idx])
+    @test mat_tmp[1,1] == LRMoE.expert_ll(model_expod[1,1,idx], Y_tmp[idx,1], Y_tmp[idx,2], Y_tmp[idx,3], Y_tmp[idx,4])
+    @test mat_tmp[1,2] == LRMoE.expert_ll(model_expod[1,2,idx], Y_tmp[idx,1], Y_tmp[idx,2], Y_tmp[idx,3], Y_tmp[idx,4])
+    @test mat_tmp[1,3] == LRMoE.expert_ll(model_expod[1,3,idx], Y_tmp[idx,1], Y_tmp[idx,2], Y_tmp[idx,3], Y_tmp[idx,4])
+    @test mat_tmp[1,4] == LRMoE.expert_ll(model_expod[1,4,idx], Y_tmp[idx,1], Y_tmp[idx,2], Y_tmp[idx,3], Y_tmp[idx,4])
+    @test mat_tmp[2,1] == LRMoE.expert_ll(model_expod[2,1,idx], Y_tmp[idx,5], Y_tmp[idx,6], Y_tmp[idx,7], Y_tmp[idx,8])
+    @test mat_tmp[2,2] == LRMoE.expert_ll(model_expod[2,2,idx], Y_tmp[idx,5], Y_tmp[idx,6], Y_tmp[idx,7], Y_tmp[idx,8])
+    @test mat_tmp[2,3] == LRMoE.expert_ll(model_expod[2,3,idx], Y_tmp[idx,5], Y_tmp[idx,6], Y_tmp[idx,7], Y_tmp[idx,8])
+    @test mat_tmp[2,3] == LRMoE.expert_ll(model_expod[2,3,idx], Y_tmp[idx,5], Y_tmp[idx,6], Y_tmp[idx,7], Y_tmp[idx,8])
+
+    idx = rand(1:15, 1)[1]
+    cube_tmp = LRMoE.expert_ll_list(Y_tmp, model_expod)
+    @test cube_tmp[1,1,idx] == LRMoE.expert_ll(model_expod[1,1,idx], Y_tmp[idx,1], Y_tmp[idx,2], Y_tmp[idx,3], Y_tmp[idx,4])
+    @test cube_tmp[1,2,idx] == LRMoE.expert_ll(model_expod[1,2,idx], Y_tmp[idx,1], Y_tmp[idx,2], Y_tmp[idx,3], Y_tmp[idx,4])
+    @test cube_tmp[1,3,idx] == LRMoE.expert_ll(model_expod[1,3,idx], Y_tmp[idx,1], Y_tmp[idx,2], Y_tmp[idx,3], Y_tmp[idx,4])
+    @test cube_tmp[1,4,idx] == LRMoE.expert_ll(model_expod[1,4,idx], Y_tmp[idx,1], Y_tmp[idx,2], Y_tmp[idx,3], Y_tmp[idx,4])
+    @test cube_tmp[2,1,idx] == LRMoE.expert_ll(model_expod[2,1,idx], Y_tmp[idx,5], Y_tmp[idx,6], Y_tmp[idx,7], Y_tmp[idx,8])
+    @test cube_tmp[2,2,idx] == LRMoE.expert_ll(model_expod[2,2,idx], Y_tmp[idx,5], Y_tmp[idx,6], Y_tmp[idx,7], Y_tmp[idx,8])
+    @test cube_tmp[2,3,idx] == LRMoE.expert_ll(model_expod[2,3,idx], Y_tmp[idx,5], Y_tmp[idx,6], Y_tmp[idx,7], Y_tmp[idx,8])
+    @test cube_tmp[2,4,idx] == LRMoE.expert_ll(model_expod[2,4,idx], Y_tmp[idx,5], Y_tmp[idx,6], Y_tmp[idx,7], Y_tmp[idx,8])
+
     # ll related
     gate_tmp = rand(Distributions.Uniform(-1, 1), 15, 4)
 

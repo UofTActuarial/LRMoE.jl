@@ -1,15 +1,17 @@
 # This fitting function assumes 
 function fit_main(Y, X, α_init, model;
+                  exposure = nothing,
                   penalty = true, pen_α = 5.0, pen_params = nothing,
                   ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
                   grad_jump = true, grad_seq = nothing,
                   print_steps = true)
 
     # Make variables accessible within the scope of `let`
-    let α_em, gate_em, model_em, ll_em_list, ll_em, ll_em_np, ll_em_old, ll_em_np_old, iter, z_e_obs, z_e_lat, k_e, params_old
+    let α_em, gate_em, model_em, model_em_expo, ll_em_list, ll_em, ll_em_np, ll_em_old, ll_em_np_old, iter, z_e_obs, z_e_lat, k_e, params_old
         # Initial loglik
         gate_init = LogitGating(α_init, X)
-        ll_np_list = loglik_np(Y, gate_init, model)
+        model_expo = exposurize_model(model, exposure = exposure) # exposurize
+        ll_np_list = loglik_np(Y, gate_init, model_expo)
         ll_init_np = ll_np_list.ll
         ll_penalty = penalty ? (penalty_α(α_init, pen_α) + penalty_params(model, pen_params)) : 0.0
         ll_init = ll_init_np + ll_penalty 
@@ -21,8 +23,9 @@ function fit_main(Y, X, α_init, model;
         # start em
         α_em = copy(α_init)
         model_em = copy(model)
+        model_em_expo = exposurize_model(model_em, exposure = exposure)
         gate_em = LogitGating(α_em, X)
-        ll_em_list = loglik_np(Y, gate_em, model_em)
+        ll_em_list = loglik_np(Y, gate_em, model_em_expo)
         ll_em_np = ll_em_list.ll
         ll_em = ll_init
         ll_em_old = -Inf
@@ -36,9 +39,6 @@ function fit_main(Y, X, α_init, model;
 
             # E-Step
             z_e_obs = EM_E_z_obs(ll_em_list.gate_expert_ll_comp, ll_em_list.gate_expert_ll)
-            # z_e_obs = EM_E_z_obs(ll_em_list.gate_expert_tn_bar_comp_k, ll_em_list.gate_expert_tn_bar_k)
-            # z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp, ll_em_list.gate_expert_tn_bar)
-            # z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp_k, ll_em_list.gate_expert_tn_bar_k)
             z_e_lat = EM_E_z_lat(ll_em_list.gate_expert_tn_bar_comp_z_lat, ll_em_list.gate_expert_tn_bar_z_lat)
             # k_e = EM_E_k(ll_em_list.gate_expert_tn)
             k_e = EM_E_k(ll_em_list.gate_expert_tn_bar_k)
@@ -49,7 +49,7 @@ function fit_main(Y, X, α_init, model;
             ll_em_temp = ll_em
             α_em = EM_M_α(X, α_em, z_e_obs, z_e_lat, k_e, α_iter_max = α_iter_max, penalty = penalty, pen_α = pen_α)
             gate_em = LogitGating(α_em, X)
-            ll_em_list = loglik_np(Y, gate_em, model_em)
+            ll_em_list = loglik_np(Y, gate_em, model_em_expo)
             ll_em_np = ll_em_list.ll
             ll_em_penalty = penalty ? (penalty_α(α_em, pen_α) + penalty_params(model_em, pen_params)) : 0.0
             ll_em = ll_em_np + ll_em_penalty
@@ -76,7 +76,8 @@ function fit_main(Y, X, α_init, model;
                                                 vec(z_e_obs[:,k]), vec(z_e_lat[:,k]), vec(k_e),
                                                 penalty = penalty, pen_pararms_jk = pen_params[j][k])
 
-                    ll_em_list = loglik_np(Y, gate_em, model_em)
+                    model_em_expo = exposurize_model(model_em, exposure = exposure)
+                    ll_em_list = loglik_np(Y, gate_em, model_em_expo)
                     ll_em_np = ll_em_list.ll
                     ll_em_penalty = penalty ? (penalty_α(α_em, pen_α) + penalty_params(model_em, pen_params)) : 0.0
                     ll_em = ll_em_np + ll_em_penalty
@@ -95,8 +96,9 @@ function fit_main(Y, X, α_init, model;
 
             α_em = α_em
             model_em = model_em
+            model_em_expo = exposurize_model(model_em, exposure = exposure)
             gate_em = LogitGating(α_em, X)
-            ll_em_list = loglik_np(Y, gate_em, model_em)
+            ll_em_list = loglik_np(Y, gate_em, model_em_expo)
             ll_em_np = ll_em_list.ll
             ll_em_penalty = penalty ? (penalty_α(α_em, pen_α) + penalty_params(model_em, pen_params)) : 0.0
             ll_em = ll_em_np + ll_em_penalty
