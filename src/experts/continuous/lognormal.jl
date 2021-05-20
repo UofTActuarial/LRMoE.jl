@@ -137,9 +137,10 @@ end
 ## EM: M-Step
 function EM_M_expert(d::LogNormalExpert,
                      tl, yl, yu, tu,
-                     expert_ll_pos,
-                     expert_tn_pos,
-                     expert_tn_bar_pos,
+                     exposure,
+                     # expert_ll_pos,
+                     # expert_tn_pos,
+                     # expert_tn_bar_pos,
                      z_e_obs, z_e_lat, k_e;
                      penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
 
@@ -147,7 +148,8 @@ function EM_M_expert(d::LogNormalExpert,
     μ_old = d.μ
     σ_old = d.σ
 
-    # println("$(μ_old), $(σ_old)")
+    expert_ll_pos = expert_ll.(d, tl, yl, yu, tu)
+    expert_tn_bar_pos = expert_tn_bar.(d, tl, yl, yu, tu)
 
     # Further E-Step
     logY_e_obs = vec( _int_obs_logY.(d, yl, yu, expert_ll_pos) )
@@ -166,8 +168,6 @@ function EM_M_expert(d::LogNormalExpert,
 
     μ_new = sum(term_zkz_logY)[1] / sum(term_zkz)[1]
     σ_new = sqrt( 1/sum(term_zkz)[1] * (sum(term_zkz_logY_sq)[1] - 2.0*μ_new*sum(term_zkz_logY)[1] + (μ_new)^2*sum(term_zkz)[1] ) )
-
-    # println("$(μ_new), $(σ_new)")
 
     return LogNormalExpert(μ_new, σ_new)
 end

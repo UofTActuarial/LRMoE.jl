@@ -70,9 +70,10 @@ function fit_main(Y, X, α_init, model;
                     
                     model_em[j,k] = EM_M_expert(model_em[j,k], 
                                                 Y[:, 4*(j-1)+1], Y[:, 4*(j-1)+2], Y[:, 4*(j-1)+3],Y[:, 4*(j-1)+4],
-                                                ll_em_list.expert_ll_pos_dim_comp[j][:,k],
-                                                ll_em_list.expert_tn_pos_dim_comp[j][:,k],
-                                                ll_em_list.expert_tn_bar_pos_dim_comp[j][:,k],
+                                                exposure,
+                                                # ll_em_list.expert_ll_pos_dim_comp[j][:,k],
+                                                # ll_em_list.expert_tn_pos_dim_comp[j][:,k],
+                                                # ll_em_list.expert_tn_bar_pos_dim_comp[j][:,k],
                                                 vec(z_e_obs[:,k]), vec(z_e_lat[:,k]), vec(k_e),
                                                 penalty = penalty, pen_pararms_jk = pen_params[j][k])
 

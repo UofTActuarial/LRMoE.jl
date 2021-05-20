@@ -95,18 +95,21 @@ excess(d::ZILogNormalExpert, u) = mean(d) - lev(d, u)
 ## EM: M-Step
 function EM_M_expert(d::ZILogNormalExpert,
                      tl, yl, yu, tu,
-                     expert_ll_pos,
-                     expert_tn_pos,
-                     expert_tn_bar_pos,
+                     exposure,
                      z_e_obs, z_e_lat, k_e;
                      penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
     
     # Old parameters
-    μ_old = d.μ
-    σ_old = d.σ
-    p_old = d.p
+    p_old = p_zero(d)
+
+    if p_old > 0.999999 || d.σ < 0.00001
+        return d
+    end
 
     # Update zero probability
+    expert_ll_pos = expert_ll.(LRMoE.LogNormalExpert(d.μ, d.σ), tl, yl, yu, tu)
+    expert_tn_bar_pos = expert_tn_bar.(LRMoE.LogNormalExpert(d.μ, d.σ), tl, yl, yu, tu)
+
     z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(yl, p_old, expert_ll_pos)
     z_pos_e_obs = z_e_obs .- z_zero_e_obs
     z_zero_e_lat = z_e_lat .* EM_E_z_zero_lat(tl, p_old, expert_tn_bar_pos)
@@ -117,10 +120,7 @@ function EM_M_expert(d::ZILogNormalExpert,
     tmp_exp = LogNormalExpert(d.μ, d.σ)
     tmp_update = EM_M_expert(tmp_exp,
                             tl, yl, yu, tu,
-                            expert_ll_pos,
-                            expert_tn_pos,
-                            expert_tn_bar_pos,
-                            # z_e_obs, z_e_lat, k_e,
+                            exposure,
                             z_pos_e_obs, z_pos_e_lat, k_e,
                             penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 

@@ -33,7 +33,7 @@ function expert_tn_ind_mat(Y, model)
     result = fill(NaN, size(model)[1], size(model)[2])
     for j in 1:size(model)[1]
         for k in 1:size(model)[2]
-            result[j, k] = LRMoE.expert_tn.(model[j, k], YY[4*(j-1)+1], Y[4*(j-1)+2], Y[4*(j-1)+3], Y[4*(j-1)+4])
+            result[j, k] = LRMoE.expert_tn.(model[j, k], Y[4*(j-1)+1], Y[4*(j-1)+2], Y[4*(j-1)+3], Y[4*(j-1)+4])
         end
     end
     return result 
