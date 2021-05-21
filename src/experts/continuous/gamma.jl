@@ -165,13 +165,17 @@ end
 ## EM: M-Step
 function EM_M_expert(d::GammaExpert,
                      tl, yl, yu, tu,
-                     expert_ll_pos,
-                     expert_tn_pos,
-                     expert_tn_bar_pos,
+                     exposure,
+                    #  expert_ll_pos,
+                    #  expert_tn_pos,
+                    #  expert_tn_bar_pos,
                      z_e_obs, z_e_lat, k_e;
                      penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
 
     # Further E-Step
+    expert_ll_pos = expert_ll.(d, tl, yl, yu, tu)
+    expert_tn_bar_pos = expert_tn_bar.(d, tl, yl, yu, tu)
+
     Y_e_obs = vec(_int_obs_Y.(d, yl, yu, expert_ll_pos))
     Y_e_lat = vec(_int_lat_Y.(d, tl, tu, expert_tn_bar_pos))
     nan2num(Y_e_obs, 0.0) # get rid of NaN
