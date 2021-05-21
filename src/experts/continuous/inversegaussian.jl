@@ -153,46 +153,47 @@ end
 ## EM: M-Step
 function EM_M_expert(d::InverseGaussianExpert,
                      tl, yl, yu, tu,
-                     expert_ll_pos,
-                     expert_tn_pos,
-                     expert_tn_bar_pos,
+                     exposure,
                      z_e_obs, z_e_lat, k_e;
                      penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
+    
+    expert_ll_pos = expert_ll.(d, tl, yl, yu, tu)
+    expert_tn_bar_pos = expert_tn_bar.(d, tl, yl, yu, tu)
 
     # Further E-Step
     yl_yu_unique = unique_bounds(yl, yu)
 
     int_obs_Y_tmp = _int_obs_Y_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    int_obs_logY_tmp = _int_obs_logY_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
+    # int_obs_logY_tmp = _int_obs_logY_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
     int_obs_invY_tmp = _int_obs_invY_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
 
     Y_e_obs = exp.(-expert_ll_pos) .* int_obs_Y_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
-    logY_e_obs = exp.(-expert_ll_pos) .* int_obs_logY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
+    # logY_e_obs = exp.(-expert_ll_pos) .* int_obs_logY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
     invY_e_obs = exp.(-expert_ll_pos) .* int_obs_invY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
 
     nan2num(Y_e_obs, 0.0) # get rid of NaN
-    nan2num(logY_e_obs, 0.0) # get rid of NaN
+    # nan2num(logY_e_obs, 0.0) # get rid of NaN
     nan2num(invY_e_obs, 0.0) # get rid of NaN
 
     tl_tu_unique = unique_bounds(tl, tu)
     
     int_lat_Y_tmp = _int_lat_Y_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    int_lat_logY_tmp = _int_lat_logY_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
+    # int_lat_logY_tmp = _int_lat_logY_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
     int_lat_invY_tmp = _int_lat_invY_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
 
     Y_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_Y_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
-    logY_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_logY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
+    # logY_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_logY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
     invY_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_invY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
     
     nan2num(Y_e_lat, 0.0) # get rid of NaN
-    nan2num(logY_e_lat, 0.0) # get rid of NaN
+    # nan2num(logY_e_lat, 0.0) # get rid of NaN
     nan2num(invY_e_lat, 0.0) # get rid of NaN
     
     # Update parameters
     pos_idx = (yu .!= 0.0)
     term_zkz = z_e_obs[pos_idx] .+ (z_e_lat[pos_idx] .* k_e[pos_idx])
     term_zkz_Y = (z_e_obs[pos_idx] .* Y_e_obs[pos_idx]) .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* Y_e_lat[pos_idx])
-    term_zkz_logY = (z_e_obs[pos_idx] .* logY_e_obs[pos_idx]) .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_e_lat[pos_idx])
+    # term_zkz_logY = (z_e_obs[pos_idx] .* logY_e_obs[pos_idx]) .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_e_lat[pos_idx])
     term_zkz_invY = (z_e_obs[pos_idx] .* invY_e_obs[pos_idx]) .+ (z_e_lat[pos_idx] .* k_e[pos_idx] .* invY_e_lat[pos_idx])
 
     μ_new = sum(term_zkz_Y)[1] / sum(term_zkz)[1]
