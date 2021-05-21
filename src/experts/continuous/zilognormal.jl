@@ -102,7 +102,7 @@ function EM_M_expert(d::ZILogNormalExpert,
     # Old parameters
     p_old = p_zero(d)
 
-    if p_old > 0.999999 || d.σ < 0.00001
+    if p_old > 0.999999 || p_old < 0.000001 || d.σ < 0.000001
         return d
     end
 

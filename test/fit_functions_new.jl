@@ -421,13 +421,19 @@ end
 
     # expos = rand(Distributions.Uniform(0.1, 5), 50000)
     # Y_sim = LRMoE.sim_dataset(α, X, model, exposure = expos)
-    # Y_sim = hcat(0.25.* Y_sim[:,1], 0.80.* Y_sim[:,1], 1.25.* Y_sim[:,1], 10 .* Y_sim[:,1], fill(0.0, length(Y_sim[:,2])), 0.75.* Y_sim[:,1], 2 .* Y_sim[:,1], fill(Inf, length(Y_sim[:,2])))
-
-    # # Y_sim = hcat(0.25.* Y_sim[:,1], Y_sim[:,1], Y_sim[:,1], 10 .* Y_sim[:,1], fill(0.0, length(Y_sim[:,2])), 0.75.* Y_sim[:,1], 2 .* Y_sim[:,1], fill(Inf, length(Y_sim[:,2])))
+   
+    # # All exact observations
+    # Y_sim = hcat(fill(0.0, length(Y_sim[:,1])), Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), fill(0.0, length(Y_sim[:,2])), Y_sim[:,2], Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+    # # Small censoring
+    # Y_sim = hcat(fill(0.0, length(Y_sim[:,1])), 0.975.* Y_sim[:,1], 1.025.* Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), fill(0.0, length(Y_sim[:,2])), 0.975.* Y_sim[:,2], 1.025.* Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+    # # Small truncation
+    # Y_sim = hcat(0.1 .* Y_sim[:,1], Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), 0.1 .* Y_sim[:,2], Y_sim[:,2], Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+    # # Censoring + Truncation
+    # Y_sim = hcat(0.1 .* Y_sim[:,1], 0.95.* Y_sim[:,1], 1.25.* Y_sim[:,1], 10 .* Y_sim[:,1], 0.1 .* Y_sim[:,2], 0.95.* Y_sim[:,2], 1.25.* Y_sim[:,2], 10 .* Y_sim[:,2])
 
     # α_guess = fill(0.0, 2, 7)
-    # model_guess = [LogNormalExpert(0.5*param1[1], 1.2*param2[1]) LogNormalExpert(0.75*param1[2], 0.8*param2[2]);
-    #                LogNormalExpert(2*param1[3], 1.25*param2[3]) LogNormalExpert(0.1*param1[4], param2[4])]
+    # model_guess = [LogNormalExpert(0.8*param1[1], 1.2*param2[1]) LogNormalExpert(0.75*param1[2], 1.3*param2[2]);
+    #                LogNormalExpert(1.2*param1[3], 1.25*param2[3]) LogNormalExpert(0.9*param1[4], param2[4])]
 
     # pen_α = 5
     # pen_params = [[[Inf 1.0 Inf], [Inf 1.0 Inf]],
@@ -437,7 +443,7 @@ end
     #                     exposure = expos,
     #                     penalty = true, 
     #                     pen_α = pen_α, pen_params = pen_params,
-    #                     ϵ = 0.05,
+    #                     ϵ = 0.5,
     #                     # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
     #                     # grad_jump = true, grad_seq = nothing,
     #                     print_steps = true)
@@ -500,46 +506,51 @@ end
 
     # Fit 50,000 observations as an example
 
-    param0 = rand(Distributions.Uniform(0, 1), 4)
-    param1 = rand(Distributions.Uniform(0.5, 5), 4)
-    param2 = rand(Distributions.Uniform(0.5, 3), 4)
+    # param0 = rand(Distributions.Uniform(0, 1), 4)
+    # param1 = rand(Distributions.Uniform(0.5, 5), 4)
+    # param2 = rand(Distributions.Uniform(0.5, 3), 4)
 
-    X = rand(Distributions.Uniform(-5, 5), 50000, 7)
-    α = rand(Distributions.Uniform(-1, 1), 2, 7)
-    α[2,:] .= 0
+    # X = rand(Distributions.Uniform(-5, 5), 50000, 7)
+    # α = rand(Distributions.Uniform(-1, 1), 2, 7)
+    # α[2,:] .= 0
 
-    model = [ZILogNormalExpert(param0[1], param1[1], param2[1]) ZILogNormalExpert(param0[2], param1[2], param2[2]);
-             ZILogNormalExpert(param0[3], param1[3], param2[3]) ZILogNormalExpert(param0[4], param1[4], param2[4])]
+    # model = [ZILogNormalExpert(param0[1], param1[1], param2[1]) ZILogNormalExpert(param0[2], param1[2], param2[2]);
+    #          ZILogNormalExpert(param0[3], param1[3], param2[3]) ZILogNormalExpert(param0[4], param1[4], param2[4])]
 
-    expos = rand(Distributions.Uniform(0.1, 5), 50000)
-    Y_sim = LRMoE.sim_dataset(α, X, model, exposure = expos)
-    Y_sim = hcat(0.25.* Y_sim[:,1], 0.80.* Y_sim[:,1], 1.25.* Y_sim[:,1], 10 .* Y_sim[:,1], fill(0.0, length(Y_sim[:,2])), 0.75.* Y_sim[:,1], 2 .* Y_sim[:,1], fill(Inf, length(Y_sim[:,2])))
+    # expos = rand(Distributions.Uniform(0.1, 5), 50000)
+    # Y_sim = LRMoE.sim_dataset(α, X, model, exposure = expos)
 
-    Y_sim = hcat(0.25.* Y_sim[:,1], Y_sim[:,1], Y_sim[:,1], 10 .* Y_sim[:,1], fill(0.0, length(Y_sim[:,2])), 0.75.* Y_sim[:,1], 2 .* Y_sim[:,1], fill(Inf, length(Y_sim[:,2])))
+    # # All exact observations
+    # Y_sim = hcat(fill(0.0, length(Y_sim[:,1])), Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), fill(0.0, length(Y_sim[:,2])), Y_sim[:,2], Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+    # # Small censoring
+    # Y_sim = hcat(fill(0.0, length(Y_sim[:,1])), 0.975.* Y_sim[:,1], 1.025.* Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), fill(0.0, length(Y_sim[:,2])), 0.975.* Y_sim[:,2], 1.025.* Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+    # # Small truncation
+    # Y_sim = hcat(0.1 .* Y_sim[:,1], Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), 0.1 .* Y_sim[:,2], Y_sim[:,2], Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+    # # Censoring + Truncation
+    # Y_sim = hcat(0.1 .* Y_sim[:,1], 0.95.* Y_sim[:,1], 1.25.* Y_sim[:,1], 10 .* Y_sim[:,1], 0.1 .* Y_sim[:,2], 0.95.* Y_sim[:,2], 1.25.* Y_sim[:,2], 10 .* Y_sim[:,2])
 
+    # α_guess = fill(0.0, 2, 7)
+    # model_guess = [ZILogNormalExpert(0.5, 0.5*param1[1], 1.2*param2[1]) ZILogNormalExpert(0.5, 0.75*param1[2], 0.8*param2[2]);
+    #                ZILogNormalExpert(0.5, 2*param1[3], 1.25*param2[3]) ZILogNormalExpert(0.5, 0.1*param1[4], param2[4])]
 
-    α_guess = fill(0.0, 2, 7)
-    model_guess = [ZILogNormalExpert(0.5, 0.5*param1[1], 1.2*param2[1]) ZILogNormalExpert(0.5, 0.75*param1[2], 0.8*param2[2]);
-                   ZILogNormalExpert(0.5, 2*param1[3], 1.25*param2[3]) ZILogNormalExpert(0.5, 0.1*param1[4], param2[4])]
+    # pen_α = 5
+    # pen_params = [[[Inf 1.0 Inf], [Inf 1.0 Inf]],
+    #               [[Inf 1.0 Inf], [Inf 1.0 Inf]]]
 
-    pen_α = 5
-    pen_params = [[[Inf 1.0 Inf], [Inf 1.0 Inf]],
-                  [[Inf 1.0 Inf], [Inf 1.0 Inf]]]
-
-    result = LRMoE.fit_main(Y_sim, X, α_guess, model_guess,
-                        exposure = expos,
-                        penalty = true, 
-                        pen_α = pen_α, pen_params = pen_params,
-                        ϵ = 0.05,
-                        # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
-                        # grad_jump = true, grad_seq = nothing,
-                        print_steps = true)
+    # result = LRMoE.fit_main(Y_sim, X, α_guess, model_guess,
+    #                     exposure = expos,
+    #                     penalty = true, 
+    #                     pen_α = pen_α, pen_params = pen_params,
+    #                     ϵ = 0.5,
+    #                     # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
+    #                     # grad_jump = true, grad_seq = nothing,
+    #                     print_steps = true)
     
-    α
-    result.α_fit 
+    # α
+    # result.α_fit 
    
-    model
-    result.model_fit
+    # model
+    # result.model_fit
 
 
 
@@ -589,6 +600,59 @@ end
 
 end
 
+@testset "Gamma, inexact" begin
+
+    # Fit 50,000 observations as an example
+
+    param0 = rand(Distributions.Uniform(0, 1), 1)[1]
+    param1 = rand(Distributions.Uniform(3, 8), 4)
+    param2 = rand(Distributions.Uniform(0.5, 15), 4)
+
+    X = rand(Distributions.Uniform(-5, 5), 50000, 7)
+    α = rand(Distributions.Uniform(-1, 1), 2, 7)
+    α[2,:] .= 0
+
+    model = [GammaExpert(param1[1], param2[1]) GammaExpert(param1[2], param2[2]);
+             GammaExpert(param1[3], param2[3]) GammaExpert(param1[4], param2[4])]
+
+    expos = rand(Distributions.Uniform(0.1, 5), 50000)
+    Y_sim = LRMoE.sim_dataset(α, X, model, exposure = expos)
+
+    # All exact observations
+    Y_sim = hcat(fill(0.0, length(Y_sim[:,1])), Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), fill(0.0, length(Y_sim[:,2])), Y_sim[:,2], Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+    # Small censoring
+    Y_sim = hcat(fill(0.0, length(Y_sim[:,1])), 0.975.* Y_sim[:,1], 1.025.* Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), fill(0.0, length(Y_sim[:,2])), 0.975.* Y_sim[:,2], 1.025.* Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+    # Small truncation
+    Y_sim = hcat(0.1 .* Y_sim[:,1], Y_sim[:,1], Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), 0.1 .* Y_sim[:,2], Y_sim[:,2], Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+    # Censoring + Truncation
+    Y_sim = hcat(0.1 .* Y_sim[:,1], 0.95.* Y_sim[:,1], 1.25.* Y_sim[:,1], 10 .* Y_sim[:,1], 0.1 .* Y_sim[:,2], 0.95.* Y_sim[:,2], 1.25.* Y_sim[:,2], 10 .* Y_sim[:,2])
+
+    α_guess = fill(0.0, 2, 7)
+    model_guess = [GammaExpert(0.5*param1[1], 1.2*param2[1]) GammaExpert(0.8*param1[2], 0.8*param2[2]);
+                   GammaExpert(2*param1[3], 1.25*param2[3]) GammaExpert(0.9*param1[4], param2[4])]
+
+    pen_α = 5
+    pen_params = [[[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]],
+                  [[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]]]
+
+    result = LRMoE.fit_main(Y_sim, X, α_guess, model_guess,
+                        exposure = expos,
+                        penalty = true, 
+                        pen_α = pen_α, pen_params = pen_params,
+                        ϵ = 0.5,
+                        # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
+                        # grad_jump = true, grad_seq = nothing,
+                        print_steps = true)
+    
+    α
+    result.α_fit 
+   
+    model
+    result.model_fit
+
+
+
+end
 
 @testset "ZIGamma, exact" begin
 
@@ -629,6 +693,57 @@ end
    
     # model
     # result.model_fit
+
+
+
+end
+
+@testset "ZIGamma, inexact" begin
+
+    # Fit 50,000 observations as an example
+
+    param0 = rand(Distributions.Uniform(0, 1), 4)
+    param1 = rand(Distributions.Uniform(3, 8), 4)
+    param2 = rand(Distributions.Uniform(0.5, 15), 4)
+
+    X = rand(Distributions.Uniform(-5, 5), 50000, 7)
+    α = rand(Distributions.Uniform(-1, 1), 2, 7)
+    α[2,:] .= 0
+
+    model = [ZIGammaExpert(param0[1], param1[1], param2[1]) ZIGammaExpert(param0[2], param1[2], param2[2]);
+             ZIGammaExpert(param0[3], param1[3], param2[3]) ZIGammaExpert(param0[4], param1[4], param2[4])]
+
+    expos = rand(Distributions.Uniform(0.1, 5), 50000)
+    Y_sim = LRMoE.sim_dataset(α, X, model, exposure = expos)
+    Y_sim = hcat(0.25.* Y_sim[:,1], 0.80.* Y_sim[:,1], 1.25.* Y_sim[:,1], 10 .* Y_sim[:,1], fill(0.0, length(Y_sim[:,2])), 0.75.* Y_sim[:,2], 2 .* Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+
+    # Y_sim = hcat(0.25.* Y_sim[:,1], Y_sim[:,1], Y_sim[:,1], 10 .* Y_sim[:,1], fill(0.0, length(Y_sim[:,2])), 0.75.* Y_sim[:,2], 2 .* Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+
+    Y_sim = hcat(fill(0.0, length(Y_sim[:,1])), 0.80.* Y_sim[:,1], 1.25.* Y_sim[:,1], fill(Inf, length(Y_sim[:,1])), fill(0.0, length(Y_sim[:,2])), 0.75.* Y_sim[:,2], 2 .* Y_sim[:,2], fill(Inf, length(Y_sim[:,2])))
+
+
+    α_guess = fill(0.0, 2, 7)
+    model_guess = [ZIGammaExpert(0.5, 0.5*param1[1], 1.2*param2[1]) ZIGammaExpert(0.5, 0.8*param1[2], 0.8*param2[2]);
+                   ZIGammaExpert(0.5, 2*param1[3], 1.25*param2[3]) ZIGammaExpert(0.5, 0.9*param1[4], param2[4])]
+
+    pen_α = 5
+    pen_params = [[[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]],
+                  [[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]]]
+
+    result = LRMoE.fit_main(Y_sim, X, α_guess, model_guess,
+                        exposure = expos,
+                        penalty = true, 
+                        pen_α = pen_α, pen_params = pen_params,
+                        ϵ = 0.5,
+                        # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
+                        # grad_jump = true, grad_seq = nothing,
+                        print_steps = true)
+    
+    α
+    result.α_fit 
+   
+    model
+    result.model_fit
 
 
 
