@@ -20,7 +20,7 @@ end
 
 
 """
-    predict_class_posterior(Y, X, α, model)
+    predict_class_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
 
 Predicts the latent class probabilities, 
 given observations `Y`, covariates `X`, 
@@ -32,13 +32,27 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `α`: A matrix of logit regression coefficients.
 - `model`: A matrix specifying the expert functions.
 
+# Optional Arguments
+- `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
+- `exposure`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
+
 # Return Values
 - `prob`: A matrix of latent class probabilities.
 - `max_prob_idx`: A matrix of the most likely latent class for each observation.
 """
-function predict_class_posterior(Y, X, α, model)
+function predict_class_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
+    if exact_Y == true
+        Y = _exact_to_full(Y)
+    end
+
+    if isnothing(exposure)
+        exposure = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure)
+
     gate = LogitGating(α, X)
-    ll_np_list = loglik_np(Y, gate, model)
+    ll_np_list = loglik_np(Y, gate, model_exp)
     z_e_obs = EM_E_z_obs(ll_np_list.gate_expert_ll_comp, ll_np_list.gate_expert_ll)
     return (prob = z_e_obs, max_prob_idx = [findmax(z_e_obs[i,:])[2] for i in 1:size(z_e_obs)[1]])
 end
