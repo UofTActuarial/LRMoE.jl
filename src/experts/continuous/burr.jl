@@ -162,7 +162,7 @@ end
 function _burr_optim_params(lognew,
                         d_old,
                         tl, yl, yu, tu,
-                        expert_ll_pos, expert_tn_pos, expert_tn_bar_pos,
+                        expert_ll_pos, expert_tn_bar_pos,
                         z_e_obs, z_e_lat, k_e,
                         sum_term_zkzlogy;
                         penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
@@ -196,11 +196,12 @@ end
 ## EM: M-Step
 function EM_M_expert(d::BurrExpert,
                      tl, yl, yu, tu,
-                     expert_ll_pos,
-                     expert_tn_pos,
-                     expert_tn_bar_pos,
+                     exposure,
                      z_e_obs, z_e_lat, k_e;
                      penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf 1.0 Inf])
+
+    expert_ll_pos = expert_ll.(d, tl, yl, yu, tu)
+    expert_tn_bar_pos = expert_tn_bar.(d, tl, yl, yu, tu)
 
     # Further E-Step
     yl_yu_unique = unique_bounds(yl, yu)
@@ -222,7 +223,7 @@ function EM_M_expert(d::BurrExpert,
     
     logparams_new = Optim.minimizer( Optim.optimize(x -> _burr_optim_params(x, d,
                                                 tl[pos_idx], yl[pos_idx], yu[pos_idx], tu[pos_idx],
-                                                expert_ll_pos[pos_idx], expert_tn_pos[pos_idx], expert_tn_bar_pos[pos_idx],
+                                                expert_ll_pos[pos_idx], expert_tn_bar_pos[pos_idx],
                                                 z_e_obs[pos_idx], z_e_lat[pos_idx], k_e[pos_idx],
                                                 sum_term_zkzlogy,
                                                 penalty = penalty, pen_pararms_jk = pen_pararms_jk),

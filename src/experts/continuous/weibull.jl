@@ -153,7 +153,7 @@ end
 function _weibull_optim_k(logk,
                         d_old,
                         tl, yl, yu, tu,
-                        expert_ll_pos, expert_tn_pos, expert_tn_bar_pos,
+                        expert_ll_pos, expert_tn_bar_pos,
                         z_e_obs, z_e_lat, k_e,
                         logY_e_obs, logY_e_lat;
                         penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
@@ -185,11 +185,12 @@ end
 ## EM: M-Step
 function EM_M_expert(d::WeibullExpert,
                      tl, yl, yu, tu,
-                     expert_ll_pos,
-                     expert_tn_pos,
-                     expert_tn_bar_pos,
+                     exposure,
                      z_e_obs, z_e_lat, k_e;
                      penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
+
+    expert_ll_pos = expert_ll.(d, tl, yl, yu, tu)
+    expert_tn_bar_pos = expert_tn_bar.(d, tl, yl, yu, tu)
 
     # Further E-Step
     yl_yu_unique = unique_bounds(yl, yu)
@@ -206,7 +207,7 @@ function EM_M_expert(d::WeibullExpert,
     pos_idx = (yu .!= 0.0)
     logk_new = Optim.minimizer( Optim.optimize(x -> _weibull_optim_k(x, d,
                                                             tl[pos_idx], yl[pos_idx], yu[pos_idx], tu[pos_idx],
-                                                            expert_ll_pos[pos_idx], expert_tn_pos[pos_idx], expert_tn_bar_pos[pos_idx],
+                                                            expert_ll_pos[pos_idx],  expert_tn_bar_pos[pos_idx],
                                                             z_e_obs[pos_idx], z_e_lat[pos_idx], k_e[pos_idx],
                                                             logY_e_obs[pos_idx], logY_e_lat[pos_idx],
                                                             penalty = penalty, pen_pararms_jk = pen_pararms_jk),
@@ -230,9 +231,8 @@ function EM_M_expert(d::WeibullExpert,
     # sum_term_zkz_logY = sum(term_zkz_logY)[1]
     sum_term_zkz_powY = sum(term_zkz_powY)[1]
 
-    θ_new = _weibull_k_to_λ(k_new, sum(term_zkz)[1], sum(sum_term_zkz_powY)[1], penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+    θ_new = _weibull_k_to_λ(k_new, sum_term_zkz, sum(sum_term_zkz_powY)[1], penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
-    # println("$k_new, $θ_new")
     return WeibullExpert(k_new, θ_new)
 
 end

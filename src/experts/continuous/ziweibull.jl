@@ -98,16 +98,21 @@ excess(d::ZIWeibullExpert, u) = mean(d) - lev(d, u)
 ## EM: M-Step
 function EM_M_expert(d::ZIWeibullExpert,
                      tl, yl, yu, tu,
-                     expert_ll_pos,
-                     expert_tn_pos,
-                     expert_tn_bar_pos,
+                     exposure,
                      z_e_obs, z_e_lat, k_e;
                      penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
     
     # Old parameters
-    p_old = d.p
+    p_old = p_zero(d)
+
+    if p_old > 0.999999 || p_old < 0.000001
+        return d
+    end
 
     # Update zero probability
+    expert_ll_pos = expert_ll.(LRMoE.WeibullExpert(d.k, d.θ), tl, yl, yu, tu)
+    expert_tn_bar_pos = expert_tn_bar.(LRMoE.WeibullExpert(d.k, d.θ), tl, yl, yu, tu)
+
     z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(yl, p_old, expert_ll_pos)
     z_pos_e_obs = z_e_obs .- z_zero_e_obs
     z_zero_e_lat = z_e_lat .* EM_E_z_zero_lat(tl, p_old, expert_tn_bar_pos)
@@ -118,10 +123,7 @@ function EM_M_expert(d::ZIWeibullExpert,
     tmp_exp = WeibullExpert(d.k, d.θ)
     tmp_update = EM_M_expert(tmp_exp,
                             tl, yl, yu, tu,
-                            expert_ll_pos,
-                            expert_tn_pos,
-                            expert_tn_bar_pos,
-                            # z_e_obs, z_e_lat, k_e,
+                            exposure,
                             z_pos_e_obs, z_pos_e_lat, k_e,
                             penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
