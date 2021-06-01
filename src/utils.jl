@@ -61,3 +61,15 @@ function _solve_discrete_quantile(d::DiscreteUnivariateDistribution, q::Real)
         return u
     end
 end
+
+# Convert exact Y to full Y
+function _exact_to_full(Y)
+    result = fill(NaN, size(Y)[1], size(Y)[2]*4)
+    for j in 1:size(Y)[2]
+        result[:,4*(j-1)+1] .= 0.0
+        result[:,4*(j-1)+2] .= Y[:,j]
+        result[:,4*(j-1)+3] .= Y[:,j]
+        result[:,4*(j-1)+4] .= Inf
+    end
+    return result
+end
