@@ -58,7 +58,7 @@ function predict_class_posterior(Y, X, α, model; exact_Y = true, exposure = not
 end
 
 """
-    predict_mean_prior(X, α, model)
+    predict_mean_prior(X, α, model; exposure = nothing)
 
 Predicts the mean values of response, 
 given covariates `X`, 
@@ -69,17 +69,33 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `α`: A matrix of logit regression coefficients.
 - `model`: A matrix specifying the expert functions.
 
+# Optional Arguments
+- `exposure`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
+
 # Return Values
 - A matrix of predicted mean values of response, based on prior probabilities.
 """
-function predict_mean_prior(X, α, model)
+function predict_mean_prior(X, α, model; exposure = nothing)
+    if isnothing(exposure)
+        exposure = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure)
+
     weights = predict_class_prior(X, α).prob
-    means = mean.(model)
-    return hcat([weights * means[j,:] for j in 1:size(means)[1]]...)
+    means = mean.(model_exp)
+
+    result = fill(NaN, size(X)[1], size(model)[1])
+
+    for i in 1:size(X)[1]
+        result[i,:] = means[:,:,i] * weights[i,:]
+    end
+
+    return result
 end
 
 """
-    predict_mean_posterior(Y, X, α, model)
+    predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
 
 Predicts the mean values of response,
 given observations `Y`, covariates `X`, 
@@ -91,13 +107,30 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `α`: A matrix of logit regression coefficients.
 - `model`: A matrix specifying the expert functions.
 
+# Optional Arguments
+- `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
+- `exposure`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
+
 # Return Values
 - A matrix of predicted mean values of response, based on posterior probabilities.
 """
-function predict_mean_posterior(Y, X, α, model)
-    weights = predict_class_posterior(Y, X, α, model).prob
-    means = mean.(model)
-    return hcat([weights * means[j,:] for j in 1:size(means)[1]]...)
+function predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
+    if isnothing(exposure)
+        exposure = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure)
+
+    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure = exposure).prob
+    means = mean.(model_exp)
+
+    result = fill(NaN, size(X)[1], size(model)[1])
+
+    for i in 1:size(X)[1]
+        result[i,:] = means[:,:,i] * weights[i,:]
+    end
+
+    return result
 end
 
 """
