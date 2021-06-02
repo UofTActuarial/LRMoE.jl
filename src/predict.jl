@@ -20,7 +20,7 @@ end
 
 
 """
-    predict_class_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
+    predict_class_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing)
 
 Predicts the latent class probabilities, 
 given observations `Y`, covariates `X`, 
@@ -34,22 +34,22 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 
 # Optional Arguments
 - `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
-- `exposure`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
+- `exposure_past`: A vector indicating the time exposure (past) of each observation. If nothing is supplied, it is set to 1.0 by default.
 
 # Return Values
 - `prob`: A matrix of latent class probabilities.
 - `max_prob_idx`: A matrix of the most likely latent class for each observation.
 """
-function predict_class_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
+function predict_class_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing)
     if exact_Y == true
         Y = _exact_to_full(Y)
     end
 
-    if isnothing(exposure)
-        exposure = fill(1.0, size(X)[1])
+    if isnothing(exposure_past)
+        exposure_past = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure)
+    model_exp = exposurize_model(model, exposure = exposure_past)
 
     gate = LogitGating(α, X)
     ll_np_list = loglik_np(Y, gate, model_exp)
@@ -58,7 +58,7 @@ function predict_class_posterior(Y, X, α, model; exact_Y = true, exposure = not
 end
 
 """
-    predict_mean_prior(X, α, model; exposure = nothing)
+    predict_mean_prior(X, α, model; exposure_future = nothing)
 
 Predicts the mean values of response, 
 given covariates `X`, 
@@ -70,17 +70,17 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `model`: A matrix specifying the expert functions.
 
 # Optional Arguments
-- `exposure`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
+- `exposure_future`: A vector indicating the time exposure (future) of each observation. If nothing is supplied, it is set to 1.0 by default.
 
 # Return Values
 - A matrix of predicted mean values of response, based on prior probabilities.
 """
-function predict_mean_prior(X, α, model; exposure = nothing)
-    if isnothing(exposure)
-        exposure = fill(1.0, size(X)[1])
+function predict_mean_prior(X, α, model; exposure_future = nothing)
+    if isnothing(exposure_future)
+        exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure)
+    model_exp = exposurize_model(model, exposure = exposure_future)
 
     weights = predict_class_prior(X, α).prob
     means = mean.(model_exp)
@@ -95,7 +95,7 @@ function predict_mean_prior(X, α, model; exposure = nothing)
 end
 
 """
-    predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
+    predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
 
 Predicts the mean values of response,
 given observations `Y`, covariates `X`, 
@@ -109,23 +109,28 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 
 # Optional Arguments
 - `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
-- `exposure`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
+- `exposure_past`: A vector indicating the time exposure (past) of each observation. If nothing is supplied, it is set to 1.0 by default.
+- `exposure_future`: A vector indicating the time exposure (future) of each observation. If nothing is supplied, it is set to 1.0 by default.
 
 # Return Values
 - A matrix of predicted mean values of response, based on posterior probabilities.
 """
-function predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
+function predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
     if exact_Y == true
         Y = _exact_to_full(Y)
     end
 
-    if isnothing(exposure)
-        exposure = fill(1.0, size(X)[1])
+    if isnothing(exposure_past)
+        exposure_past = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure)
+    if isnothing(exposure_future)
+        exposure_future = fill(1.0, size(X)[1])
+    end
 
-    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure = exposure).prob
+    model_exp = exposurize_model(model, exposure = exposure_future)
+
+    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past).prob
     means = mean.(model_exp)
 
     result = fill(NaN, size(X)[1], size(model)[1])
@@ -138,7 +143,7 @@ function predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure = noth
 end
 
 """
-    predict_var_prior(X, α, model; exposure = nothing)
+    predict_var_prior(X, α, model; exposure_future = nothing)
 
 Predicts the variance of response, 
 given covariates `X`, 
@@ -150,22 +155,22 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `model`: A matrix specifying the expert functions.
 
 # Optional Arguments
-- `exposure`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
+- `exposure_future`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
 
 # Return Values
 - A matrix of predicted variance of response, based on prior probabilities.
 """
-function predict_var_prior(X, α, model; exposure = nothing)
-    if isnothing(exposure)
-        exposure = fill(1.0, size(X)[1])
+function predict_var_prior(X, α, model; exposure_future = nothing)
+    if isnothing(exposure_future)
+        exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure)
+    model_exp = exposurize_model(model, exposure = exposure_future)
 
     weights = predict_class_prior(X, α).prob
 
     c_mean = mean.(model_exp)
-    g_mean = predict_mean_prior(X, α, model, exposure = exposure)
+    g_mean = predict_mean_prior(X, α, model, exposure_future = exposure_future)
     c_var = var.(model_exp)
 
     var_c_mean = fill(NaN, size(X)[1], size(model)[1])
@@ -180,7 +185,7 @@ function predict_var_prior(X, α, model; exposure = nothing)
 end
 
 """
-    predict_var_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
+    predict_var_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
 
 Predicts the variance of response, 
 given observations `Y`, covariates `X`, 
@@ -194,26 +199,31 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 
 # Optional Arguments
 - `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
-- `exposure`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
+- `exposure_past`: A vector indicating the time exposure (past) of each observation. If nothing is supplied, it is set to 1.0 by default.
+- `exposure_future`: A vector indicating the time exposure (future) of each observation. If nothing is supplied, it is set to 1.0 by default.
 
 # Return Values
 - A matrix of predicted variance of response, based on posterior probabilities.
 """
-function predict_var_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
+function predict_var_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
     if exact_Y == true
         Y = _exact_to_full(Y)
     end
 
-    if isnothing(exposure)
-        exposure = fill(1.0, size(X)[1])
+    if isnothing(exposure_past)
+        exposure_past = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure)
+    if isnothing(exposure_future)
+        exposure_future = fill(1.0, size(X)[1])
+    end
 
-    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure = exposure).prob
+    model_exp = exposurize_model(model, exposure = exposure_future)
+
+    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past).prob
 
     c_mean = mean.(model_exp)
-    g_mean = predict_mean_posterior(Y, X, α, model, exact_Y = exact_Y, exposure = exposure)
+    g_mean = predict_mean_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past, exposure_future = exposure_future)
     c_var = var.(model_exp)
 
     var_c_mean = fill(NaN, size(X)[1], size(model)[1])
