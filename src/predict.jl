@@ -115,6 +115,10 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - A matrix of predicted mean values of response, based on posterior probabilities.
 """
 function predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
+    if exact_Y == true
+        Y = _exact_to_full(Y)
+    end
+
     if isnothing(exposure)
         exposure = fill(1.0, size(X)[1])
     end
@@ -134,7 +138,7 @@ function predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure = noth
 end
 
 """
-    predict_var_prior(X, α, model)
+    predict_var_prior(X, α, model; exposure = nothing)
 
 Predicts the variance of response, 
 given covariates `X`, 
@@ -145,21 +149,38 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `α`: A matrix of logit regression coefficients.
 - `model`: A matrix specifying the expert functions.
 
+# Optional Arguments
+- `exposure`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
+
 # Return Values
 - A matrix of predicted variance of response, based on prior probabilities.
 """
-function predict_var_prior(X, α, model)
+function predict_var_prior(X, α, model; exposure = nothing)
+    if isnothing(exposure)
+        exposure = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure)
+
     weights = predict_class_prior(X, α).prob
-    c_mean = mean.(model)
-    g_mean = predict_mean_prior(X, α, model)
-    var_c_mean = hcat([vec(sum(hcat([(c_mean[d,j] .- g_mean[d]).^2 for j in 1:length(c_mean[d,:])]...) .* weights, dims = 2)) for d in 1:size(g_mean)[2]]...)
-    c_var = var.(model)
-    mean_c_var = hcat([weights * c_var[j,:] for j in 1:size(c_var)[1]]...)
+
+    c_mean = mean.(model_exp)
+    g_mean = predict_mean_prior(X, α, model, exposure = exposure)
+    c_var = var.(model_exp)
+
+    var_c_mean = fill(NaN, size(X)[1], size(model)[1])
+    mean_c_var = fill(NaN, size(X)[1], size(model)[1])
+
+    for i in 1:size(X)[1]
+        var_c_mean[i,:] = (c_mean[:,:,i] .- g_mean[i,:] ).^2 * weights[i,:]
+        mean_c_var[i,:] = c_var[:,:,i] * weights[i,:]
+    end
+    
     return var_c_mean + mean_c_var
 end
 
 """
-    predict_var_posterior(Y, X, α, model)
+    predict_var_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
 
 Predicts the variance of response, 
 given observations `Y`, covariates `X`, 
@@ -171,16 +192,38 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `α`: A matrix of logit regression coefficients.
 - `model`: A matrix specifying the expert functions.
 
+# Optional Arguments
+- `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
+- `exposure`: A vector indicating the time exposure of each observation. If nothing is supplied, it is set to 1.0 by default.
+
 # Return Values
 - A matrix of predicted variance of response, based on posterior probabilities.
 """
-function predict_var_posterior(Y, X, α, model)
-    weights = predict_class_posterior(Y, X, α, model).prob
-    c_mean = mean.(model)
-    g_mean = predict_mean_prior(X, α, model)
-    var_c_mean = hcat([vec(sum(hcat([(c_mean[d,j] .- g_mean[d]).^2 for j in 1:length(c_mean[d,:])]...) .* weights, dims = 2)) for d in 1:size(g_mean)[2]]...)
-    c_var = var.(model)
-    mean_c_var = hcat([weights * c_var[j,:] for j in 1:size(c_var)[1]]...)
+function predict_var_posterior(Y, X, α, model; exact_Y = true, exposure = nothing)
+    if exact_Y == true
+        Y = _exact_to_full(Y)
+    end
+
+    if isnothing(exposure)
+        exposure = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure)
+
+    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure = exposure).prob
+
+    c_mean = mean.(model_exp)
+    g_mean = predict_mean_posterior(Y, X, α, model, exact_Y = exact_Y, exposure = exposure)
+    c_var = var.(model_exp)
+
+    var_c_mean = fill(NaN, size(X)[1], size(model)[1])
+    mean_c_var = fill(NaN, size(X)[1], size(model)[1])
+
+    for i in 1:size(X)[1]
+        var_c_mean[i,:] = (c_mean[:,:,i] .- g_mean[i,:] ).^2 * weights[i,:]
+        mean_c_var[i,:] = c_var[:,:,i] * weights[i,:]
+    end
+    
     return var_c_mean + mean_c_var
 end
 
