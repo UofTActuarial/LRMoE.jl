@@ -116,9 +116,9 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - A matrix of predicted mean values of response, based on posterior probabilities.
 """
 function predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
-    if exact_Y == true
-        Y = _exact_to_full(Y)
-    end
+    # if exact_Y == true
+    #     Y = _exact_to_full(Y)
+    # end
 
     if isnothing(exposure_past)
         exposure_past = fill(1.0, size(X)[1])
@@ -206,9 +206,9 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - A matrix of predicted variance of response, based on posterior probabilities.
 """
 function predict_var_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
-    if exact_Y == true
-        Y = _exact_to_full(Y)
-    end
+    # if exact_Y == true
+    #     Y = _exact_to_full(Y)
+    # end
 
     if isnothing(exposure_past)
         exposure_past = fill(1.0, size(X)[1])
