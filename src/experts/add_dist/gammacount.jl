@@ -98,7 +98,7 @@ function rand(rng::AbstractRNG, d::GammaCount)
 end
 
 function _gc_moments(d::GammaCount, m)
-    upper_finite = convert(Int, quantile(d, 1-1e-10))
+    upper_finite = 250 # convert(Int, quantile(d, 1-1e-10))
     series = 0:upper_finite
     # return sum( (series.^m) .* LRMoE.pdf.(d, series) )[1]
     return sum( (series.^m) .* Distributions.pdf.(d, series) )[1]
