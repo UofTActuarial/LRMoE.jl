@@ -20,7 +20,8 @@ end
 
 
 """
-    predict_class_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing)
+    predict_class_posterior(Y, X, α, model; 
+        exact_Y = true, exposure_past = nothing)
 
 Predicts the latent class probabilities, 
 given observations `Y`, covariates `X`, 
@@ -58,7 +59,8 @@ function predict_class_posterior(Y, X, α, model; exact_Y = true, exposure_past 
 end
 
 """
-    predict_mean_prior(X, α, model; exposure_future = nothing)
+    predict_mean_prior(X, α, model; 
+        exposure_future = nothing)
 
 Predicts the mean values of response, 
 given covariates `X`, 
@@ -95,7 +97,8 @@ function predict_mean_prior(X, α, model; exposure_future = nothing)
 end
 
 """
-    predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
+    predict_mean_posterior(Y, X, α, model; 
+        exact_Y = true, exposure_past = nothing, exposure_future = nothing)
 
 Predicts the mean values of response,
 given observations `Y`, covariates `X`, 
@@ -143,7 +146,8 @@ function predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure_past =
 end
 
 """
-    predict_var_prior(X, α, model; exposure_future = nothing)
+    predict_var_prior(X, α, model; 
+        exposure_future = nothing)
 
 Predicts the variance of response, 
 given covariates `X`, 
@@ -185,7 +189,8 @@ function predict_var_prior(X, α, model; exposure_future = nothing)
 end
 
 """
-    predict_var_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
+    predict_var_posterior(Y, X, α, model; 
+        exact_Y = true, exposure_past = nothing, exposure_future = nothing)
 
 Predicts the variance of response, 
 given observations `Y`, covariates `X`, 
@@ -238,7 +243,8 @@ function predict_var_posterior(Y, X, α, model; exact_Y = true, exposure_past = 
 end
 
 """
-    predict_limit_prior(X, α, model, limit)
+    predict_limit_prior(X, α, model, limit; 
+        exposure_future = nothing)
 
 Predicts the limit expected value (LEV) of response, 
 given covariates `X`, 
@@ -248,19 +254,36 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `X`: A matrix of covariates.
 - `α`: A matrix of logit regression coefficients.
 - `model`: A matrix specifying the expert functions.
-- `limit`: A vector specifying the cutoff point.
+- `limit`: A matrix specifying the cutoff point.
+
+# Optional Arguments
+- `exposure_future`: A vector indicating the time exposure (future) of each observation. If nothing is supplied, it is set to 1.0 by default.
 
 # Return Values
 - A matrix of predicted limit expected value of response, based on prior probabilities.
 """
-function predict_limit_prior(X, α, model, limit)
+function predict_limit_prior(X, α, model, limit; exposure_future = nothing)
+    if isnothing(exposure_future)
+        exposure_future = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure_future)
+
     weights = predict_class_prior(X, α).prob
-    means = vcat([hcat([lev(model[d,j], limit[d]) for j in 1:size(model)[2]]...) for d in 1:size(model)[1]]...)
-    return hcat([weights * means[j,:] for j in 1:size(means)[1]]...)
+
+    result = fill(NaN, size(X)[1], size(model)[1])
+
+    for i in 1:size(X)[1]
+        means = vcat([hcat([lev(model_exp[d,j,i], limit[i,d]) for j in 1:size(model_exp)[2]]...) for d in 1:size(model_exp)[1]]...)
+        result[i,:] = means * weights[i,:]
+    end
+
+    return result
 end
 
 """
-    predict_limit_posterior(Y, X, α, model, limit)
+    predict_limit_posterior(Y, X, α, model, limit;
+        exact_Y = true, exposure_past = nothing, exposure_future = nothing)
 
 Predicts the limit expected value (LEV) of response, 
 given observations `Y`, covariates `X`, 
@@ -273,17 +296,40 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `model`: A matrix specifying the expert functions.
 - `limit`: A vector specifying the cutoff point.
 
+# Optional Arguments
+- `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
+- `exposure_past`: A vector indicating the time exposure (past) of each observation. If nothing is supplied, it is set to 1.0 by default.
+- `exposure_future`: A vector indicating the time exposure (future) of each observation. If nothing is supplied, it is set to 1.0 by default.
+
 # Return Values
 - A matrix of predicted limit expected value of response, based on posterior probabilities.
 """
-function predict_limit_posterior(Y, X, α, model, limit)
-    weights = predict_class_posterior(Y, X, α, model).prob
-    means = vcat([hcat([lev(model[d,j], limit[d]) for j in 1:size(model)[2]]...) for d in 1:size(model)[1]]...)
-    return hcat([weights * means[j,:] for j in 1:size(means)[1]]...)
+function predict_limit_posterior(Y, X, α, model, limit; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
+    if isnothing(exposure_past)
+        exposure_past = fill(1.0, size(X)[1])
+    end
+
+    if isnothing(exposure_future)
+        exposure_future = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure_future)
+
+    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past).prob
+
+    result = fill(NaN, size(X)[1], size(model)[1])
+
+    for i in 1:size(X)[1]
+        means = vcat([hcat([lev(model_exp[d,j,i], limit[i,d]) for j in 1:size(model_exp)[2]]...) for d in 1:size(model_exp)[1]]...)
+        result[i,:] = means * weights[i,:]
+    end
+
+    return result
 end
 
 """
-    predict_excess_prior(X, α, model, limit)
+    predict_excess_prior(X, α, model, limit;
+        exposure_future = nothing)
 
 Predicts the excess expectation of response, 
 given covariates `X`, 
@@ -295,17 +341,34 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `model`: A matrix specifying the expert functions.
 - `limit`: A vector specifying the cutoff point.
 
+# Optional Arguments
+- `exposure_future`: A vector indicating the time exposure (future) of each observation. If nothing is supplied, it is set to 1.0 by default.
+
 # Return Values
 - A matrix of predicted excess expectation of response, based on prior probabilities.
 """
-function predict_excess_prior(X, α, model, limit)
+function predict_excess_prior(X, α, model, limit; exposure_future = nothing)
+    if isnothing(exposure_future)
+        exposure_future = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure_future)
+
     weights = predict_class_prior(X, α).prob
-    means = vcat([hcat([excess(model[d,j], limit[d]) for j in 1:size(model)[2]]...) for d in 1:size(model)[1]]...)
-    return hcat([weights * means[j,:] for j in 1:size(means)[1]]...)
+
+    result = fill(NaN, size(X)[1], size(model)[1])
+
+    for i in 1:size(X)[1]
+        means = vcat([hcat([excess(model_exp[d,j,i], limit[i,d]) for j in 1:size(model_exp)[2]]...) for d in 1:size(model_exp)[1]]...)
+        result[i,:] = means * weights[i,:]
+    end
+
+    return result
 end
 
 """
-    predict_excess_posterior(Y, X, α, model, limit)
+    predict_excess_posterior(Y, X, α, model, limit;
+        exact_Y = true, exposure_past = nothing, exposure_future = nothing)
 
 Predicts the excess expectation of response, 
 given observations `Y`, covariates `X`, 
@@ -318,13 +381,35 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `model`: A matrix specifying the expert functions.
 - `limit`: A vector specifying the cutoff point.
 
+# Optional Arguments
+- `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
+- `exposure_past`: A vector indicating the time exposure (past) of each observation. If nothing is supplied, it is set to 1.0 by default.
+- `exposure_future`: A vector indicating the time exposure (future) of each observation. If nothing is supplied, it is set to 1.0 by default.
+
 # Return Values
 - A matrix of predicted excess expectation of response, based on posterior probabilities.
 """
-function predict_excess_posterior(Y, X, α, model, limit)
-    weights = predict_class_posterior(Y, X, α, model).prob
-    means = vcat([hcat([excess(model[d,j], limit[d]) for j in 1:size(model)[2]]...) for d in 1:size(model)[1]]...)
-    return hcat([weights * means[j,:] for j in 1:size(means)[1]]...)
+function predict_excess_posterior(Y, X, α, model, limit; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
+    if isnothing(exposure_past)
+        exposure_past = fill(1.0, size(X)[1])
+    end
+
+    if isnothing(exposure_future)
+        exposure_future = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure_future)
+
+    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past).prob
+
+    result = fill(NaN, size(X)[1], size(model)[1])
+
+    for i in 1:size(X)[1]
+        means = vcat([hcat([excess(model_exp[d,j,i], limit[i,d]) for j in 1:size(model_exp)[2]]...) for d in 1:size(model_exp)[1]]...)
+        result[i,:] = means * weights[i,:]
+    end
+
+    return result
 end
 
 # solve a quantile of a mixture model
