@@ -444,7 +444,8 @@ end
 # end
 
 """
-    predict_VaRCTE_prior(X, α, model, p)
+    predict_VaRCTE_prior(X, α, model, p;
+        exposure_future = nothing)
 
 Predicts the `p`-th value-at-risk (VaR) and conditional tail expectation (CTE) of response, 
 given covariates `X`, 
@@ -454,33 +455,43 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `X`: A matrix of covariates.
 - `α`: A matrix of logit regression coefficients.
 - `model`: A matrix specifying the expert functions.
-- `p`: A vector of probabilities.
+- `p`: A matrix of probabilities.
+
+# Optional Arguments
+- `exposure_future`: A vector indicating the time exposure (future) of each observation. If nothing is supplied, it is set to 1.0 by default.
 
 # Return Values
 - `VaR`: A matrix of predicted VaR of response, based on prior probabilities.
 - `CTE`: A matrix of predicted CTE of response, based on prior probabilities.
 """
-function predict_VaRCTE_prior(X, α, model, p)
+function predict_VaRCTE_prior(X, α, model, p; exposure_future = nothing)
+
+    if isnothing(exposure_future)
+        exposure_future = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure_future)
+
     weights = predict_class_prior(X, α).prob
-    # VaR = fill(NaN, size(X)[1], size(model)[1])
-    # for i in 1:size(X)[1]
-    #     for k in 1:size(model)[1]
-    #         VaR[i,k] = try 
-    #             find_zero(y -> sum(weights[i,:] .* exp.(expert_ll.(model[k,:], 0.0, 0.0, y, Inf))) - p, 100)
-    #         catch;
-    #             NaN
-    #         end
-    #     end
-    # end
+
+    VaR = fill(NaN, size(X)[1], size(model)[1])
+    CTE = fill(NaN, size(X)[1], size(model)[1])
+    for i in 1:size(X)[1]
+        for k in 1:size(model)[1]
+            VaR[i,k] = _solve_continuous_mix_quantile(weights[i,:], model_exp[k,:,i], p[i,k])
+            CTE[i,k] = _calc_continuous_CTE(weights[i,:], model_exp[k,:,i], p[i,k], VaR[i,k])
+        end
+    end
     # return VaR
 
-    VaR = vcat([hcat([_solve_continuous_mix_quantile(weights[i,:], model[k,:], p) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
-    CTE = vcat([hcat([_calc_continuous_CTE(weights[i,:], model[k,:], p, VaR[i,k]) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
+    # VaR = vcat([hcat([_solve_continuous_mix_quantile(weights[i,:], model[k,:], p) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
+    # CTE = vcat([hcat([_calc_continuous_CTE(weights[i,:], model[k,:], p, VaR[i,k]) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
     return (VaR = VaR, CTE = CTE)
 end
 
 """
-    predict_VaRCTE_posterior(Y, X, α, model, p)
+    predict_VaRCTE_posterior(Y, X, α, model, p;
+        exact_Y = true, exposure_past = nothing, exposure_future = nothing)
 
 Predicts the `p`-th value-at-risk (VaR) and conditional tail expectation (CTE) of response, 
 given observations `Y`, covariates `X`,
@@ -490,28 +501,42 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `X`: A matrix of covariates.
 - `α`: A matrix of logit regression coefficients.
 - `model`: A matrix specifying the expert functions.
-- `p`: A vector of probabilities.
+- `p`: A matrix of probabilities.
+
+# Optional Arguments
+- `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
+- `exposure_past`: A vector indicating the time exposure (past) of each observation. If nothing is supplied, it is set to 1.0 by default.
+- `exposure_future`: A vector indicating the time exposure (future) of each observation. If nothing is supplied, it is set to 1.0 by default.
 
 # Return Values
 - `VaR`: A matrix of predicted VaR of response, based on posterior probabilities.
 - `CTE`: A matrix of predicted CTE of response, based on posterior probabilities.
 """
-function predict_VaRCTE_posterior(Y, X, α, model, p)
-    weights = predict_class_posterior(Y, X, α, model).prob
-    # VaR = fill(NaN, size(X)[1], size(model)[1])
-    # for i in 1:size(X)[1]
-    #     for k in 1:size(model)[1]
-    #         VaR[i,k] = try 
-    #             find_zero(y -> sum(weights[i,:] .* exp.(expert_ll.(model[k,:], 0.0, 0.0, y, Inf))) - p, 100)
-    #         catch;
-    #             NaN
-    #         end
-    #     end
-    # end
+function predict_VaRCTE_posterior(Y, X, α, model, p; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
+    if isnothing(exposure_past)
+        exposure_past = fill(1.0, size(X)[1])
+    end
+
+    if isnothing(exposure_future)
+        exposure_future = fill(1.0, size(X)[1])
+    end
+
+    model_exp = exposurize_model(model, exposure = exposure_future)
+
+    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past).prob
+
+    VaR = fill(NaN, size(X)[1], size(model)[1])
+    CTE = fill(NaN, size(X)[1], size(model)[1])
+    for i in 1:size(X)[1]
+        for k in 1:size(model)[1]
+            VaR[i,k] = _solve_continuous_mix_quantile(weights[i,:], model_exp[k,:,i], p[i,k])
+            CTE[i,k] = _calc_continuous_CTE(weights[i,:], model_exp[k,:,i], p[i,k], VaR[i,k])
+        end
+    end
     # return VaR
 
-    VaR = vcat([hcat([_solve_continuous_mix_quantile(weights[i,:], model[k,:], p) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
-    CTE = vcat([hcat([_calc_continuous_CTE(weights[i,:], model[k,:], p, VaR[i,k]) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
+    # VaR = vcat([hcat([_solve_continuous_mix_quantile(weights[i,:], model[k,:], p) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
+    # CTE = vcat([hcat([_calc_continuous_CTE(weights[i,:], model[k,:], p, VaR[i,k]) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
     return (VaR = VaR, CTE = CTE)
 end
 
