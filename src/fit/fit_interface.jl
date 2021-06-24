@@ -10,6 +10,9 @@ Fit an LRMoE model.
 - `model`: A matrix specifying the expert functions.
 
 # Optional Arguments
+- `expusure`: an array of numerics, indicating the time invertal over which the count data (if applicable) are collected.
+    If `nothing` is provided, it is set to 1.0 for all observations. It is assumed that all continuous expert functions are
+    not affected by `exposure`.
 - `exact_Y`: `true` or `false` (default), indicating if `Y` is observed exactly or with censoring and truncation.
 - `penalty`: `true` (default) or `false`, indicating whether penalty is imposed on the magnitude of parameters.
 - `pen_α`: a numeric penalty on the magnitude of logit regression coefficients. Default is 1.0.
@@ -32,6 +35,7 @@ Fit an LRMoE model.
 - `BIC`: Bayesian Information Criterion (BIC) of the fitted model.
 """
 function fit_LRMoE(Y, X, α_init, model;
+                    exposure = nothing,
                     exact_Y = false,
                     penalty = true, pen_α = 1.0, pen_params = nothing,
                     ϵ = 1e-03, α_iter_max = 5, ecm_iter_max = 200,
@@ -49,14 +53,20 @@ function fit_LRMoE(Y, X, α_init, model;
         pen_params = [LRMoE.penalty_init.(model[k,:]) for k in 1:size(model)[1]]
     end
 
+    if isnothing(exposure)
+        exposure = fill(1.0, size(X)[1])
+    end
+
     if exact_Y == true
         tmp = fit_exact(Array(Y), Array(X), Array(α_init), model;
+                        exposure = exposure,
                         penalty = penalty, pen_α = pen_α, pen_params = pen_params,
                         ϵ = ϵ, α_iter_max = α_iter_max, ecm_iter_max = ecm_iter_max,
                         grad_jump = grad_jump, grad_seq = grad_seq,
                         print_steps = print_steps)
     else
         tmp = fit_main(Array(Y), Array(X), Array(α_init), model;
+                        exposure = exposure,
                         penalty = penalty, pen_α = pen_α, pen_params = pen_params,
                         ϵ = ϵ, α_iter_max = α_iter_max, ecm_iter_max = ecm_iter_max,
                         grad_jump = grad_jump, grad_seq = grad_seq,
