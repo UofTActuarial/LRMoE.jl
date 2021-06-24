@@ -545,6 +545,16 @@ end
     #                     # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
     #                     # grad_jump = true, grad_seq = nothing,
     #                     print_steps = true)
+
+    # result = LRMoE.fit_LRMoE(Y_sim, X, α_guess, model_guess,
+    #                     exposure = expos,
+    #                     exact_Y = false,
+    #                     penalty = true, 
+    #                     pen_α = pen_α, pen_params = pen_params,
+    #                     ϵ = 5,
+    #                     # ϵ = 1e-03, α_iter_max = 5.0, ecm_iter_max = 200,
+    #                     # grad_jump = true, grad_seq = nothing,
+    #                     print_steps = true)
     
     # α
     # result.α_fit 
