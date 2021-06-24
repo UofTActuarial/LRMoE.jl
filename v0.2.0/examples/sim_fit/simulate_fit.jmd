@@ -1,0 +1,222 @@
+---
+options:
+  eval: true #Set this to true if you'd like to evaluate the code in this document
+---
+
+```{julia; echo=false}
+using Distributions, Random, DataFrames
+using LRMoE
+using Plots, StatsPlots
+using JLD2
+```
+
+# Introduction
+
+This document contains the data fitting process for the demo dataset included in the `LRMoE.jl` package. 
+This serves as an example of using the main fitting function `fit_LRMoE` included in the package.
+
+```{julia; results="hidden"}
+# Load data
+@load "X_obs.jld2" X_obs
+@load "Y_obs.jld2" Y_obs
+```
+
+# Fitting `LRMoE`
+
+In this section, we demonstrate how to fit an LRMoE model in the package. 
+In the current version of `LRMoE`, the minimal inputs required from the user are: 
+response, covariates, initialization of logit regression coeffecients and
+component distributions.
+
+```{julia; results="hidden"}
+# Assume a non-informative guess
+α_guess = fill(0.0, 2, 5)
+# Correctly specified component distributions
+model_guess = [PoissonExpert(10.0) ZIGammaCountExpert(0.50, 40, 0.80);
+               LogNormalExpert(3.0, 1.0) InverseGaussianExpert(15.0, 15.0)]
+```
+
+Now we are ready to call the fitting function.
+It is optional to print out intermediate updates of parameters. 
+
+```{julia; eval=false}
+result_1 = fit_LRMoE(Y_obs, X_obs, α_guess, model_guess)
+```
+
+```{julia; results="hidden", echo=false}
+# load already fitted model, save time for weaving document
+@load "result_1.jld2" result_1
+```
+
+The fitted model can be viewed as follows.
+```julia
+summary(result_1)
+```
+
+More specifically, the fitted logit regression coefficients and component distributions are
+given below. We see that the fitting function can correctly identify the true model within
+reasonable range.
+
+```julia
+result_1.model_fit.α 
+```
+
+```julia
+result_1.model_fit.comp_dist
+```
+
+In practice, it is almost impossible to know the *true* underlying distribution of data. 
+Assume the user has conducted some preliminary analysis, and proposes to use the following LRMoE.
+
+```{julia; results="hidden"}
+# Assume a non-informative guess
+α_guess = fill(0.0, 2, 5)
+# Incorrectly specified component distributions
+model_guess = [ZIPoissonExpert(0.50, 10.0) ZIPoissonExpert(0.50, 20.0);
+               BurrExpert(5.0, 2.0, 30.0) GammaExpert(1.0, 10.0)]
+```
+
+```{julia; eval=false, echo=false}
+# hidden
+model_guess = [ZIPoissonExpert(0.50, 10.0) ZINegativeBinomialExpert(0.50, 15, 0.40);
+               BurrExpert(5.0, 2.0, 30.0) GammaExpert(1.0, 10.0)]
+
+model_guess = [ZIPoissonExpert(0.50, 10.0) NegativeBinomialExpert(15, 0.40);
+               BurrExpert(5.0, 2.0, 30.0) GammaExpert(1.0, 10.0)]
+```
+
+We call the fitting function similarly as before.
+```{julia; eval=false}
+result_2 = fit_LRMoE(Y_obs, X_obs, α_guess, model_guess, penalty=true)
+```
+
+```{julia; results="hidden", echo=false}
+# load already fitted model, save time for weaving document
+@load "result_2.jld2" result_2
+```
+
+```julia
+summary(result_2)
+```
+
+# Fitted Results
+
+We can visually examine the fitted results of `result_1` and `result_2`.
+The following histogram compares dimension 1 of the observed data (green) 
+with fitted model 1 (blue) and model 2 (red). Since the true model has a slightly
+heavy tail due to the gamma-count component, model 2 fails to capture this
+characteristics with only two Poisson components.
+
+```{julia; results="hidden", echo=false}
+@load "X_complete.jld2" X
+@load "Y_complete.jld2" Y_complete
+
+Random.seed!(1234)
+```
+
+```{julia; echo=false}
+y_1 = sim_dataset(result_1.model_fit.α, X, result_1.model_fit.comp_dist)
+y_2 = sim_dataset(result_2.model_fit.α, X, result_2.model_fit.comp_dist)
+
+y_series = vcat(Y_complete[:,1], y_1[:,1], y_2[:,1])
+labels = vcat(fill("Data", 10000), fill("Model 1", 10000), fill("Model 2", 10000))
+
+groupedhist(y_series, 
+          group = labels,
+          color = [:green :blue :red],
+          bins = 0:1:50,
+          title = "Marginal 1 of Demo Data",
+          size = (500, 500),
+          bar_position = :dodge)
+# savefig("demo-hist-dim-1.png")
+```
+
+The histogram below shows the fitting result for the second dimension (excluding
+zero inflation). Both models fit the body of data quite well. This is partly because
+both Burr and Inverse Gaussian distributions are dense (see [Fung et al. (2019)](https://www.sciencedirect.com/science/article/abs/pii/S0167668719303956)). 
+In other words, they are flexible enough to
+capture the distribution of response, even under a mis-specified model.
+
+```{julia; echo=false}
+y_series = collect(0:1:150)
+
+α_true = [-0.5 1.0 -0.05 0.1 1.25;
+          0.0 0.0   0.0 0.0  0.0]
+model_true = [PoissonExpert(6.0)         ZIGammaCountExpert(0.20, 30, 0.50);
+             LogNormalExpert(4.0, 0.3)  InverseGaussianExpert(20, 20)]
+
+true_weights = exp.(LogitGating(α_true, Array(X)))
+true_dens = hcat([pdf.(model_true[2,k], y_series) for k in 1:2]...)
+true_line = sum(hcat([true_dens * true_weights[i,:] for i in 1:10000]...), dims = 2) / 10000
+
+m1_weights = exp.(LogitGating(result_1.model_fit.α, Array(X)))
+m1_dens = hcat([pdf.(result_1.model_fit.comp_dist[2,k], y_series) for k in 1:2]...)
+m1_line = sum(hcat([true_dens * m1_weights[i,:] for i in 1:10000]...), dims = 2) / 10000
+
+m2_weights = exp.(LogitGating(result_2.model_fit.α, Array(X)))
+m2_dens = hcat([pdf.(result_2.model_fit.comp_dist[2,k], y_series) for k in 1:2]...)
+m2_line = sum(hcat([true_dens * m2_weights[i,:] for i in 1:10000]...), dims = 2) / 10000
+
+plot()
+histogram(Y_complete[:,2], 
+          bins = 0:1:150,
+          normed = true,
+          title = "Marginal 2 of Demo Data",
+          size = (500, 500),
+          color = :white,
+          label = "")
+plot!(y_series, [true_line m1_line m2_line],
+      label = ["True Model" "Model 1" "Model 2"],
+      color = [:green :blue :red],
+      linewidth = 1.5)
+# savefig("demo-hist-dim-2.png")
+```
+
+The fitting results can also be demonstrated with the following Q-Q plots.
+For both dimensions of the response, the mis-specified model 2 gives a
+slightly worse fit for the tails.
+
+```{julia; echo=false}
+m1_sim = sim_dataset(result_1.model_fit.α, Array(X), result_1.model_fit.comp_dist)
+m2_sim = sim_dataset(result_2.model_fit.α, Array(X), result_2.model_fit.comp_dist)
+
+# plot(qqplot(Y_complete[:,1], m1_sim[:,1]),
+#      qqplot(Y_complete[:,1], m2_sim[:,1]))
+
+
+plot([0, 65], [0, 65],
+      label = "True Model",
+      color = :green,
+      linewidth = 1.5)
+scatter!(sort(Y_complete[:,1]), [sort(m1_sim[:,1]) sort(m2_sim[:,1])],
+        title = "Q-Q Plot of Marginal 1",
+        size = (500, 500),
+        label = ["Model 1" "Model 2"],
+        xlabel = "Theoretical Quantile",
+        ylabel = "Sample Quantile",
+        color = [:blue :red],
+        markersize = 2.5,
+        markerstrokewidth = 0,
+        legend = :bottomright)
+# savefig("demo-hist-dim-2.png")
+```
+
+```{julia; echo=false}
+plot([0, 200], [0, 200],
+      label = "True Model",
+      color = :green,
+      linewidth = 1.5)
+scatter!(sort(Y_complete[:,2])[1:9998], [sort(m1_sim[:,2])[1:9998] sort(m2_sim[:,2])[1:9998]],
+        title = "Q-Q Plot of Marginal 2",
+        size = (500, 500),
+        label = ["Model 1" "Model 2"],
+        xlabel = "Theoretical Quantile",
+        ylabel = "Sample Quantile",
+        color = [:blue :red],
+        markersize = 2.5,
+        markerstrokewidth = 0,
+        legend = :bottomright)
+# savefig("demo-hist-dim-2.png")
+```
+
+
