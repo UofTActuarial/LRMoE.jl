@@ -102,7 +102,7 @@ function EM_M_expert(d::ZILogNormalExpert,
     # Old parameters
     p_old = p_zero(d)
 
-    if p_old > 0.999999 || p_old < 0.000001 || d.σ < 0.000001
+    if p_old > 0.999999 || d.σ < 0.000001
         return d
     end
 
@@ -137,6 +137,10 @@ function EM_M_expert_exact(d::ZILogNormalExpert,
     μ_old = d.μ
     σ_old = d.σ
     p_old = p_zero(d)
+
+    if p_old > 0.999999 || d.σ < 0.000001
+        return d
+    end
 
     # Update zero probability
     expert_ll_pos = expert_ll_exact.(LRMoE.LogNormalExpert(μ_old, σ_old), ye)

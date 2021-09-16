@@ -110,7 +110,7 @@ function EM_M_expert(d::ZIBurrExpert,
     # Old parameters
     p_old = p_zero(d)
 
-    if p_old > 0.999999 || p_old < 0.000001
+    if p_old > 0.999999
         return d
     end
 
@@ -147,6 +147,10 @@ function EM_M_expert_exact(d::ZIBurrExpert,
     
     # Old parameters
     p_old = p_zero(d)
+
+    if p_old > 0.999999
+        return d
+    end
 
     # Update zero probability
     expert_ll_pos = expert_ll_exact.(LRMoE.BurrExpert(d.k, d.c, d.λ), ye)

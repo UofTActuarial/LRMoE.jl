@@ -96,7 +96,11 @@ function EM_M_expert(d::ZIGammaCountExpert,
                     penalty = true, pen_pararms_jk = [2.0 1.0])
 
     # Old parameters
-    p_old = d.p
+    p_old = p_zero(d)
+
+    if p_old > 0.999999
+        return d
+    end
 
     # Update zero probability
     z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(yl, p_old, expert_ll_pos)
@@ -128,6 +132,10 @@ function EM_M_expert_exact(d::ZIGammaCountExpert,
 
     # Old parameters
     p_old = p_zero(d)
+
+    if p_old > 0.999999
+        return d
+    end
 
     # Update zero probability
     expert_ll_pos = fill(NaN, length(exposure))
