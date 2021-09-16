@@ -84,7 +84,7 @@ sim_expert(d::LogNormalExpert) = Distributions.rand(Distributions.LogNormal(d.μ
 ## penalty
 penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]
 no_penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]
-penalize(d::LogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
+penalize(d::LogNormalExpert, p) = 0 # (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 
 ## statistics
 mean(d::LogNormalExpert) = mean(Distributions.LogNormal(d.μ, d.σ))

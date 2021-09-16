@@ -83,7 +83,7 @@ sim_expert(d::ZILogNormalExpert) = (1 .- Distributions.rand(Distributions.Bernou
 ## penalty
 penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]
 no_penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]
-penalize(d::ZILogNormalExpert, p) = (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
+penalize(d::ZILogNormalExpert, p) = 0 # (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 
 ## statistics
 mean(d::ZILogNormalExpert) = (1-d.p)*mean(Distributions.LogNormal(d.μ, d.σ))
