@@ -95,6 +95,9 @@ end
 
     # Fit 50,000 observations as an example
 
+    # using Random
+    # Random.seed!(1234)
+
     # param0 = rand(Distributions.Uniform(0, 1), 1)[1]
     # param1 = rand(Distributions.Uniform(0.5, 8), 4)
     # param2 = rand(Distributions.Uniform(0, 1), 4)

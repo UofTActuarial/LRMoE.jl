@@ -129,7 +129,7 @@ end
 
 function _negativebinomial_n_to_p(n, sum_term_zkz, sum_term_zkzy;
                         penalty = true, pen_pararms_jk = [])
-    return 1 - sum_term_zkzy/(n*sum_term_zkz + sum_term_zkzy)
+    return 1 - sum_term_zkzy/(sum_term_zkz + sum_term_zkzy)
 end
 
 function _negativebinomial_optim_n(logn,
@@ -241,7 +241,7 @@ function _negativebinomial_optim_n_exact(logn, d_old,
     sum_term_zkzy = sum(term_zkz_Y)[1]
     sum_term_zkzlogy = sum(term_zkz_logY)[1]
 
-    p_tmp = _negativebinomial_n_to_p(1, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+    p_tmp = _negativebinomial_n_to_p(n_tmp, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     obj = sum_term_zkzlogy - sum(z_e_obs .* loggamma.(n_tmp .* exposure))[1] + sum_term_zkz*log(p_tmp) + sum_term_zkzy*log(1-p_tmp)
     p = penalty ? (pen_pararms_jk[1]-1)*log(n_tmp) - n_tmp/pen_pararms_jk[2] : 0.0
@@ -268,7 +268,7 @@ function EM_M_expert_exact(d::NegativeBinomialExpert,
     sum_term_zkz = sum(term_zkz)[1]
     sum_term_zkzy = sum(term_zkz_Y)[1]
 
-    p_new = _negativebinomial_n_to_p(1, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
+    p_new = _negativebinomial_n_to_p(n_new, sum_term_zkz, sum_term_zkzy, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     # Deal with zero mass 
     if (p_new^n_new > 0.999999) || (isnan(p_new^n_new))
