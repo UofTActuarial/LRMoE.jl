@@ -987,8 +987,8 @@ end
     #                WeibullExpert(2*param1[3], 1.25*param2[3]) WeibullExpert(0.9*param1[4], param2[4])]
 
     # pen_α = 5
-    # pen_params = [[[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]],
-    #               [[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]]]
+    # pen_params = [[[2.0 10.0 1.0 Inf], [2.0 10.0 1.0 Inf]],
+    #               [[2.0 10.0 1.0 Inf], [2.0 10.0 1.0 Inf]]]
 
     # result = LRMoE.fit_exact(Y_sim, X, α_guess, model_guess,
     #                     exposure = expos,
@@ -1011,6 +1011,9 @@ end
 @testset "Weibull, exact" begin
 
     # Fit 50,000 observations as an example
+
+    # using Random
+    # Random.seed!(1234)
 
     # param0 = rand(Distributions.Uniform(0, 1), 1)[1]
     # param1 = rand(Distributions.Uniform(1.5, 10), 4)
@@ -1041,8 +1044,8 @@ end
     #                WeibullExpert(2*param1[3], 1.25*param2[3]) WeibullExpert(param1[4], param2[4])]
 
     # pen_α = 5
-    # pen_params = [[[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]],
-    #               [[1.0 Inf 1.0 Inf], [1.0 Inf 1.0 Inf]]]
+    # pen_params = [[[2.0 10.0 1.0 Inf], [2.0 10.0 1.0 Inf]],
+    #               [[2.0 10.0 1.0 Inf], [2.0 10.0 1.0 Inf]]]
 
     # result = LRMoE.fit_main(Y_sim, X, α_guess, model_guess,
     #                     exposure = expos,

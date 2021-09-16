@@ -177,7 +177,7 @@ function _weibull_optim_k(logk,
     θ_tmp = _weibull_k_to_λ(k_tmp, sum_term_zkz, sum_term_zkz_powY, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     obj = log(k_tmp)*sum_term_zkz - k_tmp*log(θ_tmp)*sum_term_zkz + (k_tmp-1)*sum_term_zkz_logY - (θ_tmp^(-k_tmp))*sum_term_zkz_powY
-    p = penalty ? (pen_pararms_jk[1]-1)*log(k_tmp) + k_tmp/pen_pararms_jk[2] + (pen_pararms_jk[3]-1)*log(θ_tmp) + θ_tmp/pen_pararms_jk[4] : 0.0
+    p = penalty ? (pen_pararms_jk[1]-1)*log(k_tmp) - k_tmp/pen_pararms_jk[2] + (pen_pararms_jk[3]-1)*log(θ_tmp) - θ_tmp/pen_pararms_jk[4] : 0.0
     return (obj + p) * (-1.0)
 
 end
@@ -261,7 +261,7 @@ function _weibull_optim_k_exact(logk,
     θ_tmp = _weibull_k_to_λ(k_tmp, sum_term_zkz, sum_term_zkz_powY, penalty = penalty, pen_pararms_jk = pen_pararms_jk)
 
     obj = log(k_tmp)*sum_term_zkz - k_tmp*log(θ_tmp)*sum_term_zkz + (k_tmp-1)*sum_term_zkz_logY - (θ_tmp^(-k_tmp))*sum_term_zkz_powY
-    p = penalty ? (pen_pararms_jk[1]-1)*log(k_tmp) + k_tmp/pen_pararms_jk[2] + (pen_pararms_jk[3]-1)*log(θ_tmp) + θ_tmp/pen_pararms_jk[4] : 0.0
+    p = penalty ? (pen_pararms_jk[1]-1)*log(k_tmp) - k_tmp/pen_pararms_jk[2] + (pen_pararms_jk[3]-1)*log(θ_tmp) - θ_tmp/pen_pararms_jk[4] : 0.0
     return (obj + p) * (-1.0)
 
 end
