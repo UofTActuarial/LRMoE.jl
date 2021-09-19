@@ -87,9 +87,7 @@ quantile(d::ZIBinomialExpert, p) = p <= d.p0 ? 0.0 : quantile(Distributions.Bino
 ## EM: M-Step
 function EM_M_expert(d::ZIBinomialExpert,
                     tl, yl, yu, tu,
-                    expert_ll_pos,
-                    expert_tn_pos,
-                    expert_tn_bar_pos,
+                    exposure,
                     z_e_obs, z_e_lat, k_e;
                     penalty = true, pen_pararms_jk = [2.0 1.0])
 
@@ -100,6 +98,11 @@ function EM_M_expert(d::ZIBinomialExpert,
         return d
     end
 
+    # Not affected by Exposurize
+    tmp_exp = BinomialExpert(d.n, d.p)
+    expert_ll_pos = expert_ll.(tmp_exp, tl, yl, yu, tu)
+    expert_tn_bar_pos = expert_tn_bar.(tmp_exp, tl, yl, yu, tu)
+
     # Update zero probability
     z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(yl, p_old, expert_ll_pos)
     z_pos_e_obs = z_e_obs .- z_zero_e_obs
@@ -108,12 +111,9 @@ function EM_M_expert(d::ZIBinomialExpert,
     p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, z_zero_e_lat, z_pos_e_lat, k_e)
 
     # Update parameters: call its positive part
-    tmp_exp = BinomialExpert(d.n, d.p)
     tmp_update = EM_M_expert(tmp_exp,
                             tl, yl, yu, tu,
-                            expert_ll_pos,
-                            expert_tn_pos,
-                            expert_tn_bar_pos,
+                            exposure,
                             # z_e_obs, z_e_lat, k_e,
                             z_pos_e_obs, z_pos_e_lat, k_e,
                             penalty = penalty, pen_pararms_jk = pen_pararms_jk)

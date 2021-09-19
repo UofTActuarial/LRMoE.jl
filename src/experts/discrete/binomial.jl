@@ -90,7 +90,7 @@ function _sum_densy_series(d::BinomialExpert, yl, yu)
         series = 0:(max(yl-1, 0))
         return d.n*d.p - sum(pdf.(d, series) .* series)[1]
     else
-        series = yl:yu
+        series = yl:(min(yu, d.n))
         return sum(pdf.(d, series) .* series)[1]
     end
 end
@@ -100,28 +100,32 @@ function _int_obs_Y_raw(d::BinomialExpert, yl, yu)
 end
 
 function _int_lat_Y_raw(d::BinomialExpert, tl, tu)
-    return d.n*d.p - _sum_densy_series(d, tl, tu)
+    return max(d.n*d.p - _sum_densy_series(d, tl, tu), 0)
 end
 
 ## EM: M-Step
 function EM_M_expert(d::BinomialExpert,
                     tl, yl, yu, tu,
-                    expert_ll_pos,
-                    expert_tn_pos,
-                    expert_tn_bar_pos,
+                    exposure,
                     z_e_obs, z_e_lat, k_e;
                     penalty = true, pen_pararms_jk = [2.0 1.0])
+
+    # Not affected by Exposurize
+    expert_ll_pos = expert_ll.(d, tl, yl, yu, tu)
+    expert_tn_bar_pos = expert_tn_bar.(d, tl, yl, yu, tu)
 
     # Further E-Step
     yl_yu_unique = unique_bounds(yl, yu)
     int_obs_Y_tmp = _int_obs_Y_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
     Y_e_obs = exp.(-expert_ll_pos) .* int_obs_Y_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
     nan2num(Y_e_obs, 0.0) # get rid of NaN
+    inf2num(Y_e_obs, 0.0) # get rid of inf
 
     tl_tu_unique = unique_bounds(tl, tu)
     int_lat_Y_tmp = _int_lat_Y_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
     Y_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_Y_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
     nan2num(Y_e_lat, 0.0) # get rid of NaN
+    inf2num(Y_e_lat, 0.0) # get rid of inf
 
     # Update parameters
     term_zkz_Y = (z_e_obs .* Y_e_obs) .+ (z_e_lat .* k_e .* Y_e_lat)
@@ -130,7 +134,7 @@ function EM_M_expert(d::BinomialExpert,
     p_new = sum(term_zkz_Y)[1] / (sum(term_zkz_Y)[1] + sum(term_zkz_n_Y)[1])
 
     # Deal with zero mass
-    if (1-p_new)^d.n > 0.999999 || (isnan((1-p_new)^d.n))
+    if ((1-p_new)^d.n > 0.999999) || (isnan((1-p_new)^d.n))
         p_new = d.p
     end
 
