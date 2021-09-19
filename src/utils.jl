@@ -19,6 +19,13 @@ function nan2num(x, g)
     end
 end
 
+# replace inf by a number
+function inf2num(x, g)
+    for i in eachindex(x)
+        @inbounds x[i] = ifelse(isinf(x[i]), g, x[i])
+    end
+end
+
 # matching functions for fast integration
 function unique_bounds(l, u)
     return unique(hcat(vec(l), vec(u)), dims = 1)

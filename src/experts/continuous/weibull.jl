@@ -222,6 +222,8 @@ function EM_M_expert(d::WeibullExpert,
     powY_e_lat = _int_lat_powY.(d, k_new, tl, tu, expert_tn_bar_pos)
     nan2num(powY_e_obs, 0.0) # get rid of NaN
     nan2num(powY_e_lat, 0.0) # get rid of NaN
+    inf2num(powY_e_obs, 0.0) # get rid of Inf
+    inf2num(powY_e_lat, 0.0) # get rid of Inf
 
     term_zkz = z_e_obs .+ (z_e_lat .* k_e)
     # term_zkz_logY = (z_e_obs .* logY_e_obs) .+ (z_e_lat .* k_e .* logY_e_lat)
