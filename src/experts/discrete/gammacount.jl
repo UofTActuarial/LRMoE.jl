@@ -110,25 +110,27 @@ quantile(d::GammaCountExpert, p) = quantile(LRMoE.GammaCount(d.m, d.s), p)
 
 ## Misc functions for E-Step
 
-function _sum_dens_series(m_new, s_new, d::GammaCountExpert, yl, yu)
-    upper_finite = isinf(yu) ? Distributions.quantile(GammaCount(d.m, d.s), 1-1e-10) : yu
+function _sum_dens_series(m_new, s_new, d::GammaCountExpert, yl, yu, exposure)
+    upper_finite = isinf(yu) ? Distributions.quantile(GammaCount(d.m, d.s), 1-1e-8) : yu
     series = yl:(max(yl, min(yu, upper_finite+1)))
-    return sum(logpdf.(GammaCountExpert(m_new, s_new), series) .* pdf.(d, series))[1]
+    return sum(logpdf.(GammaCountExpert(m_new, s_new/exposure), series) .* pdf.(d, series))[1]
 end
 
-function _int_obs_dens_raw(m_new, s_new, d::GammaCountExpert, yl, yu)
-    return _sum_dens_series(m_new, s_new, d, yl, yu)
+function _int_obs_dens_raw(m_new, s_new, d::GammaCountExpert, yl, yu, exposure)
+    return _sum_dens_series(m_new, s_new, d, yl, yu, exposure)
 end
 
-function _int_lat_dens_raw(m_new, s_new, d::GammaCountExpert, tl, tu)
-    return (tl==0 ? 0.0 : _sum_dens_series.(m_new, s_new, d, 0, ceil(tl)-1)) + (isinf(tu) ? 0.0 : _sum_dens_series.(m_new, s_new, d, floor(tu)+1, Inf))
+function _int_lat_dens_raw(m_new, s_new, d::GammaCountExpert, tl, tu, exposure)
+    return (tl==0 ? 0.0 : _sum_dens_series.(m_new, s_new, d, 0, ceil(tl)-1), exposure) + 
+        (isinf(tu) ? 0.0 : _sum_dens_series.(m_new, s_new, d, floor(tu)+1, Inf, exposure))
 end
 
 
 function _gammacount_optim_params(lognew,
                         d_old,
                         tl, yl, yu, tu,
-                        expert_ll_pos, expert_tn_pos, expert_tn_bar_pos,
+                        # expert_ll_pos, expert_tn_pos, expert_tn_bar_pos,
+                        exposure,
                         z_e_obs, z_e_lat, k_e; # ,
                         # Y_e_obs, Y_e_lat;
                         penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
@@ -137,15 +139,34 @@ function _gammacount_optim_params(lognew,
     s_tmp = exp(lognew[2])
 
     # Further E-Step
-    yl_yu_unique = unique_bounds(yl, yu)
-    int_obs_dens_tmp = _int_obs_dens_raw.(m_tmp, s_tmp, d_old, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    densY_e_obs = exp.(-expert_ll_pos) .* int_obs_dens_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
-    nan2num(densY_e_obs, 0.0) # get rid of NaN
+    # yl_yu_unique = unique_bounds(yl, yu)
+    # int_obs_dens_tmp = _int_obs_dens_raw.(m_tmp, s_tmp, d_old, yl_yu_unique[:,1], yl_yu_unique[:,2])
+    # densY_e_obs = exp.(-expert_ll_pos) .* int_obs_dens_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
+    # nan2num(densY_e_obs, 0.0) # get rid of NaN
 
-    tl_tu_unique = unique_bounds(tl, tu)
-    int_lat_dens_tmp = _int_lat_dens_raw.(m_tmp, s_tmp, d_old, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    densY_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_dens_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
+    # tl_tu_unique = unique_bounds(tl, tu)
+    # int_lat_dens_tmp = _int_lat_dens_raw.(m_tmp, s_tmp, d_old, tl_tu_unique[:,1], tl_tu_unique[:,2])
+    # densY_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_dens_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
+    # nan2num(densY_e_lat, 0.0) # get rid of NaN
+
+    densY_e_obs = fill(0.0, length(yl))
+    densY_e_lat = fill(0.0, length(yl))
+    d_tmp = LRMoE.GammaCountExpert(m_tmp, s_tmp)
+
+    for i in 1:length(yl)
+        d_expo = exposurize_expert(d_tmp, exposure = exposure[i])
+        # expert_ll_pos = expert_ll(d_expo, tl[i], yl[i], yu[i], tu[i])
+        # expert_tn_bar_pos = expert_tn_bar(d_expo, tl[i], yl[i], yu[i], tu[i])
+        densY_e_obs[i] = expert_ll(d_expo, tl[i], yl[i], yu[i], tu[i])
+        # _int_obs_dens_raw(m_tmp, s_tmp, d_expo, yl[i], yu[i], exposure[i]) # exp(-expert_ll_pos) * _int_obs_dens_raw(m_tmp, s_tmp, d_expo, yl[i], yu[i], exposure[i])
+        densY_e_lat[i] = expert_tn_bar(d_expo, tl[i], yl[i], yu[i], tu[i])
+        # _int_lat_dens_raw(m_tmp, s_tmp, d_expo, yl[i], yu[i], exposure[i]) # exp(-expert_tn_bar_pos) * _int_lat_dens_raw(m_tmp, s_tmp, d_expo, yl[i], yu[i], exposure[i])
+    end
+
+    nan2num(densY_e_obs, 0.0) # get rid of NaN
     nan2num(densY_e_lat, 0.0) # get rid of NaN
+    inf2num(densY_e_obs, 0.0) # get rid of inf
+    inf2num(densY_e_lat, 0.0) # get rid of inf
 
     # term_zkz = z_e_obs .+ (z_e_lat .* k_e)
     term_zkz_Y = (z_e_obs .* densY_e_obs) .+ (z_e_lat .* k_e .* densY_e_lat)
@@ -161,16 +182,14 @@ end
 ## EM: M-Step
 function EM_M_expert(d::GammaCountExpert,
                     tl, yl, yu, tu,
-                    expert_ll_pos,
-                    expert_tn_pos,
-                    expert_tn_bar_pos,
+                    exposure,
                     z_e_obs, z_e_lat, k_e;
                     penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
 
     # Update parameters
     logparams_new = Optim.minimizer( Optim.optimize(x -> _gammacount_optim_params(x, d,
                                                 tl, yl, yu, tu,
-                                                expert_ll_pos, expert_tn_pos, expert_tn_bar_pos,
+                                                exposure,
                                                 z_e_obs, z_e_lat, k_e,
                                                 # Y_e_obs, Y_e_lat,
                                                 penalty = penalty, pen_pararms_jk = pen_pararms_jk),
