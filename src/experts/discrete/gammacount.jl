@@ -111,7 +111,7 @@ quantile(d::GammaCountExpert, p) = quantile(LRMoE.GammaCount(d.m, d.s), p)
 ## Misc functions for E-Step
 
 function _sum_dens_series(m_new, s_new, d::GammaCountExpert, yl, yu, exposure)
-    upper_finite = isinf(yu) ? Distributions.quantile(GammaCount(d.m, d.s), 1-1e-8) : yu
+    upper_finite = isinf(yu) ? quantile(d, 1-1e-8) : yu
     series = yl:(max(yl, min(yu, upper_finite+1)))
     return sum(logpdf.(GammaCountExpert(m_new, s_new/exposure), series) .* pdf.(d, series))[1]
 end
