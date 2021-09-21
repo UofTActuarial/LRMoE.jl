@@ -88,9 +88,7 @@ quantile(d::ZINegativeBinomialExpert, p) = p <= d.p0 ? 0.0 :  quantile(Distribut
 ## EM: M-Step
 function EM_M_expert(d::ZINegativeBinomialExpert,
                     tl, yl, yu, tu,
-                    expert_ll_pos,
-                    expert_tn_pos,
-                    expert_tn_bar_pos,
+                    exposure,
                     z_e_obs, z_e_lat, k_e;
                     penalty = true, pen_pararms_jk = [2.0 1.0])
 
@@ -101,6 +99,16 @@ function EM_M_expert(d::ZINegativeBinomialExpert,
         return d
     end
 
+    expert_ll_pos = fill(0.0, length(yl))
+    expert_tn_bar_pos = fill(0.0, length(yl))
+
+    tmp_exp = NegativeBinomialExpert(d.n, d.p)
+    for i in 1:length(yl)
+        d_expo = exposurize_expert(tmp_exp, exposure = exposure[i])
+        expert_ll_pos[i] = expert_ll.(d_expo, tl[i], yl[i], yu[i], tu[i])
+        expert_tn_bar_pos[i] = expert_tn_bar.(d_expo, tl[i], yl[i], yu[i], tu[i])
+    end
+
     # Update zero probability
     z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(yl, p_old, expert_ll_pos)
     z_pos_e_obs = z_e_obs .- z_zero_e_obs
@@ -109,12 +117,9 @@ function EM_M_expert(d::ZINegativeBinomialExpert,
     p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, z_zero_e_lat, z_pos_e_lat, k_e)
 
     # Update parameters: call its positive part
-    tmp_exp = NegativeBinomialExpert(d.n, d.p)
     tmp_update = EM_M_expert(tmp_exp,
                             tl, yl, yu, tu,
-                            expert_ll_pos,
-                            expert_tn_pos,
-                            expert_tn_bar_pos,
+                            exposure,
                             # z_e_obs, z_e_lat, k_e,
                             z_pos_e_obs, z_pos_e_lat, k_e,
                             penalty = penalty, pen_pararms_jk = pen_pararms_jk)
