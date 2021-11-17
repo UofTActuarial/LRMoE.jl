@@ -157,6 +157,10 @@ function EM_M_expert(d::InverseGaussianExpert,
                      z_e_obs, z_e_lat, k_e;
                      penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
     
+    if d.μ < 0.000001 || d.λ < 0.000001
+        return d
+    end
+    
     expert_ll_pos = expert_ll.(d, tl, yl, yu, tu)
     expert_tn_bar_pos = expert_tn_bar.(d, tl, yl, yu, tu)
 
@@ -207,6 +211,10 @@ function EM_M_expert_exact(d::InverseGaussianExpert,
                             ye, exposure,
                             z_e_obs; 
                             penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
+
+    if d.μ < 0.000001 || d.λ < 0.000001
+        return d
+    end
 
     # Further E-Step
     Y_e_obs = ye
