@@ -141,6 +141,10 @@ function EM_M_expert(d::LogNormalExpert,
                      z_e_obs, z_e_lat, k_e;
                      penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
 
+    if d.σ < 0.000001
+        return d
+    end
+
     expert_ll_pos = expert_ll.(d, tl, yl, yu, tu)
     expert_tn_bar_pos = expert_tn_bar.(d, tl, yl, yu, tu)
 
@@ -170,6 +174,10 @@ function EM_M_expert_exact(d::LogNormalExpert,
                             ye, exposure,
                             z_e_obs; 
                             penalty = true, pen_pararms_jk = [Inf 1.0 Inf])
+    
+    if d.σ < 0.000001
+        return d
+    end
 
     # Further E-Step
     logY_e_obs = log.(ye)
