@@ -14,7 +14,6 @@ External links
 * [Burr distribution on Wikipedia](https://en.wikipedia.org/wiki/Burr_distribution)
 """
 
-
 struct Burr{T<:Real} <: ContinuousUnivariateDistribution
     k::T # shape1
     c::T # shape2
@@ -28,18 +27,18 @@ end
 
 Burr(k::Real, c::Real, λ::Real) = Burr(promote(k, c, λ)...)
 Burr(k::Integer, c::Integer, λ::Integer) = Burr(float(k), float(c), float(λ))
-Burr(k::T, c::T) where {T <: Real} = Burr(k, c, one(T))
-Burr() = Burr(1.0, 1.0, 1.0, check_args=false)
+Burr(k::T, c::T) where {T<:Real} = Burr(k, c, one(T))
+Burr() = Burr(1.0, 1.0, 1.0; check_args=false)
 
 @distr_support Burr 0.0 Inf
 
 #### Conversions
 
-function convert(::Type{Burr{T}}, k::S, c::S, λ::S) where {T <: Real, S <: Real}
-    Burr(T(k), T(c), T(λ))
+function convert(::Type{Burr{T}}, k::S, c::S, λ::S) where {T<:Real,S<:Real}
+    return Burr(T(k), T(c), T(λ))
 end
-function convert(::Type{Burr{T}}, d::Burr{S}) where {T <: Real, S <: Real}
-    Burr(T(d.k), T(d.c), T(d.λ), check_args=false)
+function convert(::Type{Burr{T}}, d::Burr{S}) where {T<:Real,S<:Real}
+    return Burr(T(d.k), T(d.c), T(d.λ); check_args=false)
 end
 
 #### Parameters
@@ -53,39 +52,37 @@ partype(::Burr{T}) where {T<:Real} = T
 
 #### Statistics
 
-function m(d::Burr{T}, g::Real) where T<:Real # The calculating moments: this should not be exported.
+function m(d::Burr{T}, g::Real) where {T<:Real} # The calculating moments: this should not be exported.
     (k, c, λ) = params(d)
 
-    if (g-(-c))*(g-k*c) < 0
-        λ^g * gamma(1 + g/c) * gamma(k - g/c) / gamma(k)
+    if (g - (-c)) * (g - k * c) < 0
+        λ^g * gamma(1 + g / c) * gamma(k - g / c) / gamma(k)
     else
         return T(Inf)
     end
-
 end
 
-
-function median(d::Burr{T}) where T<:Real
+function median(d::Burr{T}) where {T<:Real}
     (k, c, λ) = params(d)
 
-    return λ * (2^(1/k) - 1)^(1/c)
+    return λ * (2^(1 / k) - 1)^(1 / c)
 end
 
-function mean(d::Burr{T}) where T<:Real
+function mean(d::Burr{T}) where {T<:Real}
     return m(d, 1)
 end
 
-function mode(d::Burr{T}) where T<:Real
+function mode(d::Burr{T}) where {T<:Real}
     (k, c, λ) = params(d)
 
     if c > 1.0
-        return λ * ( (c-1) / (k*c+1) )^(1/c)
+        return λ * ((c - 1) / (k * c + 1))^(1 / c)
     else
         return 0.0
     end
 end
 
-function var(d::Burr{T}) where T<:Real
+function var(d::Burr{T}) where {T<:Real}
     if isinf(m(d, 1))
         return T(Inf)
     else
@@ -93,18 +90,18 @@ function var(d::Burr{T}) where T<:Real
     end
 end
 
-function skewness(d::Burr{T}) where T<:Real
+function skewness(d::Burr{T}) where {T<:Real}
     if isinf(m(d, 2))
         return T(Inf)
     else
         g1 = m(d, 1)
         g2 = m(d, 2)
         g3 = m(d, 3)
-        return (g3 - 3g1 * g2 + 2g1^3) / (g2 - g1^2) ^ (3/2)
+        return (g3 - 3g1 * g2 + 2g1^3) / (g2 - g1^2)^(3 / 2)
     end
 end
 
-function kurtosis(d::Burr{T}) where T<:Real
+function kurtosis(d::Burr{T}) where {T<:Real}
     if isinf(m(d, 3))
         return T(Inf)
     else
@@ -122,64 +119,65 @@ end
 function quantile(d::Burr, p::Real)
     (k, c, λ) = params(d)
 
-    return λ * ( (1-p)^(-1/k) - 1 )^(1/c)
+    return λ * ((1 - p)^(-1 / k) - 1)^(1 / c)
 end
 
 #### Evaluation
 
-function pdf(d::Burr{T}, x::Real) where T<:Real
+function pdf(d::Burr{T}, x::Real) where {T<:Real}
     if isinf(x)
         return zero(T)
     elseif x > 0
         (k, c, λ) = params(d)
-        return k*c/λ * (x/λ)^(c-1) * ( 1 + (x/λ)^c )^(-k-1)
+        return k * c / λ * (x / λ)^(c - 1) * (1 + (x / λ)^c)^(-k - 1)
     else
         return zero(T)
     end
 end
 
-function logpdf(d::Burr{T}, x::Real) where T<:Real
+function logpdf(d::Burr{T}, x::Real) where {T<:Real}
     if isinf(x)
         return -T(Inf)
     elseif x > 0
         (k, c, λ) = params(d)
-        return log(k) + log(c) - log(λ) + (c-1)*log(x) - (c-1)*log(λ) - (k+1)*log1p( (x/λ)^c )
+        return log(k) + log(c) - log(λ) + (c - 1) * log(x) - (c - 1) * log(λ) -
+               (k + 1) * log1p((x / λ)^c)
     else
         return -T(Inf)
     end
 end
 
-function cdf(d::Burr{T}, x::Real) where T<:Real
+function cdf(d::Burr{T}, x::Real) where {T<:Real}
     if x > 0
         (k, c, λ) = params(d)
-        return 1 - ( 1 + (x/λ)^c )^(-k)
+        return 1 - (1 + (x / λ)^c)^(-k)
     else
         return zero(T)
     end
 end
 
-function ccdf(d::Burr{T}, x::Real) where T<:Real
+function ccdf(d::Burr{T}, x::Real) where {T<:Real}
     if x > 0
         (k, c, λ) = params(d)
-        return ( 1 + (x/λ)^c )^(-k)
+        return (1 + (x / λ)^c)^(-k)
     else
         return one(T)
     end
 end
 
-function logcdf(d::Burr{T}, x::Real) where T<:Real
+function logcdf(d::Burr{T}, x::Real) where {T<:Real}
     if x > 0
         (k, c, λ) = params(d)
-        return log1p( - ( 1 + (x/λ)^c )^(-k) )
+        return log1p(-(1 + (x / λ)^c)^(-k))
     else
         return -T(Inf)
     end
 end
 
-function logccdf(d::Burr{T}, x::Real) where T<:Real
+function logccdf(d::Burr{T}, x::Real) where {T<:Real}
     if x > 0
         (k, c, λ) = params(d)
-        return -k * log1p( (x/λ)^c )
+        return -k * log1p((x / λ)^c)
     else
         return zero(T)
     end
@@ -191,4 +189,4 @@ function rand(rng::AbstractRNG, d::Burr)
     u = 1 - rand(rng)
 
     return quantile(d, u)
-end 
+end
