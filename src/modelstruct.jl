@@ -4,7 +4,7 @@ struct hasRandomEffects <: RandomEffects end
 struct noRandomEffects <: RandomEffects end
 
 # Model
-abstract type LRMoEModel{re <: RandomEffects} end
+abstract type LRMoEModel{re<:RandomEffects} end
 
 const LRMoEModelSTD = LRMoEModel{noRandomEffects}
 const LRMoEModelRE = LRMoEModel{hasRandomEffects}
@@ -17,10 +17,18 @@ abstract type LRMoEFittingResult end
 struct LRMoESTD <: LRMoEModelSTD
     α::Array
     comp_dist::Array
-    LRMoESTD(α, comp_dist) = ( size(α)[1] == size(comp_dist)[2] ? new(α, comp_dist) : error("Invalid specification of model.") )
+    function LRMoESTD(α, comp_dist)
+        return (
+            if size(α)[1] == size(comp_dist)[2]
+                new(α, comp_dist)
+            else
+                error("Invalid specification of model.")
+            end
+        )
+    end
 end
 
-struct LRMoESTDFit <: LRMoEFittingResult 
+struct LRMoESTDFit <: LRMoEFittingResult
     model_fit::LRMoESTD
     converge::Bool
     iter::Integer
@@ -28,9 +36,10 @@ struct LRMoESTDFit <: LRMoEFittingResult
     loglik_np::Real
     AIC::Real
     BIC::Real
-    LRMoESTDFit(model_fit, converge, iter, loglik, loglik_np, AIC, BIC) = new(model_fit, converge, iter, loglik, loglik_np, AIC, BIC)
+    function LRMoESTDFit(model_fit, converge, iter, loglik, loglik_np, AIC, BIC)
+        return new(model_fit, converge, iter, loglik, loglik_np, AIC, BIC)
+    end
 end
-
 
 """
     summary(obj)
@@ -59,9 +68,5 @@ function summary(m::LRMoESTDFit)
     println("Fitted α:")
     println("$(m.model_fit.α)")
     println("Fitted component distributions:")
-    println("$(m.model_fit.comp_dist)")
+    return println("$(m.model_fit.comp_dist)")
 end
-
-# tmp = LRMoESTD([1 2 ; 3 4], ["a" "b"])
-# tmp1 = LRMoESTDFit(tmp, true, 20, 1.1, 1.2, 1.3)
-# summary(tmp1)

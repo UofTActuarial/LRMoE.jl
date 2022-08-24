@@ -15,9 +15,8 @@ and logit regression coefficients `α`.
 """
 function predict_class_prior(X, α)
     tmp = exp.(LogitGating(α, X))
-    return (prob = tmp, max_prob_idx = [findmax(tmp[i,:])[2] for i in 1:size(tmp)[1]])
+    return (prob=tmp, max_prob_idx=[findmax(tmp[i, :])[2] for i in 1:size(tmp)[1]])
 end
-
 
 """
     predict_class_posterior(Y, X, α, model; 
@@ -41,7 +40,7 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `prob`: A matrix of latent class probabilities.
 - `max_prob_idx`: A matrix of the most likely latent class for each observation.
 """
-function predict_class_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing)
+function predict_class_posterior(Y, X, α, model; exact_Y=true, exposure_past=nothing)
     if exact_Y == true
         Y = _exact_to_full(Y)
     end
@@ -50,12 +49,14 @@ function predict_class_posterior(Y, X, α, model; exact_Y = true, exposure_past 
         exposure_past = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_past)
+    model_exp = exposurize_model(model; exposure=exposure_past)
 
     gate = LogitGating(α, X)
     ll_np_list = loglik_np(Y, gate, model_exp)
     z_e_obs = EM_E_z_obs(ll_np_list.gate_expert_ll_comp, ll_np_list.gate_expert_ll)
-    return (prob = z_e_obs, max_prob_idx = [findmax(z_e_obs[i,:])[2] for i in 1:size(z_e_obs)[1]])
+    return (
+        prob=z_e_obs, max_prob_idx=[findmax(z_e_obs[i, :])[2] for i in 1:size(z_e_obs)[1]]
+    )
 end
 
 """
@@ -77,12 +78,12 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 # Return Values
 - A matrix of predicted mean values of response, based on prior probabilities.
 """
-function predict_mean_prior(X, α, model; exposure_future = nothing)
+function predict_mean_prior(X, α, model; exposure_future=nothing)
     if isnothing(exposure_future)
         exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_future)
+    model_exp = exposurize_model(model; exposure=exposure_future)
 
     weights = predict_class_prior(X, α).prob
     means = mean.(model_exp)
@@ -90,7 +91,7 @@ function predict_mean_prior(X, α, model; exposure_future = nothing)
     result = fill(NaN, size(X)[1], size(model)[1])
 
     for i in 1:size(X)[1]
-        result[i,:] = means[:,:,i] * weights[i,:]
+        result[i, :] = means[:, :, i] * weights[i, :]
     end
 
     return result
@@ -118,7 +119,9 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 # Return Values
 - A matrix of predicted mean values of response, based on posterior probabilities.
 """
-function predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
+function predict_mean_posterior(
+    Y, X, α, model; exact_Y=true, exposure_past=nothing, exposure_future=nothing
+)
     # if exact_Y == true
     #     Y = _exact_to_full(Y)
     # end
@@ -131,15 +134,18 @@ function predict_mean_posterior(Y, X, α, model; exact_Y = true, exposure_past =
         exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_future)
+    model_exp = exposurize_model(model; exposure=exposure_future)
 
-    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past).prob
+    weights =
+        predict_class_posterior(
+            Y, X, α, model; exact_Y=exact_Y, exposure_past=exposure_past
+        ).prob
     means = mean.(model_exp)
 
     result = fill(NaN, size(X)[1], size(model)[1])
 
     for i in 1:size(X)[1]
-        result[i,:] = means[:,:,i] * weights[i,:]
+        result[i, :] = means[:, :, i] * weights[i, :]
     end
 
     return result
@@ -164,27 +170,27 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 # Return Values
 - A matrix of predicted variance of response, based on prior probabilities.
 """
-function predict_var_prior(X, α, model; exposure_future = nothing)
+function predict_var_prior(X, α, model; exposure_future=nothing)
     if isnothing(exposure_future)
         exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_future)
+    model_exp = exposurize_model(model; exposure=exposure_future)
 
     weights = predict_class_prior(X, α).prob
 
     c_mean = mean.(model_exp)
-    g_mean = predict_mean_prior(X, α, model, exposure_future = exposure_future)
+    g_mean = predict_mean_prior(X, α, model; exposure_future=exposure_future)
     c_var = var.(model_exp)
 
     var_c_mean = fill(NaN, size(X)[1], size(model)[1])
     mean_c_var = fill(NaN, size(X)[1], size(model)[1])
 
     for i in 1:size(X)[1]
-        var_c_mean[i,:] = (c_mean[:,:,i] .- g_mean[i,:] ).^2 * weights[i,:]
-        mean_c_var[i,:] = c_var[:,:,i] * weights[i,:]
+        var_c_mean[i, :] = (c_mean[:, :, i] .- g_mean[i, :]) .^ 2 * weights[i, :]
+        mean_c_var[i, :] = c_var[:, :, i] * weights[i, :]
     end
-    
+
     return var_c_mean + mean_c_var
 end
 
@@ -210,7 +216,9 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 # Return Values
 - A matrix of predicted variance of response, based on posterior probabilities.
 """
-function predict_var_posterior(Y, X, α, model; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
+function predict_var_posterior(
+    Y, X, α, model; exact_Y=true, exposure_past=nothing, exposure_future=nothing
+)
     # if exact_Y == true
     #     Y = _exact_to_full(Y)
     # end
@@ -223,22 +231,33 @@ function predict_var_posterior(Y, X, α, model; exact_Y = true, exposure_past = 
         exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_future)
+    model_exp = exposurize_model(model; exposure=exposure_future)
 
-    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past).prob
+    weights =
+        predict_class_posterior(
+            Y, X, α, model; exact_Y=exact_Y, exposure_past=exposure_past
+        ).prob
 
     c_mean = mean.(model_exp)
-    g_mean = predict_mean_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past, exposure_future = exposure_future)
+    g_mean = predict_mean_posterior(
+        Y,
+        X,
+        α,
+        model;
+        exact_Y=exact_Y,
+        exposure_past=exposure_past,
+        exposure_future=exposure_future,
+    )
     c_var = var.(model_exp)
 
     var_c_mean = fill(NaN, size(X)[1], size(model)[1])
     mean_c_var = fill(NaN, size(X)[1], size(model)[1])
 
     for i in 1:size(X)[1]
-        var_c_mean[i,:] = (c_mean[:,:,i] .- g_mean[i,:] ).^2 * weights[i,:]
-        mean_c_var[i,:] = c_var[:,:,i] * weights[i,:]
+        var_c_mean[i, :] = (c_mean[:, :, i] .- g_mean[i, :]) .^ 2 * weights[i, :]
+        mean_c_var[i, :] = c_var[:, :, i] * weights[i, :]
     end
-    
+
     return var_c_mean + mean_c_var
 end
 
@@ -262,20 +281,26 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 # Return Values
 - A matrix of predicted limit expected value of response, based on prior probabilities.
 """
-function predict_limit_prior(X, α, model, limit; exposure_future = nothing)
+function predict_limit_prior(X, α, model, limit; exposure_future=nothing)
     if isnothing(exposure_future)
         exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_future)
+    model_exp = exposurize_model(model; exposure=exposure_future)
 
     weights = predict_class_prior(X, α).prob
 
     result = fill(NaN, size(X)[1], size(model)[1])
 
     for i in 1:size(X)[1]
-        means = vcat([hcat([lev(model_exp[d,j,i], limit[i,d]) for j in 1:size(model_exp)[2]]...) for d in 1:size(model_exp)[1]]...)
-        result[i,:] = means * weights[i,:]
+        means = vcat(
+            [
+                hcat(
+                    [lev(model_exp[d, j, i], limit[i, d]) for j in 1:size(model_exp)[2]]...
+                ) for d in 1:size(model_exp)[1]
+            ]...,
+        )
+        result[i, :] = means * weights[i, :]
     end
 
     return result
@@ -304,7 +329,9 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 # Return Values
 - A matrix of predicted limit expected value of response, based on posterior probabilities.
 """
-function predict_limit_posterior(Y, X, α, model, limit; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
+function predict_limit_posterior(
+    Y, X, α, model, limit; exact_Y=true, exposure_past=nothing, exposure_future=nothing
+)
     if isnothing(exposure_past)
         exposure_past = fill(1.0, size(X)[1])
     end
@@ -313,15 +340,24 @@ function predict_limit_posterior(Y, X, α, model, limit; exact_Y = true, exposur
         exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_future)
+    model_exp = exposurize_model(model; exposure=exposure_future)
 
-    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past).prob
+    weights =
+        predict_class_posterior(
+            Y, X, α, model; exact_Y=exact_Y, exposure_past=exposure_past
+        ).prob
 
     result = fill(NaN, size(X)[1], size(model)[1])
 
     for i in 1:size(X)[1]
-        means = vcat([hcat([lev(model_exp[d,j,i], limit[i,d]) for j in 1:size(model_exp)[2]]...) for d in 1:size(model_exp)[1]]...)
-        result[i,:] = means * weights[i,:]
+        means = vcat(
+            [
+                hcat(
+                    [lev(model_exp[d, j, i], limit[i, d]) for j in 1:size(model_exp)[2]]...
+                ) for d in 1:size(model_exp)[1]
+            ]...,
+        )
+        result[i, :] = means * weights[i, :]
     end
 
     return result
@@ -347,20 +383,29 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 # Return Values
 - A matrix of predicted excess expectation of response, based on prior probabilities.
 """
-function predict_excess_prior(X, α, model, limit; exposure_future = nothing)
+function predict_excess_prior(X, α, model, limit; exposure_future=nothing)
     if isnothing(exposure_future)
         exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_future)
+    model_exp = exposurize_model(model; exposure=exposure_future)
 
     weights = predict_class_prior(X, α).prob
 
     result = fill(NaN, size(X)[1], size(model)[1])
 
     for i in 1:size(X)[1]
-        means = vcat([hcat([excess(model_exp[d,j,i], limit[i,d]) for j in 1:size(model_exp)[2]]...) for d in 1:size(model_exp)[1]]...)
-        result[i,:] = means * weights[i,:]
+        means = vcat(
+            [
+                hcat(
+                    [
+                        excess(model_exp[d, j, i], limit[i, d]) for
+                        j in 1:size(model_exp)[2]
+                    ]...,
+                ) for d in 1:size(model_exp)[1]
+            ]...,
+        )
+        result[i, :] = means * weights[i, :]
     end
 
     return result
@@ -389,7 +434,9 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 # Return Values
 - A matrix of predicted excess expectation of response, based on posterior probabilities.
 """
-function predict_excess_posterior(Y, X, α, model, limit; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
+function predict_excess_posterior(
+    Y, X, α, model, limit; exact_Y=true, exposure_past=nothing, exposure_future=nothing
+)
     if isnothing(exposure_past)
         exposure_past = fill(1.0, size(X)[1])
     end
@@ -398,15 +445,27 @@ function predict_excess_posterior(Y, X, α, model, limit; exact_Y = true, exposu
         exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_future)
+    model_exp = exposurize_model(model; exposure=exposure_future)
 
-    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past).prob
+    weights =
+        predict_class_posterior(
+            Y, X, α, model; exact_Y=exact_Y, exposure_past=exposure_past
+        ).prob
 
     result = fill(NaN, size(X)[1], size(model)[1])
 
     for i in 1:size(X)[1]
-        means = vcat([hcat([excess(model_exp[d,j,i], limit[i,d]) for j in 1:size(model_exp)[2]]...) for d in 1:size(model_exp)[1]]...)
-        result[i,:] = means * weights[i,:]
+        means = vcat(
+            [
+                hcat(
+                    [
+                        excess(model_exp[d, j, i], limit[i, d]) for
+                        j in 1:size(model_exp)[2]
+                    ]...,
+                ) for d in 1:size(model_exp)[1]
+            ]...,
+        )
+        result[i, :] = means * weights[i, :]
     end
 
     return result
@@ -422,10 +481,13 @@ function _solve_continuous_mix_quantile(weights, experts, p)
         # init_guess = minimum([maximum(quantile.(experts, 0.90)) 500])
         # init_guess = maximum([maximum(quantile.(experts, 0.90)) 1000])
         init_guess = maximum([maximum(quantile.(experts, p)) 1000])
-        VaR = try 
+        VaR = try
             # Roots.find_zero(y -> sum(weights .* exp.(expert_ll.(experts, 0.0, 0.0, y, Inf))) - p, init_guess, Roots.Order2())
-            Roots.find_zero(y -> sum(weights .* exp.(expert_ll.(experts, 0.0, 0.0, y, Inf))) - p, (0.0, init_guess+500))
-        catch;
+            Roots.find_zero(
+                y -> sum(weights .* exp.(expert_ll.(experts, 0.0, 0.0, y, Inf))) - p,
+                (0.0, init_guess + 500),
+            )
+        catch
             NaN
         end
         return VaR
@@ -435,7 +497,7 @@ end
 function _calc_continuous_CTE(weights, experts, p, VaR)
     m = sum(vec(weights) .* vec(mean.(experts)))
     lim_ev = sum(vec(weights) .* vec(lev.(experts, VaR))) # [lev(model[k], VaR) for k in 1:length(model)]
-    return VaR + (m-lim_ev)/(1-p)
+    return VaR + (m - lim_ev) / (1 - p)
 end
 
 # calculate CTE based on VaR and p
@@ -464,13 +526,12 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `VaR`: A matrix of predicted VaR of response, based on prior probabilities.
 - `CTE`: A matrix of predicted CTE of response, based on prior probabilities.
 """
-function predict_VaRCTE_prior(X, α, model, p; exposure_future = nothing)
-
+function predict_VaRCTE_prior(X, α, model, p; exposure_future=nothing)
     if isnothing(exposure_future)
         exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_future)
+    model_exp = exposurize_model(model; exposure=exposure_future)
 
     weights = predict_class_prior(X, α).prob
 
@@ -478,15 +539,19 @@ function predict_VaRCTE_prior(X, α, model, p; exposure_future = nothing)
     CTE = fill(NaN, size(X)[1], size(model)[1])
     for i in 1:size(X)[1]
         for k in 1:size(model)[1]
-            VaR[i,k] = _solve_continuous_mix_quantile(weights[i,:], model_exp[k,:,i], p[i,k])
-            CTE[i,k] = _calc_continuous_CTE(weights[i,:], model_exp[k,:,i], p[i,k], VaR[i,k])
+            VaR[i, k] = _solve_continuous_mix_quantile(
+                weights[i, :], model_exp[k, :, i], p[i, k]
+            )
+            CTE[i, k] = _calc_continuous_CTE(
+                weights[i, :], model_exp[k, :, i], p[i, k], VaR[i, k]
+            )
         end
     end
     # return VaR
 
     # VaR = vcat([hcat([_solve_continuous_mix_quantile(weights[i,:], model[k,:], p) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
     # CTE = vcat([hcat([_calc_continuous_CTE(weights[i,:], model[k,:], p, VaR[i,k]) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
-    return (VaR = VaR, CTE = CTE)
+    return (VaR=VaR, CTE=CTE)
 end
 
 """
@@ -512,7 +577,9 @@ logit regression coefficients `α` and a specified `model` of expert functions.
 - `VaR`: A matrix of predicted VaR of response, based on posterior probabilities.
 - `CTE`: A matrix of predicted CTE of response, based on posterior probabilities.
 """
-function predict_VaRCTE_posterior(Y, X, α, model, p; exact_Y = true, exposure_past = nothing, exposure_future = nothing)
+function predict_VaRCTE_posterior(
+    Y, X, α, model, p; exact_Y=true, exposure_past=nothing, exposure_future=nothing
+)
     if isnothing(exposure_past)
         exposure_past = fill(1.0, size(X)[1])
     end
@@ -521,22 +588,28 @@ function predict_VaRCTE_posterior(Y, X, α, model, p; exact_Y = true, exposure_p
         exposure_future = fill(1.0, size(X)[1])
     end
 
-    model_exp = exposurize_model(model, exposure = exposure_future)
+    model_exp = exposurize_model(model; exposure=exposure_future)
 
-    weights = predict_class_posterior(Y, X, α, model, exact_Y = exact_Y, exposure_past = exposure_past).prob
+    weights =
+        predict_class_posterior(
+            Y, X, α, model; exact_Y=exact_Y, exposure_past=exposure_past
+        ).prob
 
     VaR = fill(NaN, size(X)[1], size(model)[1])
     CTE = fill(NaN, size(X)[1], size(model)[1])
     for i in 1:size(X)[1]
         for k in 1:size(model)[1]
-            VaR[i,k] = _solve_continuous_mix_quantile(weights[i,:], model_exp[k,:,i], p[i,k])
-            CTE[i,k] = _calc_continuous_CTE(weights[i,:], model_exp[k,:,i], p[i,k], VaR[i,k])
+            VaR[i, k] = _solve_continuous_mix_quantile(
+                weights[i, :], model_exp[k, :, i], p[i, k]
+            )
+            CTE[i, k] = _calc_continuous_CTE(
+                weights[i, :], model_exp[k, :, i], p[i, k], VaR[i, k]
+            )
         end
     end
     # return VaR
 
     # VaR = vcat([hcat([_solve_continuous_mix_quantile(weights[i,:], model[k,:], p) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
     # CTE = vcat([hcat([_calc_continuous_CTE(weights[i,:], model[k,:], p, VaR[i,k]) for k in 1:size(model)[1] ]...) for i in 1:size(X)[1]]...)
-    return (VaR = VaR, CTE = CTE)
+    return (VaR=VaR, CTE=CTE)
 end
-
