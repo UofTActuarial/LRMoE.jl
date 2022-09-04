@@ -112,7 +112,7 @@ function sim_expert(d::ZILogNormalExpert)
 end
 
 ## penalty
-penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]
+penalty_init(d::ZILogNormalExpert) = [Inf 2.0 Inf]
 no_penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]
 penalize(d::ZILogNormalExpert, p) = 0 # (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 
