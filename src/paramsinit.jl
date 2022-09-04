@@ -1,12 +1,10 @@
 
 _default_expert_continuous = [
-    
     LogNormalExpert()
     GammaExpert()
     InverseGaussianExpert()
     WeibullExpert()
     BurrExpert()
-
     ZILogNormalExpert()
     ZIGammaExpert()
     ZIInverseGaussianExpert()
@@ -15,28 +13,24 @@ _default_expert_continuous = [
 ]
 
 _default_expert_discrete = [
-    
     PoissonExpert()
     NegativeBinomialExpert()
     BinomialExpert()
     GammaCountExpert()
-
     ZIPoissonExpert()
-    NegativeBinomialExpert()
+    ZINegativeBinomialExpert()
     ZIBinomialExpert()
     ZIGammaCountExpert()
 ]
 
 _default_expert_real = [
-    
-    
 ]
 
 function cluster_covariates(X, n_cluster)
-    X_std = ( X .- mean(X, dims = 1) ) ./ sqrt.(var(X, dims = 1))
+    X_std = (X .- mean(X; dims=1)) ./ sqrt.(var(X; dims=1))
     nan2num(X_std, 0.0) # Intercept: normalization produces NaN
     tmp = kmeans(Array(X_std'), n_cluster)
-    return (groups = assignments(tmp), prop = counts(tmp) ./ size(X)[1] )
+    return (groups=assignments(tmp), prop=counts(tmp) ./ size(X)[1])
 end
 
 function _params_init_switch(Y_j, type_j)
@@ -52,43 +46,114 @@ function _params_init_switch(Y_j, type_j)
 end
 
 function _cmm_transform_inexact_Y(Y)
-    return hcat([min.(Y[:, 4*(j-1)+4], 0.50 .* (Y[:, 4*(j-1)+2] + Y[:, 4*(j-1)+3])) for j in 1:Int((size(Y)[2]/4))]...)
+    return hcat(
+        [
+            min.(
+                Y[:, 4 * (j - 1) + 4],
+                0.50 .* (Y[:, 4 * (j - 1) + 2] + Y[:, 4 * (j - 1) + 3]),
+            ) for j in 1:Int((size(Y)[2] / 4))
+        ]...,
+    )
 end
 
 function _sample_random_init(params_init)
-    return vcat([hcat([params_init[j][lb][rand(Distributions.Categorical(fill(1/length(params_init[j][lb]), length(params_init[j][lb]))), 1)]
-                for lb in 1:length(params_init[1])]...) 
-                for j in 1:length(params_init)]...)
+    return vcat(
+        [
+            hcat(
+                [
+                    params_init[j][lb][rand(
+                        Distributions.Categorical(
+                            fill(1 / length(params_init[j][lb]), length(params_init[j][lb]))
+                        ),
+                        1,
+                    )]
+                    for lb in 1:length(params_init[1])
+                ]...,
+            )
+            for j in 1:length(params_init)
+        ]...,
+    )
 end
 
 function cmm_init_exact(Y, X, n_comp, type)
-    
     n_dim = size(Y)[2]
     n_cov = size(X)[2]
     label, prop = cluster_covariates(X, n_comp)
-    
+
     # initialize α: constant term according to prop, last class is reference
     α_init = fill(0.0, n_comp, n_cov)
-    α_init[:,1] = log.(prop) .- log(prop[n_comp])
+    α_init[:, 1] = log.(prop) .- log(prop[n_comp])
 
     # summary statistics
-    zero_y = [hcat([sum(Y[label.==lb,j] .== 0.0)/length(Y[label.==lb,j]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    mean_y_pos = [hcat([mean(Y[label.==lb,j][Y[label.==lb,j].>0.0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    var_y_pos  = [hcat([var(Y[label.==lb,j][Y[label.==lb,j].>0.0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    skewness_y_pos = [hcat([skewness(Y[label.==lb,j][Y[label.==lb,j].>0.0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
-    kurtosis_y_pos = [hcat([kurtosis(Y[label.==lb,j][Y[label.==lb,j].>0.0]) for lb in unique(label)]...) for j in 1:size(Y)[2]]
+    zero_y = [
+        hcat(
+            [
+                sum(Y[label .== lb, j] .== 0.0) / length(Y[label .== lb, j]) for
+                lb in unique(label)
+            ]...,
+        ) for j in 1:size(Y)[2]
+    ]
+    mean_y_pos = [
+        hcat(
+            [mean(Y[label .== lb, j][Y[label .== lb, j] .> 0.0]) for lb in unique(label)]...
+        ) for j in 1:size(Y)[2]
+    ]
+    var_y_pos = [
+        hcat(
+            [var(Y[label .== lb, j][Y[label .== lb, j] .> 0.0]) for lb in unique(label)]...
+        ) for j in 1:size(Y)[2]
+    ]
+    skewness_y_pos = [
+        hcat(
+            [
+                skewness(Y[label .== lb, j][Y[label .== lb, j] .> 0.0]) for
+                lb in unique(label)
+            ]...,
+        ) for j in 1:size(Y)[2]
+    ]
+    kurtosis_y_pos = [
+        hcat(
+            [
+                kurtosis(Y[label .== lb, j][Y[label .== lb, j] .> 0.0]) for
+                lb in unique(label)
+            ]...,
+        ) for j in 1:size(Y)[2]
+    ]
 
     # initialize component distributions
-    params_init = [[_params_init_switch(Y[label.==lb,j], type[j]) for lb in unique(label)] for j in 1:size(Y)[2]]
+    params_init = [
+        [_params_init_switch(Y[label .== lb, j], type[j]) for lb in unique(label)] for
+        j in 1:size(Y)[2]
+    ]
 
     # evaluate loglikelihood
-    ll_init = [[[sum(expert_ll.(params_init[j][lb][e], fill(0.0, length(Y[:,j])), Y[:,j], Y[:,j], fill(Inf, length(Y[:,j]))))
-                for e in 1:length(params_init[j][lb])]
-                for lb in unique(label)] 
-                for j in 1:size(Y)[2]]
+    ll_init = [
+        [
+            [
+                sum(
+                    expert_ll.(
+                        params_init[j][lb][e],
+                        fill(0.0, length(Y[:, j])),
+                        Y[:, j],
+                        Y[:, j],
+                        fill(Inf, length(Y[:, j])),
+                    ),
+                )
+                for e in 1:length(params_init[j][lb])
+            ]
+            for lb in unique(label)
+        ]
+        for j in 1:size(Y)[2]
+    ]
 
     # highest ll_init model
-    ll_best = vcat([hcat([params_init[j][lb][findmax.(ll_init[j])[lb][2]] for lb in unique(label)]...) for j in 1:size(Y)[2]]...)
+    ll_best = vcat(
+        [
+            hcat(
+                [params_init[j][lb][findmax.(ll_init[j])[lb][2]] for lb in unique(label)]...
+            ) for j in 1:size(Y)[2]
+        ]...,
+    )
 
     # evaluate ks stat
     # ks_init = [[[ks_distance(Y[:,j], params_init[j][lb][e])
@@ -99,12 +164,12 @@ function cmm_init_exact(Y, X, n_comp, type)
     # highest ks_init model
     # ks_best = vcat([hcat([params_init[j][lb][findmin.(ks_init[j])[lb][2]] for lb in unique(label)]...) for j in 1:size(Y)[2]]...)
 
-    return (α_init = α_init, params_init = params_init, ll_init = ll_init, # ks_init = ks_init,
-            ll_best = ll_best, # ks_best = ks_best,
-            zero_y = zero_y,
-            mean_y_pos = mean_y_pos, var_y_pos = var_y_pos, skewness_y_pos = skewness_y_pos, kurtosis_y_pos = kurtosis_y_pos)
+    return (α_init=α_init, params_init=params_init, ll_init=ll_init, # ks_init = ks_init,
+        ll_best=ll_best, # ks_best = ks_best,
+        zero_y=zero_y,
+        mean_y_pos=mean_y_pos, var_y_pos=var_y_pos, skewness_y_pos=skewness_y_pos,
+        kurtosis_y_pos=kurtosis_y_pos)
 end
-
 
 """
     cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
@@ -137,7 +202,7 @@ Initialize an LRMoE model using the Clustered Method of Moments (CMM).
 - `ll_best`: An initialization chosen from `params_init` which yields the highest likelihood upon initialization.
 - `random_init`: A list of `n_random` randomized initializations chosen from `params_init`.
 """
-function cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
+function cmm_init(Y, X, n_comp, type; exact_Y=false, n_random=5)
     Y_transform = exact_Y ? Y : _cmm_transform_inexact_Y(Y)
     tmp = cmm_init_exact(Y_transform, X, n_comp, type)
 
@@ -147,13 +212,11 @@ function cmm_init(Y, X, n_comp, type; exact_Y = false, n_random = 5)
         random_init = nothing
     end
 
-    return (zero_y = tmp.zero_y,
-            mean_y_pos = tmp.mean_y_pos, var_y_pos = tmp.var_y_pos, 
-            skewness_y_pos = tmp.skewness_y_pos, kurtosis_y_pos = tmp.kurtosis_y_pos,
-            α_init = tmp.α_init, params_init = tmp.params_init, 
-            ll_init = tmp.ll_init, # ks_init = tmp.ks_init,
-            ll_best = tmp.ll_best, # ks_best = tmp.ks_best,
-            random_init = random_init)
+    return (zero_y=tmp.zero_y,
+        mean_y_pos=tmp.mean_y_pos, var_y_pos=tmp.var_y_pos,
+        skewness_y_pos=tmp.skewness_y_pos, kurtosis_y_pos=tmp.kurtosis_y_pos,
+        α_init=tmp.α_init, params_init=tmp.params_init,
+        ll_init=tmp.ll_init, # ks_init = tmp.ks_init,
+        ll_best=tmp.ll_best, # ks_best = tmp.ks_best,
+        random_init=random_init)
 end
-
-
