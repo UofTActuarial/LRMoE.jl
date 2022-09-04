@@ -18,7 +18,7 @@ _default_expert_discrete = [
     BinomialExpert()
     GammaCountExpert()
     ZIPoissonExpert()
-    NegativeBinomialExpert()
+    ZINegativeBinomialExpert()
     ZIBinomialExpert()
     ZIGammaCountExpert()
 ]
