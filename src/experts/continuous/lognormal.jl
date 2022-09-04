@@ -102,9 +102,9 @@ end
 sim_expert(d::LogNormalExpert) = Distributions.rand(Distributions.LogNormal(d.μ, d.σ), 1)[1]
 
 ## penalty
-penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]
+penalty_init(d::LogNormalExpert) = [Inf 2.0 Inf]
 no_penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]
-penalize(d::LogNormalExpert, p) = 0 # (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
+penalize(d::LogNormalExpert, p) = (p[2] - 1) * log(d.σ) # (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
 
 ## statistics
 mean(d::LogNormalExpert) = mean(Distributions.LogNormal(d.μ, d.σ))
@@ -209,12 +209,13 @@ function EM_M_expert(d::LogNormalExpert,
         (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_sq_e_lat[pos_idx])
 
     μ_new = sum(term_zkz_logY)[1] / sum(term_zkz)[1]
-    σ_new = sqrt(
-        1 / sum(term_zkz)[1] * (
+    numerator = penalty ? (sum(term_zkz)[1] - pen_pararms_jk[2] + 1) : sum(term_zkz)[1]
+    tmp =
+        1 / numerator * (
             sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
             (μ_new)^2 * sum(term_zkz)[1]
-        ),
-    )
+        )
+    σ_new = sqrt(maximum([0.0, tmp]))
 
     return LogNormalExpert(μ_new, σ_new)
 end
