@@ -1,0 +1,3 @@
+style = "blue"
+join_lines_based_on_source = true
+remove_superfluous_whitespace = true

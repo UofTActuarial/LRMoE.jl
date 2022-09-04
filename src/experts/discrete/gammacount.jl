@@ -22,7 +22,7 @@ struct GammaCountExpert{T<:Real} <: NonZIDiscreteExpert
     GammaCountExpert{T}(m, s) where {T<:Real} = new{T}(m, s)
 end
 
-function GammaCountExpert(m::T, s::T; check_args=true) where {T <: Real}
+function GammaCountExpert(m::T, s::T; check_args=true) where {T<:Real}
     check_args && @check_args(GammaCountExpert, m > zero(m) && s > zero(s))
     return GammaCountExpert{T}(m, s)
 end
@@ -33,44 +33,66 @@ GammaCountExpert(m::Integer, s::Integer) = GammaCountExpert(float(m), float(s))
 GammaCountExpert() = GammaCountExpert(2.0, 1.0)
 
 ## Conversion
-function convert(::Type{GammaCountExpert{T}}, m::S, s::S) where {T <: Real, S <: Real}
-    GammaCountExpert(T(m), T(s))
+function convert(::Type{GammaCountExpert{T}}, m::S, s::S) where {T<:Real,S<:Real}
+    return GammaCountExpert(T(m), T(s))
 end
-function convert(::Type{GammaCountExpert{T}}, d::GammaCountExpert{S}) where {T <: Real, S <: Real}
-    GammaCountExpert(T(d.m), T(d.s), check_args=false)
+function convert(
+    ::Type{GammaCountExpert{T}}, d::GammaCountExpert{S}
+) where {T<:Real,S<:Real}
+    return GammaCountExpert(T(d.m), T(d.s); check_args=false)
 end
-copy(d::GammaCountExpert) = GammaCountExpert(d.m, d.s, check_args=false)
+copy(d::GammaCountExpert) = GammaCountExpert(d.m, d.s; check_args=false)
 
 ## Loglikelihood of Expoert
-logpdf(d::GammaCountExpert, x...) = isinf(x...) ? -Inf : LRMoE.logpdf.(LRMoE.GammaCount(d.m, d.s), x...)
-pdf(d::GammaCountExpert, x...) = isinf(x...) ? 0.0 : LRMoE.pdf.(LRMoE.GammaCount(d.m, d.s), x...)
-logcdf(d::GammaCountExpert, x...) = isinf(x...) ? 0.0 : LRMoE.logcdf.(LRMoE.GammaCount(d.m, d.s), x...)
-cdf(d::GammaCountExpert, x...) = isinf(x...) ? 1.0 : LRMoE.cdf.(LRMoE.GammaCount(d.m, d.s), x...)
+function logpdf(d::GammaCountExpert, x...)
+    return isinf(x...) ? -Inf : LRMoE.logpdf.(LRMoE.GammaCount(d.m, d.s), x...)
+end
+function pdf(d::GammaCountExpert, x...)
+    return isinf(x...) ? 0.0 : LRMoE.pdf.(LRMoE.GammaCount(d.m, d.s), x...)
+end
+function logcdf(d::GammaCountExpert, x...)
+    return isinf(x...) ? 0.0 : LRMoE.logcdf.(LRMoE.GammaCount(d.m, d.s), x...)
+end
+function cdf(d::GammaCountExpert, x...)
+    return isinf(x...) ? 1.0 : LRMoE.cdf.(LRMoE.GammaCount(d.m, d.s), x...)
+end
 
 ## expert_ll, etc
-expert_ll_exact(d::GammaCountExpert, x::Real) = LRMoE.logpdf(LRMoE.GammaCount(d.m, d.s), x) 
+expert_ll_exact(d::GammaCountExpert, x::Real) = LRMoE.logpdf(LRMoE.GammaCount(d.m, d.s), x)
 function expert_ll(d::GammaCountExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     # d_exp = LRMoE.GammaCount(d.m, d.s)
-    expert_ll = (yl == yu) ? logpdf.(d, yl) : logcdf.(d, yu) + log1mexp.(logcdf.(d, ceil.(yl) .- 1) - logcdf.(d, yu))
+    expert_ll = if (yl == yu)
+        logpdf.(d, yl)
+    else
+        logcdf.(d, yu) + log1mexp.(logcdf.(d, ceil.(yl) .- 1) - logcdf.(d, yu))
+    end
     return expert_ll
 end
 function expert_tn(d::GammaCountExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     # d_exp = LRMoE.GammaCount(d.m, d.s)
-    expert_tn = (tl == tu) ? logpdf.(d, tl) : logcdf.(d, tu) + log1mexp.(logcdf.(d, ceil.(tl) .- 1) - logcdf.(d, tu))
+    expert_tn = if (tl == tu)
+        logpdf.(d, tl)
+    else
+        logcdf.(d, tu) + log1mexp.(logcdf.(d, ceil.(tl) .- 1) - logcdf.(d, tu))
+    end
     return expert_tn
 end
 function expert_tn_bar(d::GammaCountExpert, tl::Real, yl::Real, yu::Real, tu::Real)
     # d_exp = LRMoE.GammaCount(d.m, d.s)
-    expert_tn_bar = (tl == tu) ? log1mexp.(logpdf.(d, tl)) : log1mexp.(logcdf.(d, tu) + log1mexp.(logcdf.(d, ceil.(tl) .- 1) - logcdf.(d, tu)))
+    expert_tn_bar = if (tl == tu)
+        log1mexp.(logpdf.(d, tl))
+    else
+        log1mexp.(logcdf.(d, tu) + log1mexp.(logcdf.(d, ceil.(tl) .- 1) - logcdf.(d, tu)))
+    end
     return expert_tn_bar
 end
 
-exposurize_expert(d::GammaCountExpert; exposure = 1) = GammaCountExpert(d.m, d.s/exposure)
+exposurize_expert(d::GammaCountExpert; exposure=1) = GammaCountExpert(d.m, d.s / exposure)
 
 ## Parameters
 params(d::GammaCountExpert) = (d.m, d.s)
 function params_init(y, d::GammaCountExpert)
-    
+
     # function init_obj(logparams, y)
     #     n = length(y)
     #     m_tmp = exp(logparams[1])
@@ -86,12 +108,12 @@ function params_init(y, d::GammaCountExpert)
 
     μ, σ2 = mean(y), var(y)
     s_init = σ2 / μ
-    m_init = μ/(s_init)    
+    m_init = μ / (s_init)
 
-    try 
-        GammaCountExpert(m_init, s_init) 
-    catch; 
-        GammaCountExpert() 
+    try
+        GammaCountExpert(m_init, s_init)
+    catch
+        GammaCountExpert()
     end
 end
 
@@ -101,7 +123,9 @@ sim_expert(d::GammaCountExpert) = Distributions.rand(LRMoE.GammaCount(d.m, d.s),
 ## penalty
 penalty_init(d::GammaCountExpert) = [2.0 10.0 2.0 10.0]
 no_penalty_init(d::GammaCountExpert) = [1.0 Inf 1.0 Inf]
-penalize(d::GammaCountExpert, p) = (p[1]-1)*log(d.m) - d.m/p[2] + (p[3]-1)*log(d.s) - d.s/p[4]
+function penalize(d::GammaCountExpert, p)
+    return (p[1] - 1) * log(d.m) - d.m / p[2] + (p[3] - 1) * log(d.s) - d.s / p[4]
+end
 
 ## statistics
 mean(d::GammaCountExpert) = mean(LRMoE.GammaCount(d.m, d.s))
@@ -111,9 +135,11 @@ quantile(d::GammaCountExpert, p) = quantile(LRMoE.GammaCount(d.m, d.s), p)
 ## Misc functions for E-Step
 
 function _sum_dens_series(m_new, s_new, d::GammaCountExpert, yl, yu, exposure)
-    upper_finite = isinf(yu) ? quantile(d, 1-1e-8) : yu
-    series = yl:(max(yl, min(yu, upper_finite+1)))
-    return sum(logpdf.(GammaCountExpert(m_new, s_new/exposure), series) .* pdf.(d, series))[1]
+    upper_finite = isinf(yu) ? quantile(d, 1 - 1e-8) : yu
+    series = yl:(max(yl, min(yu, upper_finite + 1)))
+    return sum(
+        logpdf.(GammaCountExpert(m_new, s_new / exposure), series) .* pdf.(d, series)
+    )[1]
 end
 
 function _int_obs_dens_raw(m_new, s_new, d::GammaCountExpert, yl, yu, exposure)
@@ -121,19 +147,20 @@ function _int_obs_dens_raw(m_new, s_new, d::GammaCountExpert, yl, yu, exposure)
 end
 
 function _int_lat_dens_raw(m_new, s_new, d::GammaCountExpert, tl, tu, exposure)
-    return (tl==0 ? 0.0 : _sum_dens_series.(m_new, s_new, d, 0, ceil(tl)-1), exposure) + 
-        (isinf(tu) ? 0.0 : _sum_dens_series.(m_new, s_new, d, floor(tu)+1, Inf, exposure))
+    return (tl == 0 ? 0.0 : _sum_dens_series.(m_new, s_new, d, 0, ceil(tl) - 1), exposure) +
+           (
+        isinf(tu) ? 0.0 : _sum_dens_series.(m_new, s_new, d, floor(tu) + 1, Inf, exposure)
+    )
 end
 
-
 function _gammacount_optim_params(lognew,
-                        d_old,
-                        tl, yl, yu, tu,
-                        # expert_ll_pos, expert_tn_pos, expert_tn_bar_pos,
-                        exposure,
-                        z_e_obs, z_e_lat, k_e; # ,
-                        # Y_e_obs, Y_e_lat;
-                        penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
+    d_old,
+    tl, yl, yu, tu,
+    # expert_ll_pos, expert_tn_pos, expert_tn_bar_pos,
+    exposure,
+    z_e_obs, z_e_lat, k_e; # ,
+    # Y_e_obs, Y_e_lat;
+    penalty=true, pen_pararms_jk=[1.0 Inf 1.0 Inf])
     # Optimization in log scale for unconstrained computation    
     m_tmp = exp(lognew[1])
     s_tmp = exp(lognew[2])
@@ -154,7 +181,7 @@ function _gammacount_optim_params(lognew,
     d_tmp = LRMoE.GammaCountExpert(m_tmp, s_tmp)
 
     for i in 1:length(yl)
-        d_expo = exposurize_expert(d_tmp, exposure = exposure[i])
+        d_expo = exposurize_expert(d_tmp; exposure=exposure[i])
         # expert_ll_pos = expert_ll(d_expo, tl[i], yl[i], yu[i], tu[i])
         # expert_tn_bar_pos = expert_tn_bar(d_expo, tl[i], yl[i], yu[i], tu[i])
         densY_e_obs[i] = expert_ll(d_expo, tl[i], yl[i], yu[i], tu[i])
@@ -175,27 +202,35 @@ function _gammacount_optim_params(lognew,
     sum_term_zkzy = sum(term_zkz_Y)[1]
 
     obj = sum_term_zkzy
-    p = penalty ? (pen_pararms_jk[1]-1)*log(m_tmp) - m_tmp/pen_pararms_jk[2] + (pen_pararms_jk[3]-1)*log(s_tmp) - s_tmp/pen_pararms_jk[4] : 0.0
+    p = if penalty
+        (pen_pararms_jk[1] - 1) * log(m_tmp) - m_tmp / pen_pararms_jk[2] +
+        (pen_pararms_jk[3] - 1) * log(s_tmp) - s_tmp / pen_pararms_jk[4]
+    else
+        0.0
+    end
     return (obj + p) * (-1.0)
 end
 
 ## EM: M-Step
 function EM_M_expert(d::GammaCountExpert,
-                    tl, yl, yu, tu,
-                    exposure,
-                    z_e_obs, z_e_lat, k_e;
-                    penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
+    tl, yl, yu, tu,
+    exposure,
+    z_e_obs, z_e_lat, k_e;
+    penalty=true, pen_pararms_jk=[1.0 Inf 1.0 Inf])
 
     # Update parameters
-    logparams_new = Optim.minimizer( Optim.optimize(x -> _gammacount_optim_params(x, d,
-                                                tl, yl, yu, tu,
-                                                exposure,
-                                                z_e_obs, z_e_lat, k_e,
-                                                # Y_e_obs, Y_e_lat,
-                                                penalty = penalty, pen_pararms_jk = pen_pararms_jk),
-                                                # [log(d.m)-2.0, log(d.s)-2.0],
-                                                # [log(d.m)+2.0, log(d.s)+2.0],
-                                                [log(d.m), log(d.s)] ))
+    logparams_new = Optim.minimizer(
+        Optim.optimize(
+            x -> _gammacount_optim_params(x, d,
+                tl, yl, yu, tu,
+                exposure,
+                z_e_obs, z_e_lat, k_e;
+                # Y_e_obs, Y_e_lat,
+                penalty=penalty, pen_pararms_jk=pen_pararms_jk),
+            # [log(d.m)-2.0, log(d.s)-2.0],
+            # [log(d.m)+2.0, log(d.s)+2.0],
+            [log(d.m), log(d.s)]),
+    )
     # println("$logparams_new")
     m_new = exp(logparams_new[1])
     s_new = exp(logparams_new[2])
@@ -203,19 +238,19 @@ function EM_M_expert(d::GammaCountExpert,
     # println("$m_new, $s_new")
 
     # Deal with zero mass
-    if ccdf.(Gamma((0+1)*s_new, 1), m_new*s_new) > 0.999999 || isnan(ccdf.(Gamma((0+1)*s_new, 1), m_new*s_new))
+    if ccdf.(Gamma((0 + 1) * s_new, 1), m_new * s_new) > 0.999999 ||
+        isnan(ccdf.(Gamma((0 + 1) * s_new, 1), m_new * s_new))
         m_new, s_new = d.m, d.s
     end
 
     return GammaCountExpert(m_new, s_new)
-
 end
 
 ## EM: M-Step, exact observations
 function _gammacount_optim_params(lognew,
-                        ye, exposure,
-                        z_e_obs;
-                        penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
+    ye, exposure,
+    z_e_obs;
+    penalty=true, pen_pararms_jk=[1.0 Inf 1.0 Inf])
     # Optimization in log scale for unconstrained computation    
     m_tmp = exp(lognew[1])
     s_tmp = exp(lognew[2])
@@ -223,7 +258,10 @@ function _gammacount_optim_params(lognew,
     # Further E-Step
     densY_e_obs = fill(NaN, length(exposure))
     for i in 1:length(exposure)
-        densY_e_obs[i] = expert_ll_exact(exposurize_expert(LRMoE.GammaCountExpert(m_tmp, s_tmp), exposure = exposure[i]), ye[i])
+        densY_e_obs[i] = expert_ll_exact(
+            exposurize_expert(LRMoE.GammaCountExpert(m_tmp, s_tmp); exposure=exposure[i]),
+            ye[i],
+        )
     end
     # densY_e_obs = logpdf.(GammaCountExpert(m_tmp, s_tmp), ye)
     nan2num(densY_e_obs, 0.0) # get rid of NaN
@@ -233,32 +271,40 @@ function _gammacount_optim_params(lognew,
     sum_term_zkzy = sum(term_zkz_Y)[1]
 
     obj = sum_term_zkzy
-    p = penalty ? (pen_pararms_jk[1]-1)*log(m_tmp) - m_tmp/pen_pararms_jk[2] + (pen_pararms_jk[3]-1)*log(s_tmp) - s_tmp/pen_pararms_jk[4] : 0.0
+    p = if penalty
+        (pen_pararms_jk[1] - 1) * log(m_tmp) - m_tmp / pen_pararms_jk[2] +
+        (pen_pararms_jk[3] - 1) * log(s_tmp) - s_tmp / pen_pararms_jk[4]
+    else
+        0.0
+    end
     return (obj + p) * (-1.0)
 end
 
 function EM_M_expert_exact(d::GammaCountExpert,
-                    ye, exposure,
-                    z_e_obs; 
-                    penalty = true, pen_pararms_jk = [1.0 Inf 1.0 Inf])
+    ye, exposure,
+    z_e_obs;
+    penalty=true, pen_pararms_jk=[1.0 Inf 1.0 Inf])
 
     # Update parameters
-    logparams_new = Optim.minimizer( Optim.optimize(x -> _gammacount_optim_params(x,
-                                                ye, exposure,
-                                                z_e_obs, 
-                                                penalty = penalty, pen_pararms_jk = pen_pararms_jk),
-                                                [log(d.m), log(d.s)] ))
+    logparams_new = Optim.minimizer(
+        Optim.optimize(
+            x -> _gammacount_optim_params(x,
+                ye, exposure,
+                z_e_obs;
+                penalty=penalty, pen_pararms_jk=pen_pararms_jk),
+            [log(d.m), log(d.s)]),
+    )
 
     # println("$logparams_new")
     m_new = exp(logparams_new[1])
     s_new = exp(logparams_new[2])
 
     # Deal with zero mass
-    if ccdf.(Gamma((0+1)*s_new, 1), m_new*s_new) > 0.999999 || isnan(ccdf.(Gamma((0+1)*s_new, 1), m_new*s_new))
+    if ccdf.(Gamma((0 + 1) * s_new, 1), m_new * s_new) > 0.999999 ||
+        isnan(ccdf.(Gamma((0 + 1) * s_new, 1), m_new * s_new))
         m_new, s_new = d.m, d.s
     end
-    
+
     # println("$m_new, $s_new")
     return GammaCountExpert(m_new, s_new)
-
 end

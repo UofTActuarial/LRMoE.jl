@@ -8,8 +8,6 @@
 # # Logit Gating
 # const NonRandomGating = AnyGating{NonRE}
 
-
-
 const gating = [
     "logit"
 ]

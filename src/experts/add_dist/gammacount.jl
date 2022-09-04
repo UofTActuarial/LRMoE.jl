@@ -5,10 +5,10 @@
 struct GammaCount{T<:Real} <: DiscreteUnivariateDistribution
     m::T
     s::T
-    GammaCount{T}(m::Real, s::Real) where {T <: Real} = new{T}(m, s)
+    GammaCount{T}(m::Real, s::Real) where {T<:Real} = new{T}(m, s)
 end
 
-function GammaCount(m::T, s::T; check_args=true) where {T <: Real}
+function GammaCount(m::T, s::T; check_args=true) where {T<:Real}
     check_args && @check_args(GammaCount, m > zero(m) && s > zero(s))
     return GammaCount{T}(m, s)
 end
@@ -20,8 +20,10 @@ GammaCount(m::Integer, s::Integer) = GammaCount(float(m), float(s))
 @distr_support GammaCount 0 Inf
 
 #### Conversions
-convert(::Type{GammaCount{T}}, m::S, s::S) where {T <: Real, S <: Real} = GammaCount(T(m), T(s))
-convert(::Type{GammaCount{T}}, d::GammaCount{S}) where {T <: Real, S <: Real} = GammaCount(T(d.m), T(d.s), check_args=false)
+convert(::Type{GammaCount{T}}, m::S, s::S) where {T<:Real,S<:Real} = GammaCount(T(m), T(s))
+function convert(::Type{GammaCount{T}}, d::GammaCount{S}) where {T<:Real,S<:Real}
+    return GammaCount(T(d.m), T(d.s); check_args=false)
+end
 
 ### Parameters
 
@@ -34,53 +36,58 @@ partype(::GammaCount{T}) where {T} = T
 
 # @_delegate_statsfuns Poisson pois λ
 
-function pdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
+function pdf(d::GammaCount, x::T) where {T<:Real} # where {T <: Integer}
     if x < 0 || x != floor(x) || isinf(x)
         return 0.0
     elseif x == 0
-        return ccdf.(Gamma((0+1)*d.s, 1), d.m*d.s) # 1-cdf.(Gamma((0+1)*d.s, 1), d.m*d.s)    
+        return ccdf.(Gamma((0 + 1) * d.s, 1), d.m * d.s) # 1-cdf.(Gamma((0+1)*d.s, 1), d.m*d.s)    
     else
-        return cdf.(Gamma((floor(x))*d.s, 1), d.m*d.s) - cdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s) 
+        return cdf.(Gamma((floor(x)) * d.s, 1), d.m * d.s) -
+               cdf.(Gamma((floor(x) + 1) * d.s, 1), d.m * d.s)
     end
 end
 
-pdf(d::GammaCount, x::T) where {T <: Integer} = pdf(d, convert(Float64, x))
+pdf(d::GammaCount, x::T) where {T<:Integer} = pdf(d, convert(Float64, x))
 
-function logpdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
+function logpdf(d::GammaCount, x::T) where {T<:Real} # where {T <: Integer}
     if x < 0 || x != floor(x) || isinf(x)
         return -Inf
     elseif x == 0
-        return logccdf.(Gamma((0+1)*d.s, 1), d.m*d.s) 
+        return logccdf.(Gamma((0 + 1) * d.s, 1), d.m * d.s)
     else
-        return logcdf.(Gamma((floor(x))*d.s, 1), d.m*d.s) + log1mexp.(logcdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s) - logcdf.(Gamma((floor(x))*d.s, 1), d.m*d.s)) 
+        return logcdf.(Gamma((floor(x)) * d.s, 1), d.m * d.s) +
+               log1mexp.(
+            logcdf.(Gamma((floor(x) + 1) * d.s, 1), d.m * d.s) -
+            logcdf.(Gamma((floor(x)) * d.s, 1), d.m * d.s)
+        )
     end
 end
 
-logpdf(d::GammaCount, x::T) where {T <: Integer} = logpdf(d, convert(Float64, x))
+logpdf(d::GammaCount, x::T) where {T<:Integer} = logpdf(d, convert(Float64, x))
 
-function cdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
+function cdf(d::GammaCount, x::T) where {T<:Real} # where {T <: Integer}
     if isinf(x)
         return 1.0
     elseif x < 0
         return 0.0
     else
-        return ccdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s)
+        return ccdf.(Gamma((floor(x) + 1) * d.s, 1), d.m * d.s)
     end
 end
 
-cdf(d::GammaCount, x::T) where {T <: Integer} = cdf(d, convert(Float64, x))
+cdf(d::GammaCount, x::T) where {T<:Integer} = cdf(d, convert(Float64, x))
 
-function logcdf(d::GammaCount, x::T) where {T <: Real} # where {T <: Integer}
+function logcdf(d::GammaCount, x::T) where {T<:Real} # where {T <: Integer}
     if isinf(x)
         return 0.0
     elseif x < 0
         return -Inf
     else
-        return log1mexp.(logcdf.(Gamma((floor(x)+1)*d.s, 1), d.m*d.s)) 
+        return log1mexp.(logcdf.(Gamma((floor(x) + 1) * d.s, 1), d.m * d.s))
     end
 end
 
-logcdf(d::GammaCount, x::T) where {T <: Integer} = logcdf(d, convert(Float64, x))
+logcdf(d::GammaCount, x::T) where {T<:Integer} = logcdf(d, convert(Float64, x))
 
 function quantile(d::GammaCount, q::Real)
     if q <= 0 || Distributions.cdf.(d, 0.0) >= q
@@ -101,7 +108,7 @@ function _gc_moments(d::GammaCount, m)
     upper_finite = 250 # convert(Int, quantile(d, 1-1e-10))
     series = 0:upper_finite
     # return sum( (series.^m) .* LRMoE.pdf.(d, series) )[1]
-    return sum( (series.^m) .* Distributions.pdf.(d, series) )[1]
+    return sum((series .^ m) .* Distributions.pdf.(d, series))[1]
 end
 
 ### Statistics
@@ -119,12 +126,14 @@ var(d::GammaCount) = _gc_moments(d, 2) - (_gc_moments(d, 1))^2
 
 function skewness(d::GammaCount)
     m1, m2, m3 = _gc_moments(d, 1), _gc_moments(d, 2), _gc_moments(d, 3)
-    return (m3 - 3*m1*m2 - m1^3)/(m2^1.5)
+    return (m3 - 3 * m1 * m2 - m1^3) / (m2^1.5)
 end
 
 function kurtosis(d::GammaCount)
-    m1, m2, m3, m4 = _gc_moments(d, 1), _gc_moments(d, 2), _gc_moments(d, 3), _gc_moments(d, 4)
-    return (m4 - 4*m1*m3 + 6*(m1^2)*m2 - 3*(m1)^4)/(m2^2)
+    m1, m2, m3, m4 = _gc_moments(d, 1),
+    _gc_moments(d, 2), _gc_moments(d, 3),
+    _gc_moments(d, 4)
+    return (m4 - 4 * m1 * m3 + 6 * (m1^2) * m2 - 3 * (m1)^4) / (m2^2)
 end
 
 # struct RecursiveGammaCountProbEvaluator <: RecursiveProbabilityEvaluator
@@ -141,10 +150,6 @@ end
 #     r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
 #     r .= pdf.(Ref(d),X)
 # end
-
-
-
-
 
 # function entropy(d::Poisson{T}) where T<:Real
 #     λ = rate(d)
@@ -166,12 +171,6 @@ end
 #     end
 # end
 
-
-
-
-
-
-
 # function mgf(d::Poisson, t::Real)
 #     λ = rate(d)
 #     return exp(λ * (exp(t) - 1))
@@ -181,7 +180,6 @@ end
 #     λ = rate(d)
 #     return exp(λ * (cis(t) - 1))
 # end
-
 
 # ### Fitting
 

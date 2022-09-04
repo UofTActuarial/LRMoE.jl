@@ -18,7 +18,8 @@ using Distributions
 import Distributions: pdf, cdf, ccdf, logpdf, logcdf, logccdf, quantile
 import Distributions: rand, AbstractRNG
 import Distributions: mean, var, skewness, kurtosis
-import Distributions: UnivariateDistribution, DiscreteUnivariateDistribution, ContinuousUnivariateDistribution
+import Distributions:
+    UnivariateDistribution, DiscreteUnivariateDistribution, ContinuousUnivariateDistribution
 import Distributions: @distr_support, RecursiveProbabilityEvaluator
 import Distributions: Bernoulli, Multinomial
 import Distributions: Binomial, Poisson
@@ -78,9 +79,7 @@ export
     # loglikelihood functions
     pdf, logpdf,
     cdf, logcdf,
-    rowlogsumexp,
-
-    expert_ll_pos,
+    rowlogsumexp, expert_ll_pos,
     expert_tn_pos,
     expert_tn_bar_pos,
     expert_ll,
@@ -91,15 +90,11 @@ export
     expert_tn_bar_pos_list,
     expert_ll_list,
     expert_tn_list,
-    expert_tn_bar_list,
-
-    loglik_aggre_dim,
+    expert_tn_bar_list, loglik_aggre_dim,
     loglik_aggre_gate_dim,
     loglik_aggre_gate_dim_comp,
     loglik_np,
-    loglik_exact,
-
-    penalty_α,
+    loglik_exact, penalty_α,
     penalty_params,
     penalize,
 
@@ -125,21 +120,15 @@ export
 
     # experts
     Burr,
-    GammaCount,
-
-    params,
+    GammaCount, params,
     p_zero,
     params_init,
     exposurize_expert,
-    exposurize_model,
-
-    BurrExpert, ZIBurrExpert,
+    exposurize_model, BurrExpert, ZIBurrExpert,
     GammaExpert, ZIGammaExpert,
     InverseGaussianExpert, ZIInverseGaussianExpert,
     LogNormalExpert, ZILogNormalExpert,
-    WeibullExpert, ZIWeibullExpert,
-
-    BinomialExpert, ZIBinomialExpert,
+    WeibullExpert, ZIWeibullExpert, BinomialExpert, ZIBinomialExpert,
     GammaCountExpert, ZIGammaCountExpert,
     NegativeBinomialExpert, ZINegativeBinomialExpert,
     PoissonExpert, ZIPoissonExpert,
@@ -168,7 +157,6 @@ export
     predict_excess_posterior,
     predict_VaRCTE_prior,
     predict_VaRCTE_posterior
-
 
 ### source files
 
