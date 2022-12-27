@@ -32,7 +32,7 @@ end
         true_val =
             logcdf.(tmp, 1.25 .* x) .+
             log1mexp.(logcdf.(tmp, 0.75 .* x) .- logcdf.(tmp, 1.25 .* x))
-        true_val[x.== 0.0] .= -Inf # x == 0.0
+        true_val[x .== 0.0] .= -Inf # x == 0.0
         @test isapprox(
             LRMoE.expert_ll.(tmp, 0.0, 0.75 .* x, 1.25 .* x, Inf), true_val, atol=1e-6
         )
@@ -44,7 +44,7 @@ end
         true_val =
             logcdf.(tmp, 1.5 .* x) .+
             log1mexp.(logcdf.(tmp, 0.25 .* x) .- logcdf.(tmp, 1.5 .* x))
-        true_val[x.== 0.0] .= -Inf # x == 0.0
+        true_val[x .== 0.0] .= -Inf # x == 0.0
         @test isapprox(
             LRMoE.expert_tn.(tmp, 0.25 .* x, 0.75 .* x, 1.25 .* x, 1.5 .* x),
             true_val,
@@ -60,7 +60,7 @@ end
                 logcdf.(tmp, 1.5 .* x) .+
                 log1mexp.(logcdf.(tmp, 0.25 .* x) .- logcdf.(tmp, 1.5 .* x))
             )
-        true_val[x.== 0.0] .= 0.0 # x == 0.0
+        true_val[x .== 0.0] .= 0.0 # x == 0.0
         @test isapprox(
             LRMoE.expert_tn_bar.(tmp, 0.25 .* x, 0.75 .* x, 1.25 .* x, 1.5 .* x),
             true_val,
