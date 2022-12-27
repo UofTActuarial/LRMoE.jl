@@ -1,5 +1,6 @@
 using LRMoE
 using Distributions
+using QuadGK
 using Random
 using StatsFuns
 using Test

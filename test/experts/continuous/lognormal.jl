@@ -91,3 +91,34 @@ end
         @test LRMoE.excess(tmp, Inf) == 0.0
     end
 end
+
+# TODO: this is currently not working
+# @testset "lognormal numerical integration" begin
+#     μμ = [1.0, 2.0, 5.0, 10.0]
+#     σσ = [1.0, 0.5, 0.1, 0.01]
+#     yl = [0.5, 1.0] # , 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]
+#     yu_multiplier = [1.5] # [1.0, 1.5, 2.0, 5.0]
+
+#     for μ in μμ, σ in σσ, m in yu_multiplier
+#         tmp = LogNormalExpert(μ, σ)
+#         d = LogNormal(μ, σ)
+#         yu = m .* yl
+#         expert_ll =
+#             LRMoE.expert_ll.(tmp, fill(0.0, length(yl)), yl, yu, fill(Inf, length(yl)))
+
+#         fn_integrate_logY(d, y) = log(y) * pdf(d, y)
+
+#         @test isapprox(LRMoE._int_obs_logY.(tmp, yl, yu, expert_ll),
+#             [
+#                 if yl_i == yu_i
+#                     log(yl_i)
+#                 else
+#                     quadgk.(x -> fn_integrate_logY(d, x), yl_i, yu_i; rtol=1e-8)[1] *
+#                     exp(-1.0 * e_ll)
+#                 end
+#                 for
+#                 (yl_i, yu_i, e_ll) in zip(yl, yu, expert_ll)
+#             ],
+#             atol=1e-6)
+#     end
+# end
