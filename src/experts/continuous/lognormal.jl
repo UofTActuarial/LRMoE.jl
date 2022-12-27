@@ -131,7 +131,7 @@ function _int_obs_logY(d::LogNormalExpert, yl, yu, expert_ll)
         return log(yl)
     else
         return exp(-expert_ll) * (
-            d.σ * invsqrt2π * 0.5 * _diff_dens_series(d, yl, yu) +
+            d.σ * invsqrt2π * _diff_dens_series(d, yl, yu) +
             d.μ * _diff_dist_series(d, yl, yu)
         )
     end
@@ -140,7 +140,7 @@ end
 function _int_lat_logY(d::LogNormalExpert, tl, tu, expert_tn_bar)
     return exp(-expert_tn_bar) * (
         d.μ - (
-            d.σ * invsqrt2π * 0.5 * _diff_dens_series(d, tl, tu) +
+            d.σ * invsqrt2π * _diff_dens_series(d, tl, tu) +
             d.μ * _diff_dist_series(d, tl, tu)
         )
     )
