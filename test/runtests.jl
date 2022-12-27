@@ -17,6 +17,7 @@ const tests = [
     "experts/continuous/gamma",
     "experts/continuous/lognormal",
 
+    "experts/continuous/zigamma",
     "experts/continuous/zilognormal",
 
 ]
