@@ -25,7 +25,7 @@ end
 ## Outer constructors
 GammaExpert(k::Real, θ::Real) = GammaExpert(promote(k, θ)...)
 GammaExpert(k::Integer, θ::Integer) = GammaExpert(float(k), float(θ))
-GammaExpert() = GammaExpert(1.0, 1.0)
+GammaExpert() = GammaExpert(2.0, 1.0)
 
 ## Conversion
 function convert(::Type{GammaExpert{T}}, k::S, θ::S) where {T<:Real,S<:Real}
@@ -135,8 +135,12 @@ mean(d::GammaExpert) = mean(Distributions.Gamma(d.k, d.θ))
 var(d::GammaExpert) = var(Distributions.Gamma(d.k, d.θ))
 quantile(d::GammaExpert, p) = quantile(Distributions.Gamma(d.k, d.θ), p)
 function lev(d::GammaExpert, u)
-    return d.θ * d.k * gamma_inc(float(d.k + 1), u / d.θ, 0)[1] +
-           u * (1 - gamma_inc(float(d.k), u / d.θ, 0)[1])
+    if isinf(u)
+        return mean(d)
+    else
+        return d.θ * d.k * gamma_inc(float(d.k + 1), u / d.θ, 0)[1] +
+               u * (1 - gamma_inc(float(d.k), u / d.θ, 0)[1])
+    end
 end
 excess(d::GammaExpert, u) = mean(d) - lev(d, u)
 
