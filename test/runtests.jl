@@ -14,6 +14,7 @@ const tests = [
 
     "gating",
 
+    "experts/continuous/gamma",
     "experts/continuous/lognormal",
 
     "experts/continuous/zilognormal",
