@@ -7,10 +7,10 @@
     for k in kk, θ in θθ
         l = Distributions.Gamma(k, θ)
         r = LRMoE.GammaExpert(k, θ)
-        @test LRMoE.logpdf(r, x) ≈ Distributions.logpdf.(l, x)
-        @test LRMoE.logcdf(r, x) ≈ Distributions.logcdf.(l, x)
-        @test LRMoE.pdf(r, x) ≈ Distributions.pdf.(l, x)
-        @test LRMoE.cdf(r, x) ≈ Distributions.cdf.(l, x)
+        @test LRMoE.logpdf.(r, x) ≈ Distributions.logpdf.(l, x)
+        @test LRMoE.logcdf.(r, x) ≈ Distributions.logcdf.(l, x)
+        @test LRMoE.pdf.(r, x) ≈ Distributions.pdf.(l, x)
+        @test LRMoE.cdf.(r, x) ≈ Distributions.cdf.(l, x)
     end
 end
 
