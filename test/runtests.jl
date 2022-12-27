@@ -16,6 +16,8 @@ const tests = [
 
     "experts/continuous/lognormal",
 
+    "experts/continuous/zilognormal",
+
 ]
 
 printstyled("Running tests:\n", color=:blue)
