@@ -1,6 +1,3 @@
-using Test
-using Distributions
-
 @testset "logit gating" begin
     Random.seed!(1234)
 
