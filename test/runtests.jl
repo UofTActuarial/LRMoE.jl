@@ -15,6 +15,7 @@ const tests = [
     "gating",
 
     "experts/continuous/gamma",
+    "experts/continuous/inversegaussian",
     "experts/continuous/lognormal",
 
     "experts/continuous/zigamma",
