@@ -1,6 +1,7 @@
 using LRMoE
 using Distributions
 using Random
+using StatsFuns
 using Test
 
 const tests = [
@@ -11,6 +12,8 @@ const tests = [
     # "fit_functions"
 
     "gating",
+
+    "experts/continuous/lognormal",
 
 ]
 
