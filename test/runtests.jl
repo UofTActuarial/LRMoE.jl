@@ -29,6 +29,7 @@ const tests = [
     "experts/discrete/binomial",
     "experts/discrete/poisson",
 
+    "experts/discrete/zibinomial",
     "experts/discrete/zipoisson",
 
 ]
