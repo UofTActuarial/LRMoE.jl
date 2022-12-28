@@ -86,61 +86,6 @@ using LRMoE
 
 end
 
-@testset "expert_ll: discrete, NonZI" begin
-
-    # param1 = 20
-    # param2 = rand(Distributions.Uniform(0, 1), 1)[1]
-    # param3 = 5.0
-
-    # # expo = rand(Distributions.Uniform(0.5, 5), 1)[1]
-    # # tmp_expo = LRMoE.GammaCountExpert(param1, param3/expo)
-
-    # # @test isapprox(LRMoE.expert_ll_exact.(tmp, x, exposure = expo), LRMoE.logpdf.(tmp_expo, x))
-
-    # # @test isapprox(LRMoE.expert_ll.(tmp, 0.0, x, x, Inf, exposure = expo), LRMoE.logpdf.(tmp_expo, x))
-    # # @test isapprox(LRMoE.expert_ll.(tmp, 0.0, 0.0, 0.0, 0.0, exposure = expo), LRMoE.logpdf.(tmp_expo, 0.0))
-    # # @test isapprox(LRMoE.expert_ll.(tmp, 0.0, x, Inf, Inf, exposure = expo), logcdf.(tmp_expo, Inf) .+ log1mexp.(logcdf.(tmp_expo, ceil.(x) .- 1) .- logcdf.(tmp_expo, Inf)), atol = 1e-6)
-    # # @test isapprox(LRMoE.expert_ll.(tmp, 0.0, 0, Inf, Inf, exposure = expo), logcdf.(tmp_expo, Inf) .+ log1mexp.(logcdf.(tmp_expo, -1) .- logcdf.(tmp_expo, Inf)), atol = 1e-6)
-    # # @test isapprox(LRMoE.expert_ll.(tmp, 0.0, 0.75 .*x, 1.25 .*x, Inf, exposure = expo), logcdf.(tmp_expo, 1.25 .*x) .+ log1mexp.(logcdf.(tmp_expo, ceil.(0.75 .*x) .- 1) .- logcdf.(tmp_expo, 1.25 .*x)), atol = 1e-6)
-
-    # # @test isapprox(LRMoE.expert_tn.(tmp, 0.0, x, x, Inf, exposure = expo), fill(0.0, length(x)), atol = 1e-06)
-    # # @test isapprox(LRMoE.expert_tn.(tmp, 0.0, 0.0, 0.0, 0.0, exposure = expo), LRMoE.logpdf.(tmp_expo, 0))
-    # # @test isapprox(LRMoE.expert_tn.(tmp, 0.25 .*x, 0.75 .*x, 1.25 .*x, 1.5 .*x, exposure = expo), logcdf.(tmp_expo, 1.5 .*x) .+ log1mexp.(logcdf.(tmp_expo, ceil.(0.25 .*x) .- 1) .- logcdf.(tmp_expo, 1.5 .*x)), atol = 1e-6)
-
-    # # # @test isapprox(LRMoE.expert_tn_bar.(tmp, 0.0, x, x, Inf, exposure = expo), fill(-Inf, length(x)))
-    # # @test isapprox(LRMoE.expert_tn_bar.(tmp, 0.0, 0.0, 0.0, 0.0, exposure = expo), log1mexp(LRMoE.logpdf.(tmp_expo, 0)), atol = 1e-06)
-    # # @test isapprox(LRMoE.expert_tn_bar.(tmp, 0.25 .*x, 0.75 .*x, 1.25 .*x, 1.5 .*x, exposure = expo), log1mexp.(logcdf.(tmp_expo, 1.5 .*x) .+ log1mexp.(logcdf.(tmp_expo, ceil.(0.25 .*x) .- 1) .- logcdf.(tmp_expo, 1.5 .*x))), atol = 1e-6)
-
-end
-
-@testset "expert_ll: discrete, ZI" begin
-
-    # param0 = rand(Distributions.Uniform(0, 1), 1)[1]
-    # param1 = 20
-    # param2 = rand(Distributions.Uniform(0, 1), 1)[1]
-    # param3 = 5.0
-
-    # # expo = rand(Distributions.Uniform(0.5, 5), 1)[1]
-    # # tmp_expo = LRMoE.ZIGammaCountExpert(param0, param1, param3/expo)
-
-    # # @test isapprox(LRMoE.expert_ll_exact.(tmp, x, exposure = expo), log.(1-param0) .+ LRMoE.logpdf.(tmp_expo, x))
-
-    # # @test isapprox(LRMoE.expert_ll.(tmp, 0.0, x, x, Inf, exposure = expo), log.(1-param0) .+ LRMoE.logpdf.(tmp_expo, x))
-    # # @test isapprox(LRMoE.expert_ll.(tmp, 0.0, 0.0, 0.0, 0.0, exposure = expo), log(param0 + (1-param0) .* exp.(LRMoE.logpdf.(tmp_expo, 0.0))))
-    # # @test isapprox(LRMoE.expert_ll.(tmp, 0.0, x, Inf, Inf, exposure = expo), log.(1-param0) .+ logcdf.(tmp_expo, Inf) .+ log1mexp.(logcdf.(tmp_expo, ceil.(x) .- 1) .- logcdf.(tmp_expo, Inf)), atol = 1e-6)
-    # # @test isapprox(LRMoE.expert_ll.(tmp, 0.0, 0, Inf, Inf, exposure = expo), logcdf.(tmp_expo, Inf) .+ log1mexp.(logcdf.(tmp_expo, -1) .- logcdf.(tmp_expo, Inf)), atol = 1e-6)
-    # # @test isapprox(LRMoE.expert_ll.(tmp, 0.0, 0.75 .*x, 1.25 .*x, Inf, exposure = expo), log.(1-param0) .+ logcdf.(tmp_expo, 1.25 .*x) .+ log1mexp.(logcdf.(tmp_expo, ceil.(0.75 .*x) .- 1) .- logcdf.(tmp_expo, 1.25 .*x)), atol = 1e-6)
-
-    # # @test isapprox(LRMoE.expert_tn.(tmp, 0.0, x, x, Inf, exposure = expo), fill(0.0, length(x)), atol = 1e-06)
-    # # @test isapprox(LRMoE.expert_tn.(tmp, 0.0, 0.0, 0.0, 0.0, exposure = expo), log(param0 + (1-param0) .* exp.(LRMoE.logpdf.(tmp_expo, 0.0))))
-    # # @test isapprox(LRMoE.expert_tn.(tmp, 0.25 .*x, 0.75 .*x, 1.25 .*x, 1.5 .*x, exposure = expo), log.(1-param0) .+ logcdf.(tmp_expo, 1.5 .*x) .+ log1mexp.(logcdf.(tmp_expo, ceil.(0.25 .*x) .- 1) .- logcdf.(tmp_expo, 1.5 .*x)), atol = 1e-6)
-
-    # # # @test isapprox(LRMoE.expert_tn_bar.(tmp, 0.0, x, x, Inf, exposure = expo), fill(-Inf, length(x)))
-    # # @test isapprox(LRMoE.expert_tn_bar.(tmp, 0.0, 0.0, 0.0, 0.0, exposure = expo), log1mexp(log(param0 + (1-param0) .* exp.(LRMoE.logpdf.(tmp_expo, 0.0)))), atol = 1e-06)
-    # # # @test isapprox(LRMoE.expert_tn_bar.(tmp, 0.25 .*x, 0.75 .*x, 1.25 .*x, 1.5 .*x, exposure = expo), log1mexp.(logcdf.(tmp_expo, 1.5 .*x) .+ log1mexp.(logcdf.(tmp_expo, ceil.(0.25 .*x) .- 1) .- logcdf.(tmp_expo, 1.5 .*x))), atol = 1e-6)
-
-end
-
 @testset "exposurize_expert" begin
 
     # param0 = rand(Distributions.Uniform(0, 1), 1)[1]
