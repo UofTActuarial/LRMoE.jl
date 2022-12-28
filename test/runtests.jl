@@ -26,6 +26,7 @@ const tests = [
     "experts/continuous/zilognormal",
     "experts/continuous/ziweibull",
 
+    "experts/discrete/binomial",
     "experts/discrete/poisson",
 
     "experts/discrete/zipoisson",
