@@ -12,19 +12,21 @@ const tests = [
     # "loglik",
     # "fit_functions"
 
-    "gating",
+    # "gating",
 
-    "experts/continuous/burr",
-    "experts/continuous/gamma",
-    "experts/continuous/inversegaussian",
-    "experts/continuous/lognormal",
-    "experts/continuous/weibull",
+    # "experts/continuous/burr",
+    # "experts/continuous/gamma",
+    # "experts/continuous/inversegaussian",
+    # "experts/continuous/lognormal",
+    # "experts/continuous/weibull",
 
-    "experts/continuous/ziburr",
-    "experts/continuous/zigamma",
-    "experts/continuous/ziinversegaussian",
-    "experts/continuous/zilognormal",
-    "experts/continuous/ziweibull",
+    # "experts/continuous/ziburr",
+    # "experts/continuous/zigamma",
+    # "experts/continuous/ziinversegaussian",
+    # "experts/continuous/zilognormal",
+    # "experts/continuous/ziweibull",
+
+    "experts/discrete/poisson",
 
 ]
 
