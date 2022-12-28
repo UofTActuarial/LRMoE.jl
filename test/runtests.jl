@@ -1,33 +1,42 @@
-# using Distributions
-# using PDMats # test dependencies
-# using Distributed
-# using StatsBase
-# using LinearAlgebra
-# using HypothesisTests
-
-# import JSON
-# import ForwardDiff
-
 using LRMoE
 using Distributions
-# using Random
+using QuadGK
+using Random
+using StatsFuns
 using Test
 
 const tests = [
-    # "dummytest",
-    # "pdfcdf",
-    # "expert_loglik",
-    # "gating",
-    # "loglik",
-    # "fit_functions"
+    # gating
+    "gating",
+    # exposurize
+    "experts/ll/exposurize",
+    # continuous experts
+    "experts/continuous/burr",
+    "experts/continuous/gamma",
+    "experts/continuous/inversegaussian",
+    "experts/continuous/lognormal",
+    "experts/continuous/weibull",
+    # zi continuous experts
+    "experts/continuous/ziburr",
+    "experts/continuous/zigamma",
+    "experts/continuous/ziinversegaussian",
+    "experts/continuous/zilognormal",
+    "experts/continuous/ziweibull",
+    # discrete experts
+    "experts/discrete/binomial",
+    "experts/discrete/gammacount",
+    "experts/discrete/negativebinomial",
+    "experts/discrete/poisson",
+    # zi discrete experts
+    "experts/discrete/zibinomial",
+    "experts/discrete/zigammacount",
+    "experts/discrete/zinegativebinomial",
+    "experts/discrete/zipoisson",
+    # loglik
+    "loglik",
 ]
 
-printstyled("Running tests:\n", color=:blue)
-
-# Random.seed!(345679)
-
-# to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
-# include("testutils.jl")
+printstyled("Running tests:\n"; color=:blue)
 
 for t in tests
     @testset "Test $t" begin

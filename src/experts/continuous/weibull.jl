@@ -129,8 +129,12 @@ mean(d::WeibullExpert) = mean(Distributions.Weibull(d.k, d.θ))
 var(d::WeibullExpert) = var(Distributions.Weibull(d.k, d.θ))
 quantile(d::WeibullExpert, p) = quantile(Distributions.Weibull(d.k, d.θ), p)
 function lev(d::WeibullExpert, u)
-    return d.θ * gamma_inc(float(1 / d.k + 1), (u / d.θ)^d.k, 0)[1] *
-           gamma(float(1 / d.k + 1)) + u * exp(-(u / d.θ)^d.k)
+    if isinf(u)
+        return mean(d)
+    else
+        return d.θ * gamma_inc(float(1 / d.k + 1), (u / d.θ)^d.k, 0)[1] *
+               gamma(float(1 / d.k + 1)) + u * exp(-(u / d.θ)^d.k)
+    end
 end
 excess(d::WeibullExpert, u) = mean(d) - lev(d, u)
 

@@ -111,8 +111,12 @@ mean(d::LogNormalExpert) = mean(Distributions.LogNormal(d.μ, d.σ))
 var(d::LogNormalExpert) = var(Distributions.LogNormal(d.μ, d.σ))
 quantile(d::LogNormalExpert, p) = quantile(Distributions.LogNormal(d.μ, d.σ), p)
 function lev(d::LogNormalExpert, u)
-    return exp(d.μ + 0.5 * d.σ^2) * cdf.(Normal(d.μ + d.σ^2, d.σ), log(u)) +
-           u * (1 - cdf.(Normal(d.μ, d.σ), log(u)))
+    if isinf(u)
+        return mean(d)
+    else
+        return exp(d.μ + 0.5 * d.σ^2) * cdf.(Normal(d.μ + d.σ^2, d.σ), log(u)) +
+               u * (1 - cdf.(Normal(d.μ, d.σ), log(u)))
+    end
 end
 excess(d::LogNormalExpert, u) = mean(d) - lev(d, u)
 
@@ -131,7 +135,7 @@ function _int_obs_logY(d::LogNormalExpert, yl, yu, expert_ll)
         return log(yl)
     else
         return exp(-expert_ll) * (
-            d.σ * invsqrt2π * 0.5 * _diff_dens_series(d, yl, yu) +
+            d.σ * invsqrt2π * _diff_dens_series(d, yl, yu) +
             d.μ * _diff_dist_series(d, yl, yu)
         )
     end
@@ -140,7 +144,7 @@ end
 function _int_lat_logY(d::LogNormalExpert, tl, tu, expert_tn_bar)
     return exp(-expert_tn_bar) * (
         d.μ - (
-            d.σ * invsqrt2π * 0.5 * _diff_dens_series(d, tl, tu) +
+            d.σ * invsqrt2π * _diff_dens_series(d, tl, tu) +
             d.μ * _diff_dist_series(d, tl, tu)
         )
     )

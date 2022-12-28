@@ -1,7 +1,7 @@
 name = "LRMoE"
 uuid = "b6847444-3cfa-4637-857f-9c8c615f8351"
 authors = ["Spark Tseung <hi@sparktseung.com>"]
-version = "0.3.1"
+version = "0.3.2"
 
 [deps]
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
