@@ -111,8 +111,12 @@ mean(d::LogNormalExpert) = mean(Distributions.LogNormal(d.μ, d.σ))
 var(d::LogNormalExpert) = var(Distributions.LogNormal(d.μ, d.σ))
 quantile(d::LogNormalExpert, p) = quantile(Distributions.LogNormal(d.μ, d.σ), p)
 function lev(d::LogNormalExpert, u)
-    return exp(d.μ + 0.5 * d.σ^2) * cdf.(Normal(d.μ + d.σ^2, d.σ), log(u)) +
-           u * (1 - cdf.(Normal(d.μ, d.σ), log(u)))
+    if isinf(u)
+        return mean(d)
+    else
+        return exp(d.μ + 0.5 * d.σ^2) * cdf.(Normal(d.μ + d.σ^2, d.σ), log(u)) +
+               u * (1 - cdf.(Normal(d.μ, d.σ), log(u)))
+    end
 end
 excess(d::LogNormalExpert, u) = mean(d) - lev(d, u)
 
