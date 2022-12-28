@@ -1,6 +1,6 @@
 @testset "poisson pdf, cdf, etc." begin
     λλ = [1.0, 0.5, 0.1, 0.01]
-    x = collect(0.0:0.5:100.0)
+    x = collect(0.0:1:50.0)
 
     for λ in λλ
         l = Distributions.Poisson(λ)
@@ -14,7 +14,7 @@ end
 
 @testset "poisson expert_ll" begin
     λλ = [1.0, 0.5, 0.1, 0.01]
-    x = collect(0.0:1:100.0)
+    x = collect(0.0:1:50.0)
 
     for λ in λλ
         tmp = LRMoE.PoissonExpert(λ)
