@@ -134,9 +134,14 @@ mean(d::BurrExpert) = mean(LRMoE.Burr(d.k, d.c, d.λ))
 var(d::BurrExpert) = var(LRMoE.Burr(d.k, d.c, d.λ))
 quantile(d::BurrExpert, p) = quantile(LRMoE.Burr(d.k, d.c, d.λ), p)
 function lev(d::BurrExpert, u)
-    uu = 1 / (1 + (u / d.λ)^d.c)
-    return d.λ * gamma(float(1 + 1 / d.c)) * gamma(float(d.k - 1 / d.c)) /
-           gamma(float(d.k)) * beta_inc(1 + 1 / d.c, d.k - 1 / d.c, 1 - uu)[1] + u * uu^d.k
+    if isinf(u)
+        return mean(d)
+    else
+        uu = 1 / (1 + (u / d.λ)^d.c)
+        return d.λ * gamma(float(1 + 1 / d.c)) * gamma(float(d.k - 1 / d.c)) /
+               gamma(float(d.k)) * beta_inc(1 + 1 / d.c, d.k - 1 / d.c, 1 - uu)[1] +
+               u * uu^d.k
+    end
 end
 excess(d::BurrExpert, u) = mean(d) - lev(d, u)
 
