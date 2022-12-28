@@ -20,6 +20,7 @@ const tests = [
     "experts/continuous/lognormal",
     "experts/continuous/weibull",
 
+    "experts/continuous/ziburr",
     "experts/continuous/zigamma",
     "experts/continuous/ziinversegaussian",
     "experts/continuous/zilognormal",
