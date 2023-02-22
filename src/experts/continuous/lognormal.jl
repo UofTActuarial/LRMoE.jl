@@ -213,9 +213,9 @@ function EM_M_expert(d::LogNormalExpert,
         (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_sq_e_lat[pos_idx])
 
     μ_new = sum(term_zkz_logY)[1] / sum(term_zkz)[1]
-    numerator = penalty ? (sum(term_zkz)[1] - pen_pararms_jk[2] + 1) : sum(term_zkz)[1]
+    denominator = penalty ? (sum(term_zkz)[1] - pen_pararms_jk[2] + 1) : sum(term_zkz)[1]
     tmp =
-        1 / numerator * (
+        1 / denominator * (
             sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
             (μ_new)^2 * sum(term_zkz)[1]
         )
@@ -245,12 +245,13 @@ function EM_M_expert_exact(d::LogNormalExpert,
     term_zkz_logY_sq = (z_e_obs[pos_idx] .* logY_sq_e_obs[pos_idx])
 
     μ_new = sum(term_zkz_logY)[1] / sum(term_zkz)[1]
-    σ_new = sqrt(
-        1 / sum(term_zkz)[1] * (
+    denominator = penalty ? (sum(term_zkz)[1] - pen_pararms_jk[2] + 1) : sum(term_zkz)[1]
+    tmp =
+        1 / denominator * (
             sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
             (μ_new)^2 * sum(term_zkz)[1]
-        ),
-    )
+        )
+    σ_new = sqrt(maximum([0.0, tmp]))
 
     return LogNormalExpert(μ_new, σ_new)
 end
