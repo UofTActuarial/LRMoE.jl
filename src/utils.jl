@@ -15,7 +15,7 @@ macro check_args(D, cond)
 end
 
 # rowlogsumexps
-rowlogsumexp(x) = logsumexp.(x[row, :] for row in 1:size(x)[1])
+rowlogsumexp(x) = logsumexp(x; dims=2)
 
 # replace nan by a number
 function nan2num(x, g)
