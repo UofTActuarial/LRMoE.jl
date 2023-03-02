@@ -213,14 +213,14 @@ function EM_M_expert(d::LogNormalExpert,
     demominator = penalty ? (sum(term_zkz)[1] + (pen_pararms_jk[2] - 1)) : sum(term_zkz)[1]
     numerator = if penalty
         (
-        sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
-        (μ_new)^2 * sum(term_zkz)[1] + (pen_pararms_jk[1] - 1)
-    )
+            sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
+            (μ_new)^2 * sum(term_zkz)[1] + (pen_pararms_jk[1] - 1)
+        )
     else
         (
-        sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
-        (μ_new)^2 * sum(term_zkz)[1]
-    )
+            sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
+            (μ_new)^2 * sum(term_zkz)[1]
+        )
     end
     tmp = numerator / demominator
     σ_new = sqrt(maximum([0.0, tmp]))
@@ -250,14 +250,14 @@ function EM_M_expert_exact(d::LogNormalExpert,
     demominator = penalty ? (sum(term_zkz)[1] + (pen_pararms_jk[2] - 1)) : sum(term_zkz)[1]
     numerator = if penalty
         (
-        sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
-        (μ_new)^2 * sum(term_zkz)[1] + (pen_pararms_jk[1] - 1)
-    )
+            sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
+            (μ_new)^2 * sum(term_zkz)[1] + (pen_pararms_jk[1] - 1)
+        )
     else
         (
-        sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
-        (μ_new)^2 * sum(term_zkz)[1]
-    )
+            sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
+            (μ_new)^2 * sum(term_zkz)[1]
+        )
     end
     tmp = numerator / demominator
     σ_new = sqrt(maximum([0.0, tmp]))
