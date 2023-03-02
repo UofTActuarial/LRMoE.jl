@@ -112,9 +112,9 @@ function sim_expert(d::ZILogNormalExpert)
 end
 
 ## penalty
-penalty_init(d::ZILogNormalExpert) = [Inf 2.0 Inf]
-no_penalty_init(d::ZILogNormalExpert) = [Inf 1.0 Inf]
-penalize(d::ZILogNormalExpert, p) = (p[2]-1)*log(d.σ) # (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
+penalty_init(d::ZILogNormalExpert) = [2.0 2.0]
+no_penalty_init(d::ZILogNormalExpert) = [1.0 1.0]
+penalize(d::ZILogNormalExpert, p) = -0.5 * (p[1] - 1) / (d.σ * d.σ) - (p[2] - 1) * log(d.σ)
 
 ## statistics
 mean(d::ZILogNormalExpert) = (1 - d.p) * mean(Distributions.LogNormal(d.μ, d.σ))
@@ -138,10 +138,6 @@ function EM_M_expert(d::ZILogNormalExpert,
     # Old parameters
     p_old = p_zero(d)
 
-    if p_old > 0.999999 || d.σ < 0.000001
-        return d
-    end
-
     # Update zero probability
     expert_ll_pos = expert_ll.(LRMoE.LogNormalExpert(d.μ, d.σ), tl, yl, yu, tu)
     expert_tn_bar_pos = expert_tn_bar.(LRMoE.LogNormalExpert(d.μ, d.σ), tl, yl, yu, tu)
@@ -151,6 +147,8 @@ function EM_M_expert(d::ZILogNormalExpert,
     z_zero_e_lat = z_e_lat .* EM_E_z_zero_lat(tl, p_old, expert_tn_bar_pos)
     z_pos_e_lat = z_e_lat .- z_zero_e_lat
     p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, z_zero_e_lat, z_pos_e_lat, k_e)
+
+    p_new = max(0.0, min(1 - 1e-08, p_new))
 
     # Update parameters: call its positive part
     tmp_exp = LogNormalExpert(d.μ, d.σ)
@@ -167,16 +165,12 @@ end
 function EM_M_expert_exact(d::ZILogNormalExpert,
     ye, exposure,
     z_e_obs;
-    penalty=true, pen_pararms_jk=[Inf 1.0 Inf])
+    penalty=true, pen_pararms_jk=[1.0 1.0])
 
     # Old parameters
     μ_old = d.μ
     σ_old = d.σ
     p_old = p_zero(d)
-
-    if p_old > 0.999999 || d.σ < 0.000001
-        return d
-    end
 
     # Update zero probability
     expert_ll_pos = expert_ll_exact.(LRMoE.LogNormalExpert(μ_old, σ_old), ye)
@@ -184,6 +178,8 @@ function EM_M_expert_exact(d::ZILogNormalExpert,
     z_zero_e_obs = z_e_obs .* EM_E_z_zero_obs(ye, p_old, expert_ll_pos)
     z_pos_e_obs = z_e_obs .- z_zero_e_obs
     p_new = EM_M_zero(z_zero_e_obs, z_pos_e_obs, 0.0, 0.0, 0.0)
+
+    p_new = max(0.0, min(1 - 1e-08, p_new))
 
     # Update parameters: call its positive part
     tmp_exp = LogNormalExpert(μ_old, σ_old)
