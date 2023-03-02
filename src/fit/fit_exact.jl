@@ -19,8 +19,7 @@ function loglik_exact(Y, gate, model)
     # Sum over all observations
     ll = sum(norm_gate_expert_ll)
 
-    return (expert_ll_dim_comp=expert_ll_dim_comp,
-        expert_ll_comp=expert_ll_comp,
+    return (
         gate_expert_ll_comp=gate_expert_ll_comp,
         gate_expert_ll=gate_expert_ll,
         norm_gate_expert_ll=norm_gate_expert_ll,
@@ -112,8 +111,6 @@ function fit_exact(Y, X, α_init, model;
 
                     model_em[j, k] = EM_M_expert_exact(model_em[j, k],
                         Y[:, j], exposure,
-                        # ll_em_list.expert_ll_pos_dim_comp[j][:,k],
-                        # ll_em_list.expert_ll_dim_comp[j, k, :],
                         vec(z_e_obs[:, k]);
                         penalty=penalty, pen_pararms_jk=pen_params[j][k])
 

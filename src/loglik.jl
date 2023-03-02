@@ -107,9 +107,7 @@ function loglik_np(Y, gate, model)
     # Sum over all observations
     ll = sum(norm_gate_expert_ll)
 
-    return (expert_ll_dim_comp=expert_ll_dim_comp,
-        expert_tn_dim_comp=expert_tn_dim_comp,
-        expert_tn_bar_dim_comp=expert_tn_bar_dim_comp, expert_ll_comp=expert_ll_comp,
+    return (
         expert_tn_comp=expert_tn_comp,
         expert_tn_bar_comp=expert_tn_bar_comp, gate_expert_ll_comp=gate_expert_ll_comp,
         gate_expert_tn_comp=gate_expert_tn_comp,
