@@ -1,11 +1,24 @@
+function _exact_expert_ll_threaded(Y, model, exposure)
+    expert_ll_comp = fill(NaN, size(Y)[1], size(model)[2])
+    @threads for i in 1:size(Y)[1]
+        model_exposurized = exposurize_expert.(model, exposure=exposure[i])
+
+        expert_ll_comp[i, :] = @views sum(
+            expert_ll_ind_mat_exact(
+                Y[i, :], model_exposurized
+            );
+            dims=1
+        )
+    end
+
+    return expert_ll_comp
+end
+
 # Fast fitting for exact observations
-function loglik_exact(Y, gate, model)
+function loglik_exact(Y, gate, model; exposure=nothing)
 
-    # By dimension, then by component
-    expert_ll_dim_comp = expert_ll_list_exact(Y, model)
-
-    # Aggregate by dimension
-    expert_ll_comp = loglik_aggre_dim(expert_ll_dim_comp)
+    # Parallelize over observations for aggregating by dimension
+    expert_ll_comp = _exact_expert_ll_threaded(Y, model, exposure)
 
     # Adding the gating function
     gate_expert_ll_comp = loglik_aggre_gate_dim(gate, expert_ll_comp)
@@ -13,17 +26,12 @@ function loglik_exact(Y, gate, model)
     # Aggregate by component
     gate_expert_ll = loglik_aggre_gate_dim_comp(gate_expert_ll_comp)
 
-    # Normalize by tn & tn_bar
-    norm_gate_expert_ll = gate_expert_ll
-
     # Sum over all observations
-    ll = sum(norm_gate_expert_ll)
+    ll = sum(gate_expert_ll)
 
-    return (expert_ll_dim_comp=expert_ll_dim_comp,
-        expert_ll_comp=expert_ll_comp,
+    return (
         gate_expert_ll_comp=gate_expert_ll_comp,
         gate_expert_ll=gate_expert_ll,
-        norm_gate_expert_ll=norm_gate_expert_ll,
         ll=ll,
     )
 end
@@ -35,12 +43,11 @@ function fit_exact(Y, X, α_init, model;
     grad_jump=true, grad_seq=nothing,
     print_steps=1)
     # Make variables accessible within the scope of `let`
-    let α_em, gate_em, model_em, model_em_expo, ll_em_list, ll_em, ll_em_np, ll_em_old,
+    let α_em, gate_em, model_em, ll_em_list, ll_em, ll_em_np, ll_em_old,
         ll_em_np_old, iter, z_e_obs, z_e_lat, k_e, params_old
         # Initial loglik
         gate_init = LogitGating(α_init, X)
-        model_expo = exposurize_model(model; exposure=exposure) # exposurize
-        ll_np_list = loglik_exact(Y, gate_init, model_expo)
+        ll_np_list = loglik_exact(Y, gate_init, model; exposure=exposure)
         ll_init_np = ll_np_list.ll
         ll_penalty =
             penalty ? (penalty_α(α_init, pen_α) + penalty_params(model, pen_params)) : 0.0
@@ -53,9 +60,8 @@ function fit_exact(Y, X, α_init, model;
         # start em
         α_em = copy(α_init)
         model_em = copy(model)
-        model_em_expo = exposurize_model(model_em; exposure=exposure)
         gate_em = LogitGating(α_em, X)
-        ll_em_list = loglik_exact(Y, gate_em, model_em_expo)
+        ll_em_list = loglik_exact(Y, gate_em, model_em; exposure=exposure)
         ll_em_np = ll_em_list.ll
         ll_em = ll_init
         ll_em_old = -Inf
@@ -86,7 +92,7 @@ function fit_exact(Y, X, α_init, model;
                 pen_α=pen_α,
             )
             gate_em = LogitGating(α_em, X)
-            ll_em_list = loglik_exact(Y, gate_em, model_em_expo)
+            ll_em_list = loglik_exact(Y, gate_em, model_em; exposure=exposure)
             ll_em_np = ll_em_list.ll
             ll_em_penalty = if penalty
                 (penalty_α(α_em, pen_α) + penalty_params(model_em, pen_params))
@@ -112,13 +118,10 @@ function fit_exact(Y, X, α_init, model;
 
                     model_em[j, k] = EM_M_expert_exact(model_em[j, k],
                         Y[:, j], exposure,
-                        # ll_em_list.expert_ll_pos_dim_comp[j][:,k],
-                        # ll_em_list.expert_ll_dim_comp[j, k, :],
                         vec(z_e_obs[:, k]);
                         penalty=penalty, pen_pararms_jk=pen_params[j][k])
 
-                    model_em_expo = exposurize_model(model_em; exposure=exposure)
-                    ll_em_list = loglik_exact(Y, gate_em, model_em_expo)
+                    ll_em_list = loglik_exact(Y, gate_em, model_em; exposure=exposure)
                     ll_em_np = ll_em_list.ll
                     ll_em_penalty = if penalty
                         (penalty_α(α_em, pen_α) + penalty_params(model_em, pen_params))
@@ -144,10 +147,8 @@ function fit_exact(Y, X, α_init, model;
             end
 
             α_em = α_em
-            model_em = model_em
-            model_em_expo = exposurize_model(model_em; exposure=exposure)
             gate_em = LogitGating(α_em, X)
-            ll_em_list = loglik_exact(Y, gate_em, model_em_expo)
+            ll_em_list = loglik_exact(Y, gate_em, model_em; exposure=exposure)
             ll_em_np = ll_em_list.ll
             ll_em_penalty = if penalty
                 (penalty_α(α_em, pen_α) + penalty_params(model_em, pen_params))

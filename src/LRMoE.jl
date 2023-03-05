@@ -6,6 +6,7 @@ import Base: sum, maximum, minimum, ceil, floor, extrema, +, -, *, ==
 import Base: convert, copy, findfirst, summary
 import Base.Math: @horner
 import Base: π
+import Base.Threads: @threads, nthreads, threadid
 
 using StatsFuns
 import StatsFuns: log1mexp, log1pexp, logsumexp
