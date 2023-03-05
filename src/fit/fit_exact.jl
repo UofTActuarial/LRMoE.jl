@@ -1,16 +1,24 @@
+function _exact_expert_ll_threaded(Y, model, exposure)
+    expert_ll_comp = fill(NaN, size(Y)[1], size(model)[2])
+    @threads for i in 1:size(Y)[1]
+        model_exposurized = exposurize_expert.(model, exposure=exposure[i])
+
+        expert_ll_comp[i, :] = @views sum(
+            expert_ll_ind_mat_exact(
+                Y[i, :], model_exposurized
+            );
+            dims=1
+        )
+    end
+
+    return expert_ll_comp
+end
+
 # Fast fitting for exact observations
 function loglik_exact(Y, gate, model; exposure=nothing)
 
     # Parallelize over observations for aggregating by dimension
-    expert_ll_comp = fill(NaN, size(Y)[1], size(model)[2]) # loglik_aggre_dim(expert_ll_dim_comp)
-    @threads for i in 1:size(Y)[1]
-        expert_ll_comp[i, :] = @views sum(
-            expert_ll_ind_mat_exact(
-                Y[i, :], exposurize_expert.(model, exposure=exposure[i])
-            );
-            dims=1,
-        )
-    end
+    expert_ll_comp = _exact_expert_ll_threaded(Y, model, exposure)
 
     # Adding the gating function
     gate_expert_ll_comp = loglik_aggre_gate_dim(gate, expert_ll_comp)
