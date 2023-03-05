@@ -42,6 +42,14 @@ function match_unique_bounds(all_bounds, unique_bounds)
     return [matchrow(all_bounds[i, :], unique_bounds) for i in 1:size(all_bounds)[1]]
 end
 
+function match_unique_bounds_threaded(all_bounds, unique_bounds)
+    result = fill(1, size(all_bounds)[1])
+    @threads for i in 1:size(all_bounds)[1]
+        result[i] = matchrow(all_bounds[i, :], unique_bounds)
+    end
+    return result
+end
+
 # recursively solve for quantiles of discrete distributions
 function _solve_discrete_quantile(d::DiscreteUnivariateDistribution, q::Real)
     l, u = 1, 2 * 1
