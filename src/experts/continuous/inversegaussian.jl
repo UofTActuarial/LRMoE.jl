@@ -165,9 +165,25 @@ function _int_obs_Y_raw(d::InverseGaussianExpert, yl, yu)
     end
 end
 
+function _int_obs_Y_raw_threaded(d::InverseGaussianExpert, yl, yu)
+    result = fill(NaN, length(yl))
+    @threads for i in 1:length(yl)
+        result[i] = _int_obs_Y_raw(d, yl[i], yu[i])
+    end
+    return result
+end
+
 function _int_lat_Y_raw(d::InverseGaussianExpert, tl, tu)
     return (tl == 0 ? 0.0 : quadgk.(x -> _int_y_func(d, x), 0.0, tl, rtol=1e-8)[1]) +
            (isinf(tu) ? 0.0 : quadgk.(x -> _int_y_func(d, x), tu, Inf, rtol=1e-8)[1])
+end
+
+function _int_lat_Y_raw_threaded(d::InverseGaussianExpert, tl, tu)
+    result = fill(NaN, length(tl))
+    @threads for i in 1:length(tl)
+        result[i] = _int_lat_Y_raw(d, tl[i], tu[i])
+    end
+    return result
 end
 
 function _int_logy_func(d::InverseGaussianExpert, x)
@@ -182,9 +198,25 @@ function _int_obs_logY_raw(d::InverseGaussianExpert, yl, yu)
     end
 end
 
+function _int_obs_logY_raw_threaded(d::InverseGaussianExpert, yl, yu)
+    result = fill(NaN, length(yl))
+    @threads for i in 1:length(yl)
+        result[i] = _int_obs_logY_raw(d, yl[i], yu[i])
+    end
+    return result
+end
+
 function _int_lat_logY_raw(d::InverseGaussianExpert, tl, tu)
     return (tl == 0 ? 0.0 : quadgk.(x -> _int_logy_func(d, x), 0.0, tl, rtol=1e-8)[1]) +
            (isinf(tu) ? 0.0 : quadgk.(x -> _int_logy_func(d, x), tu, Inf, rtol=1e-8)[1])
+end
+
+function _int_lat_logY_raw_threaded(d::InverseGaussianExpert, tl, tu)
+    result = fill(NaN, length(tl))
+    @threads for i in 1:length(tl)
+        result[i] = _int_lat_logY_raw(d, tl[i], tu[i])
+    end
+    return result
 end
 
 function _int_invy_func(d::InverseGaussianExpert, x)
@@ -199,9 +231,25 @@ function _int_obs_invY_raw(d::InverseGaussianExpert, yl, yu)
     end
 end
 
+function _int_obs_invY_raw_threaded(d::InverseGaussianExpert, yl, yu)
+    result = fill(NaN, length(yl))
+    @threads for i in 1:length(yl)
+        result[i] = _int_obs_invY_raw(d, yl[i], yu[i])
+    end
+    return result
+end
+
 function _int_lat_invY_raw(d::InverseGaussianExpert, tl, tu)
     return (tl == 0 ? 0.0 : quadgk.(x -> _int_invy_func(d, x), 0.0, tl, rtol=1e-8)[1]) +
            (isinf(tu) ? 0.0 : quadgk.(x -> _int_invy_func(d, x), tu, Inf, rtol=1e-8)[1])
+end
+
+function _int_lat_invY_raw_threaded(d::InverseGaussianExpert, tl, tu)
+    result = fill(NaN, length(tl))
+    @threads for i in 1:length(tl)
+        result[i] = _int_lat_invY_raw(d, tl[i], tu[i])
+    end
+    return result
 end
 
 ## EM: M-Step
@@ -220,17 +268,17 @@ function EM_M_expert(d::InverseGaussianExpert,
     # Further E-Step
     yl_yu_unique = unique_bounds(yl, yu)
 
-    int_obs_Y_tmp = _int_obs_Y_raw.(d, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
+    int_obs_Y_tmp = _int_obs_Y_raw_threaded(d, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
     # int_obs_logY_tmp = _int_obs_logY_raw.(d, yl_yu_unique[:,1], yl_yu_unique[:,2])
-    int_obs_invY_tmp = _int_obs_invY_raw.(d, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
+    int_obs_invY_tmp = _int_obs_invY_raw_threaded(d, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
 
     Y_e_obs =
         exp.(-expert_ll_pos) .*
-        int_obs_Y_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
+        int_obs_Y_tmp[match_unique_bounds_threaded(hcat(vec(yl), vec(yu)), yl_yu_unique)]
     # logY_e_obs = exp.(-expert_ll_pos) .* int_obs_logY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
     invY_e_obs =
         exp.(-expert_ll_pos) .*
-        int_obs_invY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
+        int_obs_invY_tmp[match_unique_bounds_threaded(hcat(vec(yl), vec(yu)), yl_yu_unique)]
 
     nan2num(Y_e_obs, 0.0) # get rid of NaN
     # nan2num(logY_e_obs, 0.0) # get rid of NaN
@@ -238,17 +286,17 @@ function EM_M_expert(d::InverseGaussianExpert,
 
     tl_tu_unique = unique_bounds(tl, tu)
 
-    int_lat_Y_tmp = _int_lat_Y_raw.(d, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
+    int_lat_Y_tmp = _int_lat_Y_raw_threaded(d, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
     # int_lat_logY_tmp = _int_lat_logY_raw.(d, tl_tu_unique[:,1], tl_tu_unique[:,2])
-    int_lat_invY_tmp = _int_lat_invY_raw.(d, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
+    int_lat_invY_tmp = _int_lat_invY_raw_threaded(d, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
 
     Y_e_lat =
         exp.(-expert_tn_bar_pos) .*
-        int_lat_Y_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
+        int_lat_Y_tmp[match_unique_bounds_threaded(hcat(vec(tl), vec(tu)), tl_tu_unique)]
     # logY_e_lat = exp.(-expert_tn_bar_pos) .* int_lat_logY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
     invY_e_lat =
         exp.(-expert_tn_bar_pos) .*
-        int_lat_invY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
+        int_lat_invY_tmp[match_unique_bounds_threaded(hcat(vec(tl), vec(tu)), tl_tu_unique)]
 
     nan2num(Y_e_lat, 0.0) # get rid of NaN
     # nan2num(logY_e_lat, 0.0) # get rid of NaN
