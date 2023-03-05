@@ -75,38 +75,43 @@ function expert_tn_bar_list(Y, model)
     return result
 end
 
+function _expert_ll_tn_tn_bar_threaded(Y, model, exposure)
+    expert_ll_comp = fill(NaN, size(Y)[1], size(model)[2])
+    expert_tn_comp = fill(NaN, size(Y)[1], size(model)[2])
+    expert_tn_bar_comp = fill(NaN, size(Y)[1], size(model)[2])
+
+    @threads for i in 1:size(Y)[1]
+        model_exposurized = exposurize_expert.(model, exposure=exposure[i])
+
+        expert_ll_comp[i, :] = @views sum(
+            expert_ll_ind_mat(
+                Y[i, :], model_exposurized
+            );
+            dims=1
+        )
+        expert_tn_comp[i, :] = @views sum(
+            expert_tn_ind_mat(
+                Y[i, :], model_exposurized
+            );
+            dims=1
+        )
+        expert_tn_bar_comp[i, :] = @views sum(
+            expert_tn_bar_ind_mat(
+                Y[i, :], model_exposurized
+            );
+            dims=1
+        )
+    end
+
+    return expert_ll_comp, expert_tn_comp, expert_tn_bar_comp
+end
+
 function loglik_np(Y, gate, model; exposure=nothing)
 
     # Aggregate by dimension
-    expert_ll_comp = fill(NaN, size(Y)[1], size(model)[2])
-    @threads for i in 1:size(Y)[1]
-        expert_ll_comp[i, :] = @views sum(
-            expert_ll_ind_mat(
-                Y[i, :], exposurize_expert.(model, exposure=exposure[i])
-            );
-            dims=1,
-        )
-    end
-
-    expert_tn_comp = fill(NaN, size(Y)[1], size(model)[2])
-    @threads for i in 1:size(Y)[1]
-        expert_tn_comp[i, :] = @views sum(
-            expert_tn_ind_mat(
-                Y[i, :], exposurize_expert.(model, exposure=exposure[i])
-            );
-            dims=1,
-        )
-    end
-
-    expert_tn_bar_comp = fill(NaN, size(Y)[1], size(model)[2])
-    @threads for i in 1:size(Y)[1]
-        expert_tn_bar_comp[i, :] = @views sum(
-            expert_tn_bar_ind_mat(
-                Y[i, :], exposurize_expert.(model, exposure=exposure[i])
-            );
-            dims=1,
-        )
-    end
+    expert_ll_comp, expert_tn_comp, expert_tn_bar_comp = _expert_ll_tn_tn_bar_threaded(
+        Y, model, exposure
+    )
 
     # Adding the gating function
     gate_expert_ll_comp = loglik_aggre_gate_dim(gate, expert_ll_comp)
