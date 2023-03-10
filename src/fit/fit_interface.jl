@@ -22,7 +22,8 @@ Fit an LRMoE model.
 - `ecm_iter_max`: Maximum number of iterations of the ECM algorithm. Default is 200.
 - `grad_jump`: **IN DEVELOPMENT**
 - `grad_seq`: **IN DEVELOPMENT**
-- `print_steps`: `true` (default) or `false`, indicating whether intermediate updates of parameters should be logged.
+- `print_steps`: `1` (default) or any integer, indicating whether intermediate updates of parameters should be logged (and how often).
+    If `0`, no intermediate updates will be logged. Otherwise, it will be logged every `print_steps` iterations.
 
 # Return Values
 - `model_result.α_fit`: Fitted values of logit regression coefficients `α`.
@@ -40,7 +41,7 @@ function fit_LRMoE(Y, X, α_init, model;
     penalty=true, pen_α=1.0, pen_params=nothing,
     ϵ=1e-03, α_iter_max=5, ecm_iter_max=200,
     grad_jump=true, grad_seq=nothing,
-    print_steps=true)
+    print_steps=1)
 
     # Convert possible dataframes to arrays
     # Y = Array(Y)
@@ -55,6 +56,10 @@ function fit_LRMoE(Y, X, α_init, model;
 
     if isnothing(exposure)
         exposure = fill(1.0, size(X)[1])
+    end
+
+    if !isinteger(print_steps) || (print_steps < 0)
+        error("print_steps must be a nonnegative integer.")
     end
 
     if exact_Y == true

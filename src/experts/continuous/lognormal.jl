@@ -102,9 +102,9 @@ end
 sim_expert(d::LogNormalExpert) = Distributions.rand(Distributions.LogNormal(d.μ, d.σ), 1)[1]
 
 ## penalty
-penalty_init(d::LogNormalExpert) = [Inf 2.0 Inf]
-no_penalty_init(d::LogNormalExpert) = [Inf 1.0 Inf]
-penalize(d::LogNormalExpert, p) = (p[2] - 1) * log(d.σ) # (d.μ/p[1])^2 + (p[2]-1)*log(d.σ) - d.σ/p[3]
+penalty_init(d::LogNormalExpert) = [2.0 2.0]
+no_penalty_init(d::LogNormalExpert) = [1.0 1.0]
+penalize(d::LogNormalExpert, p) = -0.5 * (p[1] - 1) / (d.σ * d.σ) - (p[2] - 1) * log(d.σ)
 
 ## statistics
 mean(d::LogNormalExpert) = mean(Distributions.LogNormal(d.μ, d.σ))
@@ -164,7 +164,7 @@ function _int_obs_logY_sq(d::LogNormalExpert, yl, yu, expert_ll)
     else
         return exp(-expert_ll) * (
             ((d.σ)^2 + (d.μ)^2) * _diff_dist_series(d, yl, yu) +
-            d.σ * d.μ * invsqrt2π * _diff_dens_series(d, yl, yu) +
+            2.0 * d.σ * d.μ * invsqrt2π * _diff_dens_series(d, yl, yu) +
             (d.σ)^2 * invsqrt2π * _diff_zdensz_series(d, yl, yu)
         )
     end
@@ -174,7 +174,7 @@ function _int_lat_logY_sq(d::LogNormalExpert, tl, tu, expert_tn_bar)
     return exp(-expert_tn_bar) * (
         ((d.σ)^2 + (d.μ)^2) - (
             ((d.σ)^2 + (d.μ)^2) * _diff_dist_series(d, tl, tu) +
-            d.σ * d.μ * invsqrt2π * _diff_dens_series(d, tl, tu) +
+            2.0 * d.σ * d.μ * invsqrt2π * _diff_dens_series(d, tl, tu) +
             (d.σ)^2 * invsqrt2π * _diff_zdensz_series(d, tl, tu)
         )
     )
@@ -185,11 +185,7 @@ function EM_M_expert(d::LogNormalExpert,
     tl, yl, yu, tu,
     exposure,
     z_e_obs, z_e_lat, k_e;
-    penalty=true, pen_pararms_jk=[Inf 1.0 Inf])
-    if d.σ < 0.000001
-        return d
-    end
-
+    penalty=true, pen_pararms_jk=[1.0 1.0])
     expert_ll_pos = expert_ll.(d, tl, yl, yu, tu)
     expert_tn_bar_pos = expert_tn_bar.(d, tl, yl, yu, tu)
 
@@ -213,12 +209,20 @@ function EM_M_expert(d::LogNormalExpert,
         (z_e_lat[pos_idx] .* k_e[pos_idx] .* logY_sq_e_lat[pos_idx])
 
     μ_new = sum(term_zkz_logY)[1] / sum(term_zkz)[1]
-    numerator = penalty ? (sum(term_zkz)[1] - pen_pararms_jk[2] + 1) : sum(term_zkz)[1]
-    tmp =
-        1 / numerator * (
+
+    demominator = penalty ? (sum(term_zkz)[1] + (pen_pararms_jk[2] - 1)) : sum(term_zkz)[1]
+    numerator = if penalty
+        (
+            sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
+            (μ_new)^2 * sum(term_zkz)[1] + (pen_pararms_jk[1] - 1)
+        )
+    else
+        (
             sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
             (μ_new)^2 * sum(term_zkz)[1]
         )
+    end
+    tmp = numerator / demominator
     σ_new = sqrt(maximum([0.0, tmp]))
 
     return LogNormalExpert(μ_new, σ_new)
@@ -228,10 +232,7 @@ end
 function EM_M_expert_exact(d::LogNormalExpert,
     ye, exposure,
     z_e_obs;
-    penalty=true, pen_pararms_jk=[Inf 1.0 Inf])
-    if d.σ < 0.000001
-        return d
-    end
+    penalty=true, pen_pararms_jk=[1.0 1.0])
 
     # Further E-Step
     logY_e_obs = log.(ye)
@@ -245,12 +246,21 @@ function EM_M_expert_exact(d::LogNormalExpert,
     term_zkz_logY_sq = (z_e_obs[pos_idx] .* logY_sq_e_obs[pos_idx])
 
     μ_new = sum(term_zkz_logY)[1] / sum(term_zkz)[1]
-    σ_new = sqrt(
-        1 / sum(term_zkz)[1] * (
+
+    demominator = penalty ? (sum(term_zkz)[1] + (pen_pararms_jk[2] - 1)) : sum(term_zkz)[1]
+    numerator = if penalty
+        (
+            sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
+            (μ_new)^2 * sum(term_zkz)[1] + (pen_pararms_jk[1] - 1)
+        )
+    else
+        (
             sum(term_zkz_logY_sq)[1] - 2.0 * μ_new * sum(term_zkz_logY)[1] +
             (μ_new)^2 * sum(term_zkz)[1]
-        ),
-    )
+        )
+    end
+    tmp = numerator / demominator
+    σ_new = sqrt(maximum([0.0, tmp]))
 
     return LogNormalExpert(μ_new, σ_new)
 end

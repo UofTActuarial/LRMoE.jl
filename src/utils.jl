@@ -15,7 +15,7 @@ macro check_args(D, cond)
 end
 
 # rowlogsumexps
-rowlogsumexp(x) = logsumexp.(x[row, :] for row in 1:size(x)[1])
+rowlogsumexp(x) = logsumexp(x; dims=2)
 
 # replace nan by a number
 function nan2num(x, g)
@@ -40,6 +40,14 @@ matchrow(a, B) = findfirst(i -> all(j -> a[j] == B[i, j], 1:size(B, 2)), 1:size(
 
 function match_unique_bounds(all_bounds, unique_bounds)
     return [matchrow(all_bounds[i, :], unique_bounds) for i in 1:size(all_bounds)[1]]
+end
+
+function match_unique_bounds_threaded(all_bounds, unique_bounds)
+    result = fill(1, size(all_bounds)[1])
+    @threads for i in 1:size(all_bounds)[1]
+        result[i] = matchrow(all_bounds[i, :], unique_bounds)
+    end
+    return result
 end
 
 # recursively solve for quantiles of discrete distributions

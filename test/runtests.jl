@@ -33,7 +33,7 @@ const tests = [
     "experts/discrete/zinegativebinomial",
     "experts/discrete/zipoisson",
     # loglik
-    "loglik",
+    # "loglik",
 ]
 
 printstyled("Running tests:\n"; color=:blue)

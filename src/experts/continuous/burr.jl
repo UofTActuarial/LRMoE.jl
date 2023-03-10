@@ -158,9 +158,25 @@ function _int_obs_logY_raw(d::BurrExpert, yl, yu)
     end
 end
 
+function _int_obs_logY_raw_threaded(d::BurrExpert, yl, yu)
+    result = fill(NaN, length(yl))
+    @threads for i in 1:length(yl)
+        result[i] = _int_obs_logY_raw(d, yl[i], yu[i])
+    end
+    return result
+end
+
 function _int_lat_logY_raw(d::BurrExpert, tl, tu)
     return (tl == 0 ? 0.0 : quadgk.(x -> _int_logy_func(d, x), 0.0, tl, rtol=1e-8)[1]) +
            (isinf(tu) ? 0.0 : quadgk.(x -> _int_logy_func(d, x), tu, Inf, rtol=1e-8)[1])
+end
+
+function _int_lat_logY_raw_threaded(d::BurrExpert, tl, tu)
+    result = fill(NaN, length(tl))
+    @threads for i in 1:length(tl)
+        result[i] = _int_lat_logY_raw(d, tl[i], tu[i])
+    end
+    return result
 end
 
 function _int_lpow_func(c_new, λ_new, d::BurrExpert, x)
@@ -173,6 +189,14 @@ function _int_obs_lpow_raw(c_new, λ_new, d::BurrExpert, yl, yu)
     else
         return quadgk.(x -> _int_lpow_func(c_new, λ_new, d, x), yl, yu, rtol=1e-8)[1]
     end
+end
+
+function _int_obs_lpow_raw_threaded(c_new, λ_new, d::BurrExpert, yl, yu)
+    result = fill(NaN, length(yl))
+    @threads for i in 1:length(yl)
+        result[i] = _int_obs_lpow_raw(c_new, λ_new, d, yl[i], yu[i])
+    end
+    return result
 end
 
 function _int_lat_lpow_raw(c_new, λ_new, d::BurrExpert, tl, tu)
@@ -189,6 +213,14 @@ function _int_lat_lpow_raw(c_new, λ_new, d::BurrExpert, tl, tu)
             quadgk.(x -> _int_lpow_func(c_new, λ_new, d, x), tu, Inf, rtol=1e-8)[1]
         end
     )
+end
+
+function _int_lat_lpow_raw_threaded(c_new, λ_new, d::BurrExpert, tl, tu)
+    result = fill(NaN, length(tl))
+    @threads for i in 1:length(tl)
+        result[i] = _int_lat_lpow_raw(c_new, λ_new, d, tl[i], tu[i])
+    end
+    return result
 end
 
 function _burr_lpow_to_k(sum_term_zkz, sum_term_zkzlpow;
@@ -214,7 +246,7 @@ function _burr_optim_params(lognew,
 
     yl_yu_unique = unique_bounds(yl, yu)
     int_obs_lpow_tmp =
-        _int_obs_lpow_raw.(c_tmp, λ_tmp, d_old, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
+        _int_obs_lpow_raw_threaded(c_tmp, λ_tmp, d_old, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
     lpow_e_obs =
         exp.(-expert_ll_pos) .*
         int_obs_lpow_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
@@ -222,7 +254,7 @@ function _burr_optim_params(lognew,
 
     tl_tu_unique = unique_bounds(tl, tu)
     int_lat_lpow_tmp =
-        _int_lat_lpow_raw.(c_tmp, λ_tmp, d_old, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
+        _int_lat_lpow_raw_threaded(c_tmp, λ_tmp, d_old, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
     lpow_e_lat =
         exp.(-expert_tn_bar_pos) .*
         int_lat_lpow_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
@@ -262,14 +294,14 @@ function EM_M_expert(d::BurrExpert,
 
     # Further E-Step
     yl_yu_unique = unique_bounds(yl, yu)
-    int_obs_logY_tmp = _int_obs_logY_raw.(d, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
+    int_obs_logY_tmp = _int_obs_logY_raw_threaded(d, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
     logY_e_obs =
         exp.(-expert_ll_pos) .*
         int_obs_logY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
     nan2num(logY_e_obs, 0.0) # get rid of NaN
 
     tl_tu_unique = unique_bounds(tl, tu)
-    int_lat_logY_tmp = _int_lat_logY_raw.(d, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
+    int_lat_logY_tmp = _int_lat_logY_raw_threaded(d, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
     logY_e_lat =
         exp.(-expert_tn_bar_pos) .*
         int_lat_logY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
@@ -301,7 +333,7 @@ function EM_M_expert(d::BurrExpert,
     # Find k_new
     # yl_yu_unique = unique_bounds(yl, yu)
     int_obs_lpow_tmp =
-        _int_obs_lpow_raw.(c_new, λ_new, d, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
+        _int_obs_lpow_raw_threaded(c_new, λ_new, d, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
     lpow_e_obs =
         exp.(-expert_ll_pos) .*
         int_obs_lpow_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
@@ -309,7 +341,7 @@ function EM_M_expert(d::BurrExpert,
 
     # tl_tu_unique = unique_bounds(tl, tu)
     int_lat_lpow_tmp =
-        _int_lat_lpow_raw.(c_new, λ_new, d, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
+        _int_lat_lpow_raw_threaded(c_new, λ_new, d, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
     lpow_e_lat =
         exp.(-expert_tn_bar_pos) .*
         int_lat_lpow_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
