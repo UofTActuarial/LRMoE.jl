@@ -152,9 +152,25 @@ function _int_obs_logY_raw(d::WeibullExpert, yl, yu)
     end
 end
 
+function _int_obs_logY_raw_threaded(d::WeibullExpert, yl, yu)
+    result = fill(NaN, length(yl))
+    @threads for i in 1:length(yl)
+        result[i] = _int_obs_logY_raw(d, yl[i], yu[i])
+    end
+    return result
+end
+
 function _int_lat_logY_raw(d::WeibullExpert, tl, tu)
     return (tl == 0 ? 0.0 : quadgk.(x -> _int_logy_func(d, x), 0.0, tl, rtol=1e-8)[1]) +
            (isinf(tu) ? 0.0 : quadgk.(x -> _int_logy_func(d, x), tu, Inf, rtol=1e-8)[1])
+end
+
+function _int_lat_logY_raw_threaded(d::WeibullExpert, tl, tu)
+    result = fill(NaN, length(tl))
+    @threads for i in 1:length(tl)
+        result[i] = _int_lat_logY_raw(d, tl[i], tu[i])
+    end
+    return result
 end
 
 function _int_powy_func(d_old::WeibullExpert, k_new, l, u)
@@ -181,9 +197,25 @@ function _int_obs_powY(d_old::WeibullExpert, k_new, yl, yu, expert_ll_pos)
     end
 end
 
+function _int_obs_powY_threaded(d_old::WeibullExpert, k_new, yl, yu, expert_ll_pos)
+    result = fill(NaN, length(yl))
+    @threads for i in 1:length(yl)
+        result[i] = _int_obs_powY(d_old, k_new, yl[i], yu[i], expert_ll_pos[i])
+    end
+    return result
+end
+
 function _int_lat_powY(d_old::WeibullExpert, k_new, tl, tu, expert_tn_bar_pos)
     return exp(-expert_tn_bar_pos) *
            (_int_powy_func(d_old, k_new, 0.0, tl) + _int_powy_func(d_old, k_new, tu, Inf))
+end
+
+function _int_lat_powY_threaded(d_old::WeibullExpert, k_new, tl, tu, expert_tn_bar_pos)
+    result = fill(NaN, length(tl))
+    @threads for i in 1:length(tl)
+        result[i] = _int_lat_powY(d_old, k_new, tl[i], tu[i], expert_tn_bar_pos[i])
+    end
+    return result
 end
 
 function _weibull_k_to_λ(k, sum_term_zkz, sum_term_zkzpowy;
@@ -202,8 +234,8 @@ function _weibull_optim_k(logk,
     k_tmp = exp(logk)
 
     # Further E-step
-    powY_e_obs = _int_obs_powY.(d_old, k_tmp, yl, yu, expert_ll_pos)
-    powY_e_lat = _int_lat_powY.(d_old, k_tmp, tl, tu, expert_tn_bar_pos)
+    powY_e_obs = _int_obs_powY_threaded(d_old, k_tmp, yl, yu, expert_ll_pos)
+    powY_e_lat = _int_lat_powY_threaded(d_old, k_tmp, tl, tu, expert_tn_bar_pos)
     nan2num(powY_e_obs, 0.0) # get rid of NaN
     nan2num(powY_e_lat, 0.0) # get rid of NaN
 
@@ -246,17 +278,17 @@ function EM_M_expert(d::WeibullExpert,
 
     # Further E-Step
     yl_yu_unique = unique_bounds(yl, yu)
-    int_obs_logY_tmp = _int_obs_logY_raw.(d, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
+    int_obs_logY_tmp = _int_obs_logY_raw_threaded(d, yl_yu_unique[:, 1], yl_yu_unique[:, 2])
     logY_e_obs =
         exp.(-expert_ll_pos) .*
-        int_obs_logY_tmp[match_unique_bounds(hcat(vec(yl), vec(yu)), yl_yu_unique)]
+        int_obs_logY_tmp[match_unique_bounds_threaded(hcat(vec(yl), vec(yu)), yl_yu_unique)]
     nan2num(logY_e_obs, 0.0) # get rid of NaN
 
     tl_tu_unique = unique_bounds(tl, tu)
-    int_lat_logY_tmp = _int_lat_logY_raw.(d, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
+    int_lat_logY_tmp = _int_lat_logY_raw_threaded(d, tl_tu_unique[:, 1], tl_tu_unique[:, 2])
     logY_e_lat =
         exp.(-expert_tn_bar_pos) .*
-        int_lat_logY_tmp[match_unique_bounds(hcat(vec(tl), vec(tu)), tl_tu_unique)]
+        int_lat_logY_tmp[match_unique_bounds_threaded(hcat(vec(tl), vec(tu)), tl_tu_unique)]
     nan2num(logY_e_lat, 0.0) # get rid of NaN
 
     # Update parameters
@@ -277,8 +309,8 @@ function EM_M_expert(d::WeibullExpert,
     k_new = exp(logk_new)
 
     # Further E-step
-    powY_e_obs = _int_obs_powY.(d, k_new, yl, yu, expert_ll_pos)
-    powY_e_lat = _int_lat_powY.(d, k_new, tl, tu, expert_tn_bar_pos)
+    powY_e_obs = _int_obs_powY_threaded(d, k_new, yl, yu, expert_ll_pos)
+    powY_e_lat = _int_lat_powY_threaded(d, k_new, tl, tu, expert_tn_bar_pos)
     nan2num(powY_e_obs, 0.0) # get rid of NaN
     nan2num(powY_e_lat, 0.0) # get rid of NaN
     inf2num(powY_e_obs, 0.0) # get rid of Inf
@@ -343,6 +375,7 @@ function _weibull_optim_k_exact(logk,
     end
     return (obj + p) * (-1.0)
 end
+
 function EM_M_expert_exact(d::WeibullExpert,
     ye, exposure,
     z_e_obs;
