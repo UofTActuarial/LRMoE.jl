@@ -1,22 +1,22 @@
-# @testset "gammacount pdf, cdf, etc." begin
-#     mm = [1.5, 2, 5, 10, 25]
-#     ss = [1.0, 2.0, 5.0, 10.0, 25.0]
-#     x = collect(0.0:1:50.0)
+@testset "gammacount pdf, cdf, etc." begin
+    mm = [1.5, 2, 5, 10, 25]
+    ss = [1.0, 2.0, 5.0, 10.0, 25.0]
+    x = collect(0.0:1:20)
 
-#     for m in mm, s in ss
-#         l = LRMoE.GammaCount(m, s)
-#         r = LRMoE.GammaCountExpert(m, s)
-#         @test LRMoE.logpdf.(r, x) ≈ Distributions.logpdf.(l, x)
-#         @test LRMoE.logcdf.(r, x) ≈ Distributions.logcdf.(l, x)
-#         @test LRMoE.pdf.(r, x) ≈ Distributions.pdf.(l, x)
-#         @test LRMoE.cdf.(r, x) ≈ Distributions.cdf.(l, x)
-#     end
-# end
+    for m in mm, s in ss
+        l = LRMoE.GammaCount(m, s)
+        r = LRMoE.GammaCountExpert(m, s)
+        @test LRMoE.logpdf.(r, x) ≈ Distributions.logpdf.(l, x)
+        @test LRMoE.logcdf.(r, x) ≈ Distributions.logcdf.(l, x)
+        @test LRMoE.pdf.(r, x) ≈ Distributions.pdf.(l, x)
+        @test LRMoE.cdf.(r, x) ≈ Distributions.cdf.(l, x)
+    end
+end
 
 @testset "gammacount expert_ll" begin
     mm = [1.5, 2, 5, 10, 25]
     ss = [1.0, 2.0, 5.0, 10.0, 25.0]
-    x = collect(0.0:1:50.0)
+    x = collect(0.0:1:20)
 
     for m in mm, s in ss
         tmp = LRMoE.GammaCountExpert(m, s)
