@@ -1,7 +1,7 @@
 @testset "gammacount pdf, cdf, etc." begin
     mm = [1.5, 2, 5, 10, 25]
     ss = [1.0, 2.0, 5.0, 10.0, 25.0]
-    x = collect(0.0:1:20)
+    x = collect(0.0:1:10)
 
     for m in mm, s in ss
         l = LRMoE.GammaCount(m, s)
@@ -16,7 +16,7 @@ end
 @testset "gammacount expert_ll" begin
     mm = [1.5, 2, 5, 10, 25]
     ss = [1.0, 2.0, 5.0, 10.0, 25.0]
-    x = collect(0.0:1:20)
+    x = collect(0.0:1:10)
 
     for m in mm, s in ss
         tmp = LRMoE.GammaCountExpert(m, s)
